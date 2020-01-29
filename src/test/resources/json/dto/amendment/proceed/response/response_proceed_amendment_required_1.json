@@ -1,0 +1,17 @@
+{
+  "amendment": {
+    "id": "bd56490f-57ca-4d1a-9210-250cb9b4eed3",
+    "date": "2019-04-01T10:00:00Z",
+    "rationale": "amendment.rationale",
+    "status": "pending",
+    "type": "cancellation",
+    "relatesTo": "lot",
+    "documents": [
+      {
+        "documentType": "biddingDocuments",
+        "id": "amendment.documents.id",
+        "title": "amendment.documents.title"
+      }
+    ]
+  }
+}

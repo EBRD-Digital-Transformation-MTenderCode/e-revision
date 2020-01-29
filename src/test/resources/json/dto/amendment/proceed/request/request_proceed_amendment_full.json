@@ -1,0 +1,12 @@
+{
+  "amendment": {
+    "rationale": "amendment.rationale",
+    "documents": [
+      {
+        "documentType": "shortlistedFirms",
+        "id": "amendment.documents.id",
+        "title": "amendment.documents.title"
+      }
+    ]
+  }
+}

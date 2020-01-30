@@ -1,10 +1,10 @@
-package com.procurement.revision.application.service.amendment
+package com.procurement.revision.application.model.amendment
 
 import com.procurement.revision.domain.model.LotId
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.Token
 
-class CheckExistingAmendmentForCancelLotContext(
+class CheckExistingAmendmentForCancelTenderContext(
     val cpid: String,
     val id: LotId,
     val token: Token,

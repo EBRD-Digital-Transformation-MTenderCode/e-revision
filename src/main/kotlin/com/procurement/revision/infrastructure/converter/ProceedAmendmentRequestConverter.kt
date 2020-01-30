@@ -1,6 +1,6 @@
 package com.procurement.revision.infrastructure.dto.converter
 
-import com.procurement.revision.application.service.amendment.ProceedAmendmentData
+import com.procurement.revision.application.model.amendment.ProceedAmendmentData
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.application.exception.ErrorType
 import com.procurement.revision.infrastructure.dto.amendment.ProceedAmendmentRequest

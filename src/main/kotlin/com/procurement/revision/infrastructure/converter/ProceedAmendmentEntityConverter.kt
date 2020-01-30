@@ -1,6 +1,6 @@
 package com.procurement.revision.infrastructure.dto.converter
 
-import com.procurement.revision.application.service.amendment.ProceedAmendmentResult
+import com.procurement.revision.application.model.amendment.ProceedAmendmentResult
 import com.procurement.revision.domain.model.Amendment
 
 fun Amendment.convert(): ProceedAmendmentResult {

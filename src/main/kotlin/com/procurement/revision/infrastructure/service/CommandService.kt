@@ -1,11 +1,12 @@
 package com.procurement.revision.infrastructure.service
 
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelLotContext
+import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotContext
 import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelLotResponse
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelTenderContext
+import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderContext
 import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelTenderResponse
-import com.procurement.revision.application.service.amendment.ProceedAmendmentLotCancellationContext
-import com.procurement.revision.application.service.amendment.ProceedAmendmentTenderCancellationContext
+import com.procurement.revision.application.model.amendment.ProceedAmendmentLotCancellationContext
+import com.procurement.revision.application.model.amendment.ProceedAmendmentTenderCancellationContext
+import com.procurement.revision.application.service.AmendmentService
 import com.procurement.revision.infrastructure.dto.amendment.ProceedAmendmentRequest
 import com.procurement.revision.infrastructure.dto.amendment.ProceedAmendmentResponse
 import com.procurement.revision.infrastructure.dto.converter.convert

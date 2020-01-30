@@ -1,4 +1,4 @@
-package com.procurement.revision.application.service.amendment
+package com.procurement.revision.application.model.amendment
 
 import com.procurement.revision.domain.enums.DocumentType
 

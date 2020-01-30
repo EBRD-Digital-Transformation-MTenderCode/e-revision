@@ -1,16 +1,16 @@
-package com.procurement.revision.infrastructure.service
+package com.procurement.revision.application.service
 
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.application.exception.ErrorType
 import com.procurement.revision.application.repository.AmendmentRepository
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelLotContext
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelLotResult
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelTenderContext
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelTenderResult
-import com.procurement.revision.application.service.amendment.ProceedAmendmentData
-import com.procurement.revision.application.service.amendment.ProceedAmendmentLotCancellationContext
-import com.procurement.revision.application.service.amendment.ProceedAmendmentResult
-import com.procurement.revision.application.service.amendment.ProceedAmendmentTenderCancellationContext
+import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotContext
+import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotResult
+import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderContext
+import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderResult
+import com.procurement.revision.application.model.amendment.ProceedAmendmentData
+import com.procurement.revision.application.model.amendment.ProceedAmendmentLotCancellationContext
+import com.procurement.revision.application.model.amendment.ProceedAmendmentResult
+import com.procurement.revision.application.model.amendment.ProceedAmendmentTenderCancellationContext
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
@@ -19,6 +19,7 @@ import com.procurement.revision.domain.model.Amendment
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.Token
 import com.procurement.revision.infrastructure.dto.converter.convert
+import com.procurement.revision.infrastructure.service.GenerationService
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 

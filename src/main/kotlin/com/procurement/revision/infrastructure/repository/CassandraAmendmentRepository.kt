@@ -4,7 +4,7 @@ import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
-import com.procurement.revision.application.exception.DatabaseInteractionException
+import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.model.Amendment
 import com.procurement.revision.domain.model.AmendmentId
@@ -83,7 +83,10 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
     private fun load(statement: BoundStatement): ResultSet = try {
         session.execute(statement)
     } catch (expected: Exception) {
-        throw DatabaseInteractionException(message = "Error read Amendments(s) from the database.", cause = expected)
+        throw DatabaseInteractionException(
+            message = "Error read Amendments(s) from the database.",
+            cause = expected
+        )
     }
 
     private fun converter(row: Row): Amendment {
@@ -133,7 +136,10 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
     private fun saveAmendment(statement: BoundStatement): ResultSet = try {
         session.execute(statement)
     } catch (expected: Exception) {
-        throw DatabaseInteractionException(message = "Error writing Amendments.", cause = expected)
+        throw DatabaseInteractionException(
+            message = "Error writing Amendments.",
+            cause = expected
+        )
     }
 
     fun convert(amendment: Amendment) = AmendmentDataEntity(

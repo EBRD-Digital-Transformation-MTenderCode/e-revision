@@ -11,7 +11,7 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.revision.application.exception.DatabaseInteractionException
+import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus

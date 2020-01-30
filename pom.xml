@@ -492,21 +492,21 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            <plugin>-->
-<!--                <groupId>pl.project13.maven</groupId>-->
-<!--                <artifactId>git-commit-id-plugin</artifactId>-->
-<!--                <configuration>-->
-<!--                    <includeOnlyProperties>-->
-<!--                        <includeOnlyProperty>^git.branch$</includeOnlyProperty>-->
-<!--                        <includeOnlyProperty>^git.build.host$</includeOnlyProperty>-->
-<!--                        <includeOnlyProperty>^git.build.time$</includeOnlyProperty>-->
-<!--                        <includeOnlyProperty>^git.commit.id$</includeOnlyProperty>-->
-<!--                        <includeOnlyProperty>^git.commit.id.abbrev$</includeOnlyProperty>-->
-<!--                        <includeOnlyProperty>^git.commit.user.email$</includeOnlyProperty>-->
-<!--                        <includeOnlyProperty>^git.tags$</includeOnlyProperty>-->
-<!--                    </includeOnlyProperties>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <configuration>
+                    <includeOnlyProperties>
+                        <includeOnlyProperty>^git.branch$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.build.host$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.build.time$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.commit.id$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.commit.id.abbrev$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.commit.user.email$</includeOnlyProperty>
+                        <includeOnlyProperty>^git.tags$</includeOnlyProperty>
+                    </includeOnlyProperties>
+                </configuration>
+            </plugin>
 
             <!--Unit Test (Surefire)-->
             <plugin>

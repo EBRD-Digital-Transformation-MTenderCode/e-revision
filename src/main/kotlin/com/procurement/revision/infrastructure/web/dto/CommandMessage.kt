@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.procurement.revision.application.exception.EnumException
+import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.application.exception.ErrorType
 import com.procurement.revision.domain.model.LotId
@@ -116,19 +116,19 @@ enum class CommandType(private val value: String) {
 
 fun errorResponse(exception: Exception, id: String, version: ApiVersion): ApiErrorResponse =
     when (exception) {
-        is ErrorException -> getApiErrorResponse(
+        is ErrorException                                                             -> getApiErrorResponse(
             id = id,
             version = version,
             code = exception.code,
             message = exception.message!!
         )
-        is EnumException  -> getApiErrorResponse(
+        is EnumException -> getApiErrorResponse(
             id = id,
             version = version,
             code = exception.code,
             message = exception.message!!
         )
-        else              -> getApiErrorResponse(
+        else                                                                          -> getApiErrorResponse(
             id = id,
             version = version,
             code = "00.00",

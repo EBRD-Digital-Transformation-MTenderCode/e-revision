@@ -1,6 +1,6 @@
 package com.procurement.revision.domain.enums
 
-import com.procurement.revision.application.exception.EnumException
+import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.infrastructure.bind.databinding.Enumable
 import com.procurement.revision.infrastructure.bind.databinding.Valuable
 

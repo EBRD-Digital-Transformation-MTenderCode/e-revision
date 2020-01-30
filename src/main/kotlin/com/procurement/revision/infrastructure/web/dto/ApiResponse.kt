@@ -13,11 +13,7 @@ sealed class ApiResponse {
 
 class ApiErrorResponse(
     @field:JsonProperty("id") @param:JsonProperty("id") override val id: String,
-
-    @JsonDeserialize(using = ApiVersionDeserializer::class)
-    @JsonSerialize(using = ApiVersionSerializer::class)
     @field:JsonProperty("version") @param:JsonProperty("version") override val version: ApiVersion,
-
     @field:JsonProperty("errors") @param:JsonProperty("errors") val errors: List<Error>
 ) : ApiResponse() {
     data class Error(
@@ -28,10 +24,6 @@ class ApiErrorResponse(
 
 class ApiSuccessResponse(
     @field:JsonProperty("id") @param:JsonProperty("id") override val id: String,
-
-    @JsonDeserialize(using = ApiVersionDeserializer::class)
-    @JsonSerialize(using = ApiVersionSerializer::class)
     @field:JsonProperty("version") @param:JsonProperty("version") override val version: ApiVersion,
-
     @field:JsonProperty("data") @param:JsonProperty("data") val data: Any
 ) : ApiResponse()

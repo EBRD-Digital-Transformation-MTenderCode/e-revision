@@ -6,7 +6,6 @@ import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import java.time.LocalDateTime
-import java.util.*
 
 data class ProceedAmendmentResult(
     val amendment: Amendment

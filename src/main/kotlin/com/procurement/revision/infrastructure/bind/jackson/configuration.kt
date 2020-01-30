@@ -11,11 +11,14 @@ import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.enums.MainProcurementCategory
 import com.procurement.revision.domain.enums.ProcurementMethod
+import com.procurement.revision.infrastructure.bind.apiversion.ApiVersionDeserializer
+import com.procurement.revision.infrastructure.bind.apiversion.ApiVersionSerializer
 import com.procurement.revision.infrastructure.bind.databinding.EnumDeserializer
 import com.procurement.revision.infrastructure.bind.databinding.EnumSerializer
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.revision.infrastructure.model.OperationType
+import com.procurement.revision.infrastructure.web.dto.ApiVersion
 import java.time.LocalDateTime
 
 fun ObjectMapper.configuration() {
@@ -25,6 +28,12 @@ fun ObjectMapper.configuration() {
          */
         addSerializer(LocalDateTime::class.java, JsonDateTimeSerializer())
         addDeserializer(LocalDateTime::class.java, JsonDateTimeDeserializer())
+
+        /**
+         * Serializer/Deserializer for LocalDateTime type
+         */
+        addSerializer(ApiVersion::class.java, ApiVersionSerializer())
+        addDeserializer(ApiVersion::class.java, ApiVersionDeserializer())
 
         /**
          *  Serializer/Deserializer for enum type

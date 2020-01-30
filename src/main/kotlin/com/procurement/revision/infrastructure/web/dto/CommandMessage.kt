@@ -23,9 +23,6 @@ data class CommandMessage @JsonCreator constructor(
     @field:JsonProperty("command") @param:JsonProperty("command") val command: CommandType,
     @field:JsonProperty("context") @param:JsonProperty("context") val context: Context,
     @field:JsonProperty("data") @param:JsonProperty("data") val data: JsonNode,
-
-    @JsonDeserialize(using = ApiVersionDeserializer::class)
-    @JsonSerialize(using = ApiVersionSerializer::class)
     @field:JsonProperty("version") @param:JsonProperty("version") val version: ApiVersion
 )
 

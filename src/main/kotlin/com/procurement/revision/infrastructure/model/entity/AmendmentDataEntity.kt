@@ -8,8 +8,7 @@ import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
-import com.procurement.revision.domain.model.Amendment
-import com.procurement.revision.domain.model.AmendmentId
+import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.Token
 import com.procurement.revision.domain.model.document.DocumentId

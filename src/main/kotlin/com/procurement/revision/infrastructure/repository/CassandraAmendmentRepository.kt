@@ -6,8 +6,8 @@ import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.application.repository.AmendmentRepository
-import com.procurement.revision.domain.model.Amendment
-import com.procurement.revision.domain.model.AmendmentId
+import com.procurement.revision.domain.model.amendment.Amendment
+import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.toObject

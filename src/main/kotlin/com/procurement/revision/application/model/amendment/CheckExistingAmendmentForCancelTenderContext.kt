@@ -1,6 +1,6 @@
 package com.procurement.revision.application.model.amendment
 
-import com.procurement.revision.domain.model.LotId
+import com.procurement.revision.domain.model.lot.LotId
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.Token
 

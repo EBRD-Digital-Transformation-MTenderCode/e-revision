@@ -17,7 +17,7 @@ import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
-import com.procurement.revision.domain.model.Amendment
+import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.revision.infrastructure.configuration.DatabaseTestConfiguration

@@ -9,8 +9,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.application.exception.ErrorType
-import com.procurement.revision.domain.model.LotId
-import com.procurement.revision.domain.model.TenderId
+import com.procurement.revision.domain.model.lot.LotId
+import com.procurement.revision.domain.model.tender.TenderId
 import com.procurement.revision.infrastructure.bind.apiversion.ApiVersionDeserializer
 import com.procurement.revision.infrastructure.bind.apiversion.ApiVersionSerializer
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties

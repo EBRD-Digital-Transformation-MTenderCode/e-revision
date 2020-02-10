@@ -30,7 +30,7 @@ fun ObjectMapper.configuration() {
         addDeserializer(LocalDateTime::class.java, JsonDateTimeDeserializer())
 
         /**
-         * Serializer/Deserializer for LocalDateTime type
+         * Serializer/Deserializer for ApiVersion type
          */
         addSerializer(ApiVersion::class.java, ApiVersionSerializer())
         addDeserializer(ApiVersion::class.java, ApiVersionDeserializer())

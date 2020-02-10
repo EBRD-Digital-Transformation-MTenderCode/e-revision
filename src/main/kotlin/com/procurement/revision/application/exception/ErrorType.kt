@@ -7,5 +7,6 @@ enum class ErrorType constructor(val code: String, val message: String) {
     COLLECTION_IS_EMPTY("10.78", "Collection is empty."),
     INVALID_FORMAT_LOT_ID("10.79", "Invalid format the lot id."),
     UNEXPECTED_AMENDMENT("10.80", "Unexpected amendment."),
-    DATA_NOT_FOUND("10.81", "Data not found.");
+    DATA_NOT_FOUND("10.81", "Data not found."),
+    IS_EMPTY("10.82", "List of items is empty.");
 }

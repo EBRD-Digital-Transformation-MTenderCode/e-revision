@@ -12,7 +12,9 @@ import org.springframework.context.annotation.Configuration
 @Configuration
 @ComponentScan(
     basePackages = [
-        "com.procurement.revision.infrastructure.service"
+        "com.procurement.revision.infrastructure.service",
+        "com.procurement.revision.application.service",
+        "com.procurement.revision.application.handler"
     ]
 )
 class ServiceConfiguration {
@@ -22,7 +24,6 @@ class ServiceConfiguration {
 
     @Autowired
     private lateinit var amendmentRepository: AmendmentRepository
-
 
     @Bean
     fun generationService(): GenerationService {

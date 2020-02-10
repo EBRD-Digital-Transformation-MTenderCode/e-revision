@@ -26,7 +26,7 @@ enum class DocumentType(override val text: String) : Valuable<DocumentType> {
     FEASIBILITY_STUDY("feasibilityStudy"),
     PROJECT_PLAN("projectPlan"),
     CONFLICT_OF_INTEREST("conflictOfInterest"),
-    CANCELLATION_DETAILS("cancellationDetails1"),
+    CANCELLATION_DETAILS("cancellationDetails"),
     SHORTLISTED_FIRMS("shortlistedFirms"),
     EVALUATION_REPORTS("evaluationReports"),
     CONTRACT_ARRANGEMENTS("contractArrangements"),

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
+import java.time.LocalDateTime
 import java.util.*
 
 data class Command2Message constructor(
@@ -13,7 +14,6 @@ data class Command2Message constructor(
     @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
     @field:JsonProperty("action") @param:JsonProperty("action") val action: Command2Type,
     @field:JsonProperty("params") @param:JsonProperty("params") val params: JsonNode
-
 )
 
 enum class Command2Type(private val value: String) {
@@ -30,35 +30,48 @@ enum class Command2Type(private val value: String) {
     }
 }
 
-fun errorResponse2(exception: Exception, id: UUID, version: ApiVersion, status: ResponseStatus): ApiResponse2 =
+fun errorResponse2(exception: Exception, id: UUID = NaN, version: ApiVersion): ApiResponse2 =
     when (exception) {
-        is ErrorException -> ApiResponse2(
+        is ErrorException -> ApiFailResponse2(
             id = id,
             version = version,
-            status = status,
-            result = getApiErrorResult2(code = exception.code, message = exception.message!!)
+            result = listOf(
+                ApiFailResponse2.Error(
+                    code = getFullErrorCode(exception.code),
+                    description = exception.message!!
+                )
+            )
         )
-        is EnumException -> ApiResponse2(
+        is EnumException -> ApiIncidentResponse2(
             id = id,
             version = version,
-            status = status,
-            result = getApiErrorResult2(code = exception.code, message = exception.message!!)
+            result = createIncident(exception.code, exception.message!!)
         )
-        else -> ApiResponse2(
+        else -> ApiIncidentResponse2(
             id = id,
             version = version,
-            status = status,
-            result = getApiErrorResult2(code = "00.00", message = exception.message ?: "Internal server error.")
+            result = createIncident("00.00", exception.message ?: "Internal server error.")
         )
     }
 
-private fun getApiErrorResult2(code: String, message: String): List<ApiErrorResult2> =
-    listOf(
-        ApiErrorResult2(
-            id = getFullErrorCode(code),
-            details = message
+private fun createIncident(code: String, message: String, metadata: Any? = null): ApiIncidentResponse2.Incident {
+    return ApiIncidentResponse2.Incident(
+        date = LocalDateTime.now(),
+        id = UUID.randomUUID(),
+        service = ApiIncidentResponse2.Incident.Service(
+            id = GlobalProperties.serviceId,
+            version = GlobalProperties.App.apiVersion,
+            name = GlobalProperties.serviceName
+        ),
+        errors = listOf(
+            ApiIncidentResponse2.Incident.Error(
+                code = getFullErrorCode(code),
+                description = message,
+                metadata = metadata
+            )
         )
     )
+}
 
 private fun getFullErrorCode(code: String): String = "400.${GlobalProperties.serviceId}." + code
 

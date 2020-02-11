@@ -6,7 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.revision.infrastructure.bind.jackson.configuration
 import java.io.IOException
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.*
 
 private object JsonMapper {
     val mapper: ObjectMapper = ObjectMapper().apply {
@@ -17,6 +20,14 @@ private object JsonMapper {
 /*Date utils*/
 fun String.toLocal(): LocalDateTime {
     return LocalDateTime.parse(this, JsonDateTimeFormatter.formatter)
+}
+
+fun LocalDateTime.toDate(): Date {
+    return Date.from(this.toInstant(ZoneOffset.UTC))
+}
+
+fun localNowUTC(): LocalDateTime {
+    return LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
 }
 
 /**

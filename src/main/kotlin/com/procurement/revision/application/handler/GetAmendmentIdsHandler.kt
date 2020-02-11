@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 import java.util.function.Predicate
 
 @Component
-class GetAmendmentIdsHandler(val amendmentRepository: AmendmentRepository) {
+class GetAmendmentIdsHandler(private val amendmentRepository: AmendmentRepository) {
 
     fun handle(data: GetAmendmentIdsData): List<GetAmendmentIdsResult> {
         val amendments = amendmentRepository.findBy(data.cpid)

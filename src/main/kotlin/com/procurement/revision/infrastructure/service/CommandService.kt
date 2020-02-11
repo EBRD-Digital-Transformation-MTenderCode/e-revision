@@ -1,15 +1,16 @@
 package com.procurement.revision.infrastructure.service
 
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotContext
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelLotResponse
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderContext
-import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelTenderResponse
 import com.procurement.revision.application.model.amendment.ProceedAmendmentLotCancellationContext
 import com.procurement.revision.application.model.amendment.ProceedAmendmentTenderCancellationContext
 import com.procurement.revision.application.service.AmendmentService
+import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelLotResponse
+import com.procurement.revision.application.service.amendment.CheckExistingAmendmentForCancelTenderResponse
 import com.procurement.revision.infrastructure.dto.amendment.ProceedAmendmentRequest
 import com.procurement.revision.infrastructure.dto.amendment.ProceedAmendmentResponse
 import com.procurement.revision.infrastructure.dto.converter.convert
+import com.procurement.revision.infrastructure.repository.HistoryDao
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.toObject
 import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CommandService(
+    private val historyDao: HistoryDao,
     private val amendmentService: AmendmentService
 ) {
     companion object {
@@ -33,6 +35,10 @@ class CommandService(
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
+        val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
+        if (historyEntity != null) {
+            return historyEntity.jsonData.toObject(ApiSuccessResponse::class.java)
+        }
         val dataOfResponse: Any = when (cm.command) {
             CommandType.PROCEED_AMENDMENT_FOR_LOT_CANCELLATION     -> {
                 val context = ProceedAmendmentLotCancellationContext(
@@ -119,6 +125,7 @@ class CommandService(
         }
         return ApiSuccessResponse(id = cm.id, version = cm.version, data = dataOfResponse)
             .also {
+                historyDao.saveHistory(cm.id, cm.command.value(), it)
                 if (log.isDebugEnabled)
                     log.debug("Response: ${it.toJson()}")
             }

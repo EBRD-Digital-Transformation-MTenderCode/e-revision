@@ -49,7 +49,7 @@ internal class GetAmendmentIdsHandlerTest {
     )
 
     @Test
-    fun handle() {
+    fun handleSuccess() {
         val amendment = getTestAmendment()
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
@@ -291,4 +291,91 @@ internal class GetAmendmentIdsHandlerTest {
 
         assertEquals(expectedIds, actualIds)
     }
+
+    @Test
+    fun handleFewRelatedItems() {
+        val amendment = getTestAmendment()
+        val secondAmendment = amendment.copy(id = UUID.randomUUID(), description = "secondAmendment")
+
+        val thirdAmendment = amendment.copy(
+            id = UUID.randomUUID(),
+            description = "thirdAmendment",
+            relatedItem = "relatedItem3"
+        )
+        val amendmentsInDb = listOf(amendment, secondAmendment, thirdAmendment)
+        whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
+
+        val result = getAmendmentIdsHandler.handle(
+            GetAmendmentIdsData(
+                status = amendment.status,
+                relatesTo = amendment.relatesTo,
+                relatedItems = listOf(amendment.relatedItem, thirdAmendment.relatedItem),
+                cpid = "cpid",
+                ocid = "ocid",
+                type = amendment.type
+            )
+        )
+
+        val expectedIds = amendmentsInDb.map { it.id }.sorted()
+        val actualIds = result.map { it.id }.sorted()
+
+        assertEquals(expectedIds, actualIds)
+    }
+
+    @Test
+    fun handleFewRelatedItemsWithDifferentRelatesTo() {
+        val amendment = getTestAmendment()
+        val secondAmendment = amendment.copy(id = UUID.randomUUID(), description = "secondAmendment")
+
+        val nonMatchingRelatesTo = AmendmentRelatesTo.CAN
+        val thirdAmendment = amendment.copy(
+            id = UUID.randomUUID(),
+            description = "thirdAmendment",
+            relatedItem = "relatedItem3",
+            relatesTo = nonMatchingRelatesTo
+        )
+        val amendmentsInDb = listOf(amendment, secondAmendment, thirdAmendment)
+        whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
+
+        val result = getAmendmentIdsHandler.handle(
+            GetAmendmentIdsData(
+                status = amendment.status,
+                relatesTo = amendment.relatesTo,
+                relatedItems = listOf(amendment.relatedItem, thirdAmendment.relatedItem),
+                cpid = "cpid",
+                ocid = "ocid",
+                type = amendment.type
+            )
+        )
+
+        val expectedIds = listOf(amendment, secondAmendment).map { it.id }.sorted()
+        val actualIds = result.map { it.id }.sorted()
+
+        assertEquals(expectedIds, actualIds)
+    }
+
+    @Test
+    fun handleDuplicateRelatedItems() {
+        val amendment = getTestAmendment()
+        val amendmentsInDb = listOf(amendment)
+        whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
+
+        val result = getAmendmentIdsHandler.handle(
+            GetAmendmentIdsData(
+                status = amendment.status,
+                relatesTo = amendment.relatesTo,
+                relatedItems = listOf(amendment.relatedItem, amendment.relatedItem),
+                cpid = "cpid",
+                ocid = "ocid",
+                type = amendment.type
+            )
+        )
+
+        val expectedIds = amendmentsInDb.map { it.id }.sorted()
+        val actualIds = result.map { it.id }.sorted()
+
+        assertEquals(expectedIds, actualIds)
+    }
+
+
 }

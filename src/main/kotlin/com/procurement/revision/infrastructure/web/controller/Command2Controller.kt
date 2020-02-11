@@ -6,8 +6,6 @@ import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.toObject
 import com.procurement.revision.infrastructure.web.dto.ApiResponse2
 import com.procurement.revision.infrastructure.web.dto.Command2Message
-import com.procurement.revision.infrastructure.web.dto.NaN
-import com.procurement.revision.infrastructure.web.dto.ResponseStatus
 import com.procurement.revision.infrastructure.web.dto.errorResponse2
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -37,9 +35,7 @@ class Command2Controller(private val commandService: Command2Service) {
             val response =
                 errorResponse2(
                     exception = expected,
-                    version = GlobalProperties.App.apiVersion,
-                    id = NaN,
-                    status = ResponseStatus.INCIDENT
+                    version = GlobalProperties.App.apiVersion
                 )
             return ResponseEntity(response, HttpStatus.OK)
         }
@@ -55,8 +51,7 @@ class Command2Controller(private val commandService: Command2Service) {
             errorResponse2(
                 exception = expected,
                 id = cm.id,
-                version = cm.version,
-                status = ResponseStatus.FAILURE
+                version = cm.version
             )
         }
         return ResponseEntity(response, HttpStatus.OK)

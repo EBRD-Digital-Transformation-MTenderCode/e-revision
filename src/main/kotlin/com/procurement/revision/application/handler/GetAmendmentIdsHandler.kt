@@ -15,6 +15,7 @@ class GetAmendmentIdsHandler(private val amendmentRepository: AmendmentRepositor
         val amendments = amendmentRepository.findBy(data.cpid)
 
         val isAmendmentSuitable = data.relatedItems
+            .takeIf { it.isNotEmpty() }
             ?.asSequence()
             ?.map { item ->
                 Predicate<Amendment> { amendment ->
@@ -25,11 +26,19 @@ class GetAmendmentIdsHandler(private val amendmentRepository: AmendmentRepositor
                         relatedItem = item
                     ).compareWith(amendment)
                 }
-            }?.reduce { accumulatedPredicate, predicate -> accumulatedPredicate.or(predicate) }
+            }
+            ?.reduce { accumulatedPredicate, predicate -> accumulatedPredicate.or(predicate) }
+            ?: Predicate { amendment ->
+                AmendmentFilter(
+                    status = data.status,
+                    relatesTo = data.relatesTo,
+                    type = data.type
+                ).compareWith(amendment)
+            }
 
         return amendments
             .asSequence()
-            .filter { amendment -> isAmendmentSuitable?.test(amendment) ?: true }
+            .filter { amendment -> isAmendmentSuitable.test(amendment) }
             .map { amendment -> GetAmendmentIdsResult(amendment.id) }
             .toList()
     }

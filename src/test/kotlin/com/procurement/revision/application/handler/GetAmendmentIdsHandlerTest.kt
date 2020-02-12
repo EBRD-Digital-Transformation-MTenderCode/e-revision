@@ -185,7 +185,7 @@ internal class GetAmendmentIdsHandlerTest {
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
-                relatedItems = null,
+                relatedItems = emptyList(),
                 cpid = "cpid",
                 ocid = "ocid",
                 type = amendment.type
@@ -249,7 +249,7 @@ internal class GetAmendmentIdsHandlerTest {
             GetAmendmentIdsData(
                 status = null,
                 relatesTo = null,
-                relatedItems = null,
+                relatedItems = emptyList(),
                 cpid = "cpid",
                 ocid = "ocid",
                 type = null

@@ -11,3 +11,12 @@ CREATE TABLE IF NOT EXISTS revision.amendments
     data text,
     primary key (cpid, id)
 );
+
+CREATE TABLE IF NOT EXISTS  revision.history
+(
+    operation_id text,
+    command text,
+    operation_date timestamp,
+    json_data text,
+    primary key(operation_id, command)
+);

@@ -17,7 +17,8 @@ fun GetAmendmentIdsRequest.convert(): GetAmendmentIdsData {
                 message = "The amendment with cpid '${cpid}' contains empty list of relatedItems."
             )
         }
-            ?.toList(),
+            ?.toList()
+            .orEmpty(),
         cpid = cpid,
         ocid = ocid
     )

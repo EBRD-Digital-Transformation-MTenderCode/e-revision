@@ -8,7 +8,7 @@ data class GetAmendmentIdsData (
     val status: AmendmentStatus?,
     val type: AmendmentType?,
     val relatesTo: AmendmentRelatesTo?,
-    val relatedItems: List<String>?,
+    val relatedItems: List<String>,
     val cpid: String,
     val ocid: String
 )

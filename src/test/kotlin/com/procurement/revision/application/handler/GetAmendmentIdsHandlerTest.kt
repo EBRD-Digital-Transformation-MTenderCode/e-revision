@@ -53,7 +53,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendment = getTestAmendment()
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -65,7 +65,6 @@ internal class GetAmendmentIdsHandlerTest {
         )
 
         val expectedIds = listOf(amendment.id)
-        val actualIds = result.map { it.id }
 
         assertEquals(expectedIds, actualIds)
     }
@@ -77,7 +76,7 @@ internal class GetAmendmentIdsHandlerTest {
 
         val nonMatchingStatus = AmendmentStatus.ACTIVE
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = nonMatchingStatus,
                 relatesTo = amendment.relatesTo,
@@ -88,7 +87,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
 
-        val actualIds = result.map { it.id }
         assertTrue(actualIds.isEmpty())
     }
 
@@ -97,7 +95,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendment = getTestAmendment()
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = null,
                 relatesTo = amendment.relatesTo,
@@ -108,7 +106,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
         val expectedIds = listOf(amendment.id)
-        val actualIds = result.map { it.id }
 
         assertEquals(expectedIds, actualIds)
     }
@@ -119,7 +116,7 @@ internal class GetAmendmentIdsHandlerTest {
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
         val nonMatchingRelatesTo = AmendmentRelatesTo.CAN
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = nonMatchingRelatesTo,
@@ -130,7 +127,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
 
-        val actualIds = result.map { it.id }
         assertTrue(actualIds.isEmpty())
     }
 
@@ -139,7 +135,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendment = getTestAmendment()
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = null,
@@ -150,7 +146,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
         val expectedIds = listOf(amendment.id)
-        val actualIds = result.map { it.id }
 
         assertEquals(expectedIds, actualIds)
     }
@@ -161,7 +156,7 @@ internal class GetAmendmentIdsHandlerTest {
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
         val nonMatchingRelatedItems = listOf("someItem")
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -172,7 +167,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
 
-        val actualIds = result.map { it.id }
         assertTrue(actualIds.isEmpty())
     }
 
@@ -181,7 +175,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendment = getTestAmendment()
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -192,7 +186,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
         val expectedIds = listOf(amendment.id)
-        val actualIds = result.map { it.id }
 
         assertEquals(expectedIds, actualIds)
     }
@@ -204,7 +197,7 @@ internal class GetAmendmentIdsHandlerTest {
 
         val nonMatchingType = AmendmentType.TENDER_CHANGE
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -215,7 +208,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
 
-        val actualIds = result.map { it.id }
         assertTrue(actualIds.isEmpty())
     }
 
@@ -224,7 +216,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendment = getTestAmendment()
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -235,7 +227,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
         val expectedIds = listOf(amendment.id)
-        val actualIds = result.map { it.id }
 
         assertEquals(expectedIds, actualIds)
     }
@@ -245,7 +236,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendment = getTestAmendment()
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(listOf(amendment))
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = null,
                 relatesTo = null,
@@ -256,7 +247,6 @@ internal class GetAmendmentIdsHandlerTest {
             )
         )
         val expectedIds = listOf(amendment.id)
-        val actualIds = result.map { it.id }
 
         assertEquals(expectedIds, actualIds)
     }
@@ -275,7 +265,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendmentsInDb = listOf(amendment, secondAmendment, thirdAmendment)
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -284,10 +274,9 @@ internal class GetAmendmentIdsHandlerTest {
                 ocid = "ocid",
                 type = amendment.type
             )
-        )
+        ).sorted()
 
         val expectedIds = listOf(amendment, secondAmendment).map { it.id }.sorted()
-        val actualIds = result.map { it.id }.sorted()
 
         assertEquals(expectedIds, actualIds)
     }
@@ -305,7 +294,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendmentsInDb = listOf(amendment, secondAmendment, thirdAmendment)
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -314,10 +303,9 @@ internal class GetAmendmentIdsHandlerTest {
                 ocid = "ocid",
                 type = amendment.type
             )
-        )
+        ).sorted()
 
         val expectedIds = amendmentsInDb.map { it.id }.sorted()
-        val actualIds = result.map { it.id }.sorted()
 
         assertEquals(expectedIds, actualIds)
     }
@@ -337,7 +325,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendmentsInDb = listOf(amendment, secondAmendment, thirdAmendment)
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -346,10 +334,9 @@ internal class GetAmendmentIdsHandlerTest {
                 ocid = "ocid",
                 type = amendment.type
             )
-        )
+        ).sorted()
 
         val expectedIds = listOf(amendment, secondAmendment).map { it.id }.sorted()
-        val actualIds = result.map { it.id }.sorted()
 
         assertEquals(expectedIds, actualIds)
     }
@@ -360,7 +347,7 @@ internal class GetAmendmentIdsHandlerTest {
         val amendmentsInDb = listOf(amendment)
         whenever(cassandraAmendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
 
-        val result = getAmendmentIdsHandler.handle(
+        val actualIds = getAmendmentIdsHandler.handle(
             GetAmendmentIdsData(
                 status = amendment.status,
                 relatesTo = amendment.relatesTo,
@@ -372,10 +359,8 @@ internal class GetAmendmentIdsHandlerTest {
         )
 
         val expectedIds = amendmentsInDb.map { it.id }.sorted()
-        val actualIds = result.map { it.id }.sorted()
 
         assertEquals(expectedIds, actualIds)
     }
-
 
 }

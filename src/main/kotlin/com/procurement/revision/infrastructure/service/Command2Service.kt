@@ -32,13 +32,7 @@ class Command2Service(
                 val result = getAmendmentIdsHandler.handle(request.convert())
                 if (log.isDebugEnabled)
                     log.debug("Amendment ids have been found. Result: ${result.toJson()}")
-
-                val response = result.map { it.id }
-                if (log.isDebugEnabled)
-                    log.debug(
-                        "Amendment ids have been found. Result: ${response.toJson()}"
-                    )
-                response
+                result
             }
         }
 

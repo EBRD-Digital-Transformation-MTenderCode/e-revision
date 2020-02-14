@@ -53,3 +53,9 @@ fun <T : Any> JsonNode.toObject(target: Class<T>): T {
         throw IllegalArgumentException("Error binding JSON to an object of type '${target.canonicalName}'.", expected)
     }
 }
+
+fun String.toNode(): JsonNode = try {
+    JsonMapper.mapper.readTree(this)
+} catch (exception: JsonProcessingException) {
+    throw IllegalArgumentException("Error parsing String to JsonNode.", exception)
+}

@@ -17,41 +17,27 @@ class HistoryDao(private val session: Session) {
 
     fun getHistory(operationId: String, command: String): HistoryEntity? {
         val query = select()
-                .all()
-                .from(HISTORY_TABLE)
-                .where(eq(OPERATION_ID, operationId))
-                .and(eq(COMMAND, command))
-                .limit(1)
+            .all()
+            .from(HISTORY_TABLE)
+            .where(eq(OPERATION_ID, operationId))
+            .and(eq(COMMAND, command))
+            .limit(1)
         val row = session.execute(query).one()
         return if (row != null) HistoryEntity(
-                row.getString(OPERATION_ID),
-                row.getString(COMMAND),
-                row.getTimestamp(OPERATION_DATE),
-                row.getString(JSON_DATA)) else null
+            row.getString(OPERATION_ID),
+            row.getString(COMMAND),
+            row.getTimestamp(OPERATION_DATE),
+            row.getString(JSON_DATA)
+        ) else null
     }
 
-    fun saveHistory(operationId: String, command: String, response: ApiResponse2): HistoryEntity {
-        val entity = HistoryEntity(
-                operationId = operationId,
-                command = command,
-                operationDate = localNowUTC().toDate(),
-                jsonData = response.toJson())
-
-        val insert = insertInto(HISTORY_TABLE)
-                .value(OPERATION_ID, entity.operationId)
-                .value(COMMAND, entity.command)
-                .value(OPERATION_DATE, entity.operationDate)
-                .value(JSON_DATA, entity.jsonData)
-        session.execute(insert)
-        return entity
-    }
-
-    fun saveHistory(operationId: String, command: String, response: ApiResponse): HistoryEntity {
+    fun saveHistory(operationId: String, command: String, result: Any): HistoryEntity {
         val entity = HistoryEntity(
             operationId = operationId,
             command = command,
             operationDate = localNowUTC().toDate(),
-            jsonData = response.toJson())
+            jsonData = result.toJson()
+        )
 
         val insert = insertInto(HISTORY_TABLE)
             .value(OPERATION_ID, entity.operationId)
@@ -69,5 +55,4 @@ class HistoryDao(private val session: Session) {
         private const val OPERATION_DATE = "operation_date"
         private const val JSON_DATA = "json_data"
     }
-
 }

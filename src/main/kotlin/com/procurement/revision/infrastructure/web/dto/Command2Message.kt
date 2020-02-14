@@ -1,20 +1,13 @@
 package com.procurement.revision.infrastructure.web.dto
 
-import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import java.time.LocalDateTime
 import java.util.*
-
-data class Command2Message constructor(
-    @field:JsonProperty("version") @param:JsonProperty("version") val version: ApiVersion,
-    @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
-    @field:JsonProperty("action") @param:JsonProperty("action") val action: Command2Type,
-    @field:JsonProperty("params") @param:JsonProperty("params") val params: JsonNode
-)
 
 enum class Command2Type(private val value: String) {
 
@@ -54,7 +47,7 @@ fun errorResponse2(exception: Exception, id: UUID = NaN, version: ApiVersion): A
         )
     }
 
-private fun createIncident(code: String, message: String, metadata: Any? = null): ApiIncidentResponse2.Incident {
+fun createIncident(code: String, message: String, metadata: Any? = null): ApiIncidentResponse2.Incident {
     return ApiIncidentResponse2.Incident(
         date = LocalDateTime.now(),
         id = UUID.randomUUID(),
@@ -78,5 +71,12 @@ private fun getFullErrorCode(code: String): String = "400.${GlobalProperties.ser
 val NaN: UUID
     get() = UUID(0, 0)
 
+fun JsonNode.getBy(parameter: String): JsonNode{
+    val node = get(parameter)
+    if(node == null || node is NullNode)  throw IllegalArgumentException("$parameter is absent")
+    return node
+}
 
-
+fun JsonNode.getId() = UUID.fromString(getBy("id").asText())
+fun JsonNode.getVersion() = ApiVersion.valueOf(getBy("version").asText())
+fun JsonNode.getAction() = getBy("action").asText()

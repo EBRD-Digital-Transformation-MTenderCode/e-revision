@@ -9,18 +9,21 @@ import com.procurement.revision.infrastructure.configuration.properties.GlobalPr
 import java.time.LocalDateTime
 import java.util.*
 
-enum class Command2Type(private val value: String) {
+enum class Command2Type(@JsonValue private val value: String) {
 
     GET_AMENDMENTS_IDS("getAmendmentIds");
 
-    @JsonValue
-    fun value(): String {
-        return this.value
+    companion object {
+        private val elements: Map<String, Command2Type> = values().associateBy { it.value.toUpperCase() }
+        fun fromString(value: String): Command2Type = elements[value.toUpperCase()]
+            ?: throw EnumException(
+                enumType = Command2Type::class.java.canonicalName,
+                value = value,
+                values = values().joinToString { it.value }
+            )
     }
 
-    override fun toString(): String {
-        return this.value
-    }
+    override fun toString() = value
 }
 
 fun errorResponse2(exception: Exception, id: UUID = NaN, version: ApiVersion): ApiResponse2 =
@@ -76,12 +79,12 @@ private fun getFullErrorCode(code: String): String = "400.${GlobalProperties.ser
 val NaN: UUID
     get() = UUID(0, 0)
 
-fun JsonNode.getBy(parameter: String): JsonNode{
+fun JsonNode.getBy(parameter: String): JsonNode {
     val node = get(parameter)
-    if(node == null || node is NullNode)  throw IllegalArgumentException("$parameter is absent")
+    if (node == null || node is NullNode) throw IllegalArgumentException("$parameter is absent")
     return node
 }
 
 fun JsonNode.getId() = UUID.fromString(getBy("id").asText())
 fun JsonNode.getVersion() = ApiVersion.valueOf(getBy("version").asText())
-fun JsonNode.getAction() = getBy("action").asText()
+fun JsonNode.getAction() = Command2Type.fromString(getBy("action").asText())

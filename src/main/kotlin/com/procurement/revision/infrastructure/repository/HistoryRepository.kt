@@ -22,17 +22,17 @@ class HistoryRepository(private val session: Session) {
                INSERT INTO $KEYSPACE.$HISTORY_TABLE(
                       $OPERATION_ID,
                       $COMMAND,
-                      $OPERATION_DATE
+                      $OPERATION_DATE,
                       $JSON_DATA
                )
-               VALUES(?, ?, ?,?)
+               VALUES(?, ?, ?, ?)
                IF NOT EXISTS
             """
 
         private const val FIND_HISTORY_ENTRY_CQL = """
                SELECT $OPERATION_ID,
                       $COMMAND,
-                      $OPERATION_DATE
+                      $OPERATION_DATE,
                       $JSON_DATA
                  FROM $KEYSPACE.$HISTORY_TABLE
                 WHERE $OPERATION_ID=?
@@ -45,10 +45,11 @@ class HistoryRepository(private val session: Session) {
     private val preparedFindHistoryByCpidAndCommandCQL = session.prepare(FIND_HISTORY_ENTRY_CQL)
 
     fun getHistory(operationId: String, command: String): HistoryEntity? {
-        val query = preparedFindHistoryByCpidAndCommandCQL.bind().apply {
-            setString(OPERATION_ID, operationId)
-            setString(COMMAND, command)
-        }
+        val query = preparedFindHistoryByCpidAndCommandCQL.bind()
+            .apply {
+                setString(OPERATION_ID, operationId)
+                setString(COMMAND, command)
+            }
         val row = session.execute(query).one()
         return if (row != null) HistoryEntity(
             row.getString(OPERATION_ID),
@@ -66,12 +67,13 @@ class HistoryRepository(private val session: Session) {
             jsonData = result.toJson()
         )
 
-        val insert = preparedSaveHistoryCQL.bind().apply {
-            setString(OPERATION_ID, entity.operationId)
-            setString(COMMAND, entity.command)
-            setTimestamp(OPERATION_DATE, entity.operationDate)
-            setString(JSON_DATA, entity.jsonData)
-        }
+        val insert = preparedSaveHistoryCQL.bind()
+            .apply {
+                setString(OPERATION_ID, entity.operationId)
+                setString(COMMAND, entity.command)
+                setTimestamp(OPERATION_DATE, entity.operationDate)
+                setString(JSON_DATA, entity.jsonData)
+            }
         session.execute(insert)
         return entity
     }

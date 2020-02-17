@@ -35,10 +35,15 @@ fun errorResponse2(exception: Exception, id: UUID = NaN, version: ApiVersion): A
                 )
             )
         )
-        is EnumException -> ApiIncidentResponse2(
+        is EnumException -> ApiFailResponse2(
             id = id,
             version = version,
-            result = createIncident(exception.code, exception.message!!)
+            result = listOf(
+                ApiFailResponse2.Error(
+                    code = getFullErrorCode(exception.code),
+                    description = exception.message!!
+                )
+            )
         )
         else -> ApiIncidentResponse2(
             id = id,

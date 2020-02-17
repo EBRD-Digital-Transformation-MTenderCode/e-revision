@@ -3,7 +3,6 @@
   "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   "action": "getAmendmentIds",
   "params": {
-    "status": "pending",
     "type": "cancellation",
     "relatesTo": "lot",
     "relatedItems": ["5407df26-9305-4f1b-b438-8e16d2ab2201", "99368915-668e-4ea6-9374-f15a8eb79521"],

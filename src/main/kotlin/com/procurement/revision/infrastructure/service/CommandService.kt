@@ -35,12 +35,9 @@ class CommandService(
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
-        val historyEntity = historyRepository.getHistory(cm.id, cm.command.value())
-        if (historyEntity != null) {
-            return historyEntity.jsonData.toObject(ApiSuccessResponse::class.java)
-        }
         val dataOfResponse: Any = when (cm.command) {
-            CommandType.PROCEED_AMENDMENT_FOR_LOT_CANCELLATION     -> {
+            CommandType.PROCEED_AMENDMENT_FOR_LOT_CANCELLATION -> {
+                generateResponseFromHistory(cm)?.run { return this }
                 val context = ProceedAmendmentLotCancellationContext(
                     cpid = cm.cpid,
                     id = cm.lotId,
@@ -59,10 +56,12 @@ class CommandService(
                 val dataResponse: ProceedAmendmentResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Amendments for lot cancellation have been created. Response: ${dataResponse.toJson()}")
+                historyRepository.saveHistory(cm.id, cm.command.value(), dataResponse)
                 dataResponse
             }
 
-            CommandType.PROCEED_AMENDMENT_FOR_TENDER_CANCELLATION  -> {
+            CommandType.PROCEED_AMENDMENT_FOR_TENDER_CANCELLATION -> {
+                generateResponseFromHistory(cm)?.run { return this }
                 val context = ProceedAmendmentTenderCancellationContext(
                     cpid = cm.cpid,
                     id = cm.tenderId,
@@ -81,10 +80,11 @@ class CommandService(
                 val dataResponse: ProceedAmendmentResponse = result.convert()
                 if (log.isDebugEnabled)
                     log.debug("Amendments for lot cancellation have been created. Response: ${dataResponse.toJson()}")
+                historyRepository.saveHistory(cm.id, cm.command.value(), dataResponse)
                 dataResponse
             }
 
-            CommandType.CHECK_EXISTING_AMENDMENT_FOR_CANCEL_LOT    -> {
+            CommandType.CHECK_EXISTING_AMENDMENT_FOR_CANCEL_LOT -> {
                 val context = CheckExistingAmendmentForCancelLotContext(
                     cpid = cm.cpid,
                     id = cm.lotId,
@@ -121,13 +121,22 @@ class CommandService(
                     )
                 dataResponse
             }
-
         }
         return ApiSuccessResponse(id = cm.id, version = cm.version, data = dataOfResponse)
             .also {
-                historyRepository.saveHistory(cm.id, cm.command.value(), it)
                 if (log.isDebugEnabled)
                     log.debug("Response: ${it.toJson()}")
             }
+    }
+
+    private fun generateResponseFromHistory(cm: CommandMessage): ApiSuccessResponse? {
+        val historyEntity = historyRepository.getHistory(cm.id, cm.command.value())
+        return if (historyEntity != null) {
+            ApiSuccessResponse(
+                id = cm.id,
+                version = cm.version,
+                data = historyEntity.jsonData
+            )
+        } else null
     }
 }

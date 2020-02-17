@@ -10,7 +10,7 @@ import com.procurement.revision.application.service.amendment.CheckExistingAmend
 import com.procurement.revision.infrastructure.dto.amendment.ProceedAmendmentRequest
 import com.procurement.revision.infrastructure.dto.amendment.ProceedAmendmentResponse
 import com.procurement.revision.infrastructure.dto.converter.convert
-import com.procurement.revision.infrastructure.repository.HistoryDao
+import com.procurement.revision.infrastructure.repository.HistoryRepository
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.toObject
 import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
@@ -27,7 +27,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class CommandService(
-    private val historyDao: HistoryDao,
+    private val historyRepository: HistoryRepository,
     private val amendmentService: AmendmentService
 ) {
     companion object {
@@ -35,7 +35,7 @@ class CommandService(
     }
 
     fun execute(cm: CommandMessage): ApiSuccessResponse {
-        val historyEntity = historyDao.getHistory(cm.id, cm.command.value())
+        val historyEntity = historyRepository.getHistory(cm.id, cm.command.value())
         if (historyEntity != null) {
             return historyEntity.jsonData.toObject(ApiSuccessResponse::class.java)
         }
@@ -125,7 +125,7 @@ class CommandService(
         }
         return ApiSuccessResponse(id = cm.id, version = cm.version, data = dataOfResponse)
             .also {
-                historyDao.saveHistory(cm.id, cm.command.value(), it)
+                historyRepository.saveHistory(cm.id, cm.command.value(), it)
                 if (log.isDebugEnabled)
                     log.debug("Response: ${it.toJson()}")
             }

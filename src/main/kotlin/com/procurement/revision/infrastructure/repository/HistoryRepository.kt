@@ -8,7 +8,7 @@ import com.procurement.revision.infrastructure.utils.toJson
 import org.springframework.stereotype.Service
 
 @Service
-class HistoryDao(private val session: Session) {
+class HistoryRepository(private val session: Session) {
 
     companion object {
         private const val KEYSPACE = "revision"

@@ -23,16 +23,16 @@ class GetAmendmentIdsHandler(private val amendmentRepository: AmendmentRepositor
 
     fun handle(node: JsonNode): ApiResponse2 {
         val request = node.getBy("params").toObject(GetAmendmentIdsRequest::class.java)
-        val data = request.convert()
-        val amendments = amendmentRepository.findBy(data.cpid)
-        val relatedItems = data.relatedItems.toSet()
+        val params = request.convert()
+        val amendments = amendmentRepository.findBy(params.cpid)
+        val relatedItems = params.relatedItems.toSet()
 
         val result = amendments
             .asSequence()
             .filter { amendment ->
-                testEquals(amendment.status, pattern = data.status)
-                    && testEquals(amendment.type, pattern = data.type)
-                    && testEquals(amendment.relatesTo, pattern = data.relatesTo)
+                testEquals(amendment.status, pattern = params.status)
+                    && testEquals(amendment.type, pattern = params.type)
+                    && testEquals(amendment.relatesTo, pattern = params.relatesTo)
                     && testContains(amendment.relatedItem, patterns = relatedItems)
             }
             .map { amendment -> amendment.id }

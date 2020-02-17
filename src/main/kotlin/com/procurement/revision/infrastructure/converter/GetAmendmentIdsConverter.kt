@@ -2,12 +2,12 @@ package com.procurement.revision.infrastructure.converter
 
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.application.exception.ErrorType
-import com.procurement.revision.application.model.amendment.GetAmendmentIdsData
+import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.infrastructure.web.dto.request.amendment.GetAmendmentIdsRequest
 import com.procurement.revision.lib.errorIfEmpty
 
-fun GetAmendmentIdsRequest.convert(): GetAmendmentIdsData {
-    return GetAmendmentIdsData(
+fun GetAmendmentIdsRequest.convert(): GetAmendmentIdsParams {
+    return GetAmendmentIdsParams(
         status = status,
         type = type,
         relatesTo = relatesTo,

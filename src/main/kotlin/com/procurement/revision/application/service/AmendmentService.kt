@@ -2,22 +2,24 @@ package com.procurement.revision.application.service
 
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.application.exception.ErrorType
-import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotContext
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotResult
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderContext
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderResult
+import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.model.amendment.ProceedAmendmentData
 import com.procurement.revision.application.model.amendment.ProceedAmendmentLotCancellationContext
 import com.procurement.revision.application.model.amendment.ProceedAmendmentResult
 import com.procurement.revision.application.model.amendment.ProceedAmendmentTenderCancellationContext
+import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
-import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.Token
+import com.procurement.revision.domain.model.amendment.Amendment
+import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.dto.converter.convert
 import com.procurement.revision.infrastructure.service.GenerationService
 import org.springframework.stereotype.Service
@@ -130,6 +132,25 @@ class AmendmentService(
         return CheckExistingAmendmentForCancelTenderResult()
     }
 
+    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): List<AmendmentId> {
+        val amendments = amendmentRepository.findBy(params.cpid)
+        val relatedItems = params.relatedItems.toSet()
+
+        return amendments.asSequence()
+            .filter { amendment ->
+                testEquals(amendment.status, pattern = params.status)
+                    && testEquals(amendment.type, pattern = params.type)
+                    && testEquals(amendment.relatesTo, pattern = params.relatesTo)
+                    && testContains(amendment.relatedItem, patterns = relatedItems)
+            }
+            .map { amendment -> amendment.id }
+            .toList()
+    }
+
+    private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true
+    private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
+        if (patterns.isNotEmpty()) value in patterns else true
+
     private fun checkDocumentsTypeForCancellation(documents: Map<String, DocumentType>) {
         documents.forEach { (id, type) ->
             when (type) {
@@ -158,7 +179,7 @@ class AmendmentService(
                 DocumentType.SHORTLISTED_FIRMS,
                 DocumentType.EVALUATION_REPORTS,
                 DocumentType.CONTRACT_ARRANGEMENTS,
-                DocumentType.CONTRACT_GUARANTEES  -> throw ErrorException(
+                DocumentType.CONTRACT_GUARANTEES -> throw ErrorException(
                     error = ErrorType.INVALID_DOCUMENT_TYPE,
                     message = "Documents with id=${id} has not allowed type='${type}'."
                 )

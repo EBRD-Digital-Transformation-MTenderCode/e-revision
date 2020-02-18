@@ -1,4 +1,4 @@
-package com.procurement.revision.application.handler
+package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.repository.AmendmentRepository

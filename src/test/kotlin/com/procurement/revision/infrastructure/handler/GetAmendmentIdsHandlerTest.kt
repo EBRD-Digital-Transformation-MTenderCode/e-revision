@@ -1,4 +1,4 @@
-package com.procurement.revision.application.handler
+package com.procurement.revision.infrastructure.handler
 
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock

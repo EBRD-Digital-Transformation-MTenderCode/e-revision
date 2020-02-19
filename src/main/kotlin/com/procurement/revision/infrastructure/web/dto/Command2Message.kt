@@ -11,7 +11,8 @@ import java.util.*
 
 enum class Command2Type(@JsonValue private val value: String) {
 
-    GET_AMENDMENTS_IDS("getAmendmentIds");
+    GET_AMENDMENTS_IDS("getAmendmentIds"),
+    DATA_VALIDATION("dataValidation");
 
     companion object {
         private val elements: Map<String, Command2Type> = values().associateBy { it.value.toUpperCase() }

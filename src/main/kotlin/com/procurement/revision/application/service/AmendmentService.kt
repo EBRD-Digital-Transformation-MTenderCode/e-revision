@@ -6,6 +6,8 @@ import com.procurement.revision.application.model.amendment.CheckExistingAmendme
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotResult
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderContext
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderResult
+import com.procurement.revision.application.model.amendment.CreateAmendmentParams
+import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.model.amendment.ProceedAmendmentData
@@ -21,6 +23,7 @@ import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.Token
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
+import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
 import com.procurement.revision.infrastructure.dto.converter.convert
 import com.procurement.revision.infrastructure.model.OperationType
 import com.procurement.revision.infrastructure.service.GenerationService
@@ -164,6 +167,42 @@ class AmendmentService(
                     message = "Document '${document.id}' has invalid documentType."
                 )
             }
+    }
+
+    fun createAmendment(params: CreateAmendmentParams): CreateAmendmentResult {
+        val relatesTo = when (params.operationType) {
+            OperationType.TENDER_CANCELLATION -> {
+                AmendmentRelatesTo.TENDER
+            }
+            OperationType.LOT_CANCELLATION -> {
+                AmendmentRelatesTo.LOT
+            }
+        }
+        val createdAmendment = params.amendment
+            .let { amendment ->
+                Amendment(
+                    id = amendment.id,
+                    description = amendment.description,
+                    rationale = amendment.rationale,
+                    status = AmendmentStatus.PENDING,
+                    type = AmendmentType.CANCELLATION,
+                    relatesTo = relatesTo,
+                    relatedItem = params.id.toString(),
+                    date = params.startDate,
+                    documents = amendment.documents.map { document ->
+                        Amendment.Document(
+                            id = document.id,
+                            description = document.description,
+                            title = document.title,
+                            documentType = document.documentType
+                        )
+                    },
+                    owner = params.owner,
+                    token = generationService.generateToken()
+                )
+            }
+        amendmentRepository.saveNewAmendment(cpid = params.cpid, amendment = createdAmendment)
+        return createdAmendment.convertToCreateAmendmentResult()
     }
 
     private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true

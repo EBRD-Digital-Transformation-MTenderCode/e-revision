@@ -1,6 +1,7 @@
 package com.procurement.revision.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.revision.infrastructure.handler.DataValidationHandler
 import com.procurement.revision.infrastructure.handler.GetAmendmentIdsHandler
 import com.procurement.revision.infrastructure.web.dto.ApiResponse2
 import com.procurement.revision.infrastructure.web.dto.Command2Type
@@ -9,7 +10,9 @@ import org.springframework.stereotype.Service
 
 @Service
 class Command2Service(
-    private val getAmendmentIdsHandler: GetAmendmentIdsHandler
+    private val getAmendmentIdsHandler: GetAmendmentIdsHandler,
+    private val dataValidationHandler: DataValidationHandler
+
 ) {
 
     fun execute(node: JsonNode): ApiResponse2 {
@@ -17,6 +20,9 @@ class Command2Service(
         return when (action) {
             Command2Type.GET_AMENDMENTS_IDS -> {
                 getAmendmentIdsHandler.handle(node)
+            }
+            Command2Type.DATA_VALIDATION -> {
+                dataValidationHandler.handle(node)
             }
         }
     }

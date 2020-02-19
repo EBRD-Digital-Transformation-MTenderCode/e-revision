@@ -4,4 +4,5 @@ import java.util.*
 
 interface Generable {
     fun generateAmendmentId(): UUID
+    fun generateToken(): UUID
 }

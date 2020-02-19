@@ -6,6 +6,7 @@ import com.procurement.revision.application.model.amendment.CheckExistingAmendme
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelLotResult
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderContext
 import com.procurement.revision.application.model.amendment.CheckExistingAmendmentForCancelTenderResult
+import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.model.amendment.ProceedAmendmentData
 import com.procurement.revision.application.model.amendment.ProceedAmendmentLotCancellationContext
@@ -21,6 +22,7 @@ import com.procurement.revision.domain.model.Token
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.dto.converter.convert
+import com.procurement.revision.infrastructure.model.OperationType
 import com.procurement.revision.infrastructure.service.GenerationService
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -145,6 +147,23 @@ class AmendmentService(
             }
             .map { amendment -> amendment.id }
             .toList()
+    }
+
+    fun validateDocumentsTypes(params: DataValidationParams) {
+        val correctDocumentType = when (params.operationType) {
+            OperationType.LOT_CANCELLATION, OperationType.TENDER_CANCELLATION -> DocumentType.CANCELLATION_DETAILS
+        }
+        params.amendments
+            .asSequence()
+            .flatMap { amendment -> amendment.documents.asSequence() }
+            .firstOrNull { document ->
+                document.documentType != correctDocumentType
+            }?.let { document ->
+                throw ErrorException(
+                    error = ErrorType.INVALID_DOCUMENT_TYPE,
+                    message = "Document '${document.id}' has invalid documentType."
+                )
+            }
     }
 
     private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true

@@ -3,6 +3,9 @@ package com.procurement.revision.application.service
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import com.procurement.revision.application.exception.ErrorException
+import com.procurement.revision.application.exception.ErrorType
+import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
@@ -10,8 +13,7 @@ import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.model.amendment.Amendment
-import com.procurement.revision.infrastructure.handler.GetAmendmentIdsHandler
-import com.procurement.revision.infrastructure.repository.CassandraAmendmentRepository
+import com.procurement.revision.infrastructure.model.OperationType
 import com.procurement.revision.infrastructure.service.GenerationService
 import org.junit.jupiter.api.Test
 
@@ -283,6 +285,76 @@ internal class AmendmentServiceTest {
             val expectedIds = amendmentsInDb.map { it.id }.sorted()
 
             assertEquals(expectedIds, actualIds)
+        }
+    }
+
+    @Nested
+    inner class ValidateDocumentsTypes {
+
+        private fun getDocument(documentType: DocumentType) = DataValidationParams.Amendment.Document(
+            documentType = documentType,
+            description = "documentDescription",
+            title = "title",
+            id = UUID.randomUUID().toString()
+        )
+
+        private fun getAmendment(documents: List<DataValidationParams.Amendment.Document>) = DataValidationParams.Amendment(
+            description = "description",
+            rationale = "rationale",
+            documents = documents
+        )
+
+        private fun getFullData(
+            amendments: List<DataValidationParams.Amendment>,
+            operationType: OperationType
+        ) = DataValidationParams(
+            cpid = "cpid",
+            ocid = "ocid",
+            operationType = operationType,
+            amendments = amendments
+        )
+
+        @Test
+        fun success() {
+            val matchingDocTypesByOperationType = mapOf(
+                OperationType.TENDER_CANCELLATION to setOf(DocumentType.CANCELLATION_DETAILS),
+                OperationType.LOT_CANCELLATION to setOf(DocumentType.CANCELLATION_DETAILS)
+            )
+            matchingDocTypesByOperationType.forEach { operationType, matchingDocTypes ->
+                matchingDocTypes.forEach { matchingDocType ->
+                    val docWithMatchingType = getDocument(matchingDocType)
+                    val amendment = getAmendment(listOf(docWithMatchingType))
+                    val params = getFullData(
+                        amendments = listOf(amendment),
+                        operationType = operationType
+                    )
+                    amendmentService.validateDocumentsTypes(params)
+                }
+            }
+        }
+
+        @Test
+        fun nonMatchingDocAndOperationTypes_exception() {
+
+            val nonMatchingDocTypesByOperationType = mapOf(
+                OperationType.TENDER_CANCELLATION to DocumentType.values().subtract(setOf(DocumentType.CANCELLATION_DETAILS)),
+                OperationType.LOT_CANCELLATION to DocumentType.values().subtract(setOf(DocumentType.CANCELLATION_DETAILS))
+            )
+            nonMatchingDocTypesByOperationType.forEach { (operationType, nonMatchingDocTypes) ->
+                nonMatchingDocTypes.forEach { nonMatchingDocType ->
+                    val docWithNonMatchingType = getDocument(nonMatchingDocType)
+                    val amendment = getAmendment(listOf(docWithNonMatchingType))
+                    val params = getFullData(
+                        amendments = listOf(amendment),
+                        operationType = operationType
+                    )
+                    val actual = assertThrows(
+                        ErrorException::class.java,
+                        { amendmentService.validateDocumentsTypes(params) })
+                    val expected = ErrorType.INVALID_DOCUMENT_TYPE.code
+                    assertEquals(expected, actual.code)
+                }
+            }
         }
     }
 }

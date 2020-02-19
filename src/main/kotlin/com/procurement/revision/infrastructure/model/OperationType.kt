@@ -5,15 +5,8 @@ import com.procurement.revision.infrastructure.bind.databinding.Enumable
 import com.procurement.revision.infrastructure.bind.databinding.Valuable
 
 enum class OperationType(override val text: String) : Valuable<OperationType> {
-    CREATE_CN("createCN"),
-    CREATE_PN("createPN"),
-    CREATE_PIN("createPIN"),
-    UPDATE_CN("updateCN"),
-    UPDATE_PN("updatePN"),
-    CREATE_CN_ON_PN("createCNonPN"),
-    CREATE_CN_ON_PIN("createCNonPIN"),
-    CREATE_PIN_ON_PN("createPINonPN"),
-    CREATE_NEGOTIATION_CN_ON_PN("createNegotiationCnOnPn");
+    TENDER_CANCELLATION("tenderCancellation"),
+    LOT_CANCELLATION("lotCancellation");
 
     override fun toString(): String = text
 

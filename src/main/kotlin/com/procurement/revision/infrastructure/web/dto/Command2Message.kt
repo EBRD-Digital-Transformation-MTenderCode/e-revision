@@ -9,7 +9,7 @@ import com.procurement.revision.infrastructure.configuration.properties.GlobalPr
 import java.time.LocalDateTime
 import java.util.*
 
-enum class Command2Type(@JsonValue private val value: String) {
+enum class Command2Type(@JsonValue override val value: String): Action {
 
     GET_AMENDMENTS_IDS("getAmendmentIds"),
     DATA_VALIDATION("dataValidation"),

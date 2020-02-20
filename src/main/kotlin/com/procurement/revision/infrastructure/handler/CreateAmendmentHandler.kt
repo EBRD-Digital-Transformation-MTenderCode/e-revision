@@ -5,9 +5,8 @@ import com.procurement.revision.application.model.amendment.CreateAmendmentResul
 import com.procurement.revision.application.service.AmendmentService
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.repository.HistoryRepository
-import com.procurement.revision.infrastructure.utils.toObject
 import com.procurement.revision.infrastructure.web.dto.Command2Type
-import com.procurement.revision.infrastructure.web.dto.getBy
+import com.procurement.revision.infrastructure.web.dto.getParams
 import com.procurement.revision.infrastructure.web.dto.request.amendment.CreateAmendmentRequest
 import org.springframework.stereotype.Component
 
@@ -19,7 +18,7 @@ class CreateAmendmentHandler(
     override val action: Command2Type = Command2Type.CREATE_AMENDMENT
 
     override fun execute(node: JsonNode): CreateAmendmentResult {
-        val request = node.getBy("params").toObject(CreateAmendmentRequest::class.java)
+        val request = node.getParams(CreateAmendmentRequest::class.java)
         val params = request.convert()
         return amendmentService.createAmendment(params)
     }

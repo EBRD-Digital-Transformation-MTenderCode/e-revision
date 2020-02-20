@@ -6,10 +6,11 @@ import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
+import com.procurement.revision.infrastructure.utils.toObject
 import java.time.LocalDateTime
 import java.util.*
 
-enum class Command2Type(@JsonValue override val value: String): Action {
+enum class Command2Type(@JsonValue override val value: String) : Action {
 
     GET_AMENDMENTS_IDS("getAmendmentIds"),
     DATA_VALIDATION("dataValidation"),
@@ -90,3 +91,4 @@ fun JsonNode.getBy(parameter: String): JsonNode {
 fun JsonNode.getId() = UUID.fromString(getBy("id").asText())
 fun JsonNode.getVersion() = ApiVersion.valueOf(getBy("version").asText())
 fun JsonNode.getAction() = Command2Type.fromString(getBy("action").asText())
+fun <T : Any> JsonNode.getParams(target: Class<T>) = getBy("params").toObject(target)

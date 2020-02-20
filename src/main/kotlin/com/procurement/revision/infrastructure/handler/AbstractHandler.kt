@@ -21,9 +21,9 @@ abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiRe
         val result = execute(node)
 
         if (log.isDebugEnabled)
-            log.debug("${action.value} has been executed. Result: ${result.toJson()}")
+            log.debug("${action.value} has been executed. Result: ${result?.toJson()}")
         return ApiSuccessResponse2(version = version, id = id, result = result)
     }
 
-    abstract fun execute(node: JsonNode): R
+    abstract fun execute(node: JsonNode): R?
 }

@@ -1,6 +1,7 @@
 package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.service.AmendmentService
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.repository.HistoryRepository
@@ -31,26 +32,23 @@ class CreateAmendmentHandler(
         val action = node.getAction().toString()
         val version = node.getVersion()
 
-        historyRepository.getHistory(id.toString(), action)?.run {
-            return ApiSuccessResponse2(
-                id = id,
-                version = version,
-                result = jsonData
-            )
+        val history = historyRepository.getHistory(id.toString(), action)
+        if (history != null) {
+            val amendment = history.jsonData.toObject(CreateAmendmentResult::class.java)
+            val result = amendment.convert()
+            return ApiSuccessResponse2(version = version, id = id, result = result)
         }
 
         val request = node.getBy("params").toObject(CreateAmendmentRequest::class.java)
         val params = request.convert()
 
-        val result = amendmentService.createAmendment(params).convert()
+        val amendment = amendmentService.createAmendment(params)
+        historyRepository.saveHistory(id.toString(), action, amendment)
 
+        val result = amendment.convert()
         if (log.isDebugEnabled)
             log.debug("Amendment has been created. Response: ${result.toJson()}")
 
-        return ApiSuccessResponse2(
-            version = version,
-            id = id,
-            result = result
-        ).also { historyRepository.saveHistory(id.toString(), action, result) }
+        return ApiSuccessResponse2(version = version, id = id, result = result)
     }
 }

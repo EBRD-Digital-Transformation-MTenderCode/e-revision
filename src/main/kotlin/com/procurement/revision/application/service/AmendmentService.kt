@@ -201,8 +201,12 @@ class AmendmentService(
                     token = generationService.generateToken()
                 )
             }
-        amendmentRepository.saveNewAmendment(cpid = params.cpid, amendment = createdAmendment)
-        return createdAmendment.convertToCreateAmendmentResult()
+        val isSaved = amendmentRepository.saveNewAmendment(cpid = params.cpid, amendment = createdAmendment)
+        return if (isSaved)
+            createdAmendment.convertToCreateAmendmentResult()
+        else {
+            amendmentRepository.findBy(params.cpid, createdAmendment.id)!!.convertToCreateAmendmentResult()
+        }
     }
 
     private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true

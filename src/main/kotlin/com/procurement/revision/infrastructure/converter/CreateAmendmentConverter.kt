@@ -8,7 +8,7 @@ import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.infrastructure.model.OperationType
 import com.procurement.revision.infrastructure.web.dto.request.amendment.CreateAmendmentRequest
-import com.procurement.revision.infrastructure.web.dto.response.amendment.CreateAmendmentResponse
+
 import com.procurement.revision.lib.errorIfEmpty
 
 fun CreateAmendmentRequest.convert() = CreateAmendmentParams(
@@ -57,28 +57,6 @@ fun Amendment.convertToCreateAmendmentResult() = CreateAmendmentResult(
                 description = document.description,
                 documentType = document.documentType,
                 title = document.title
-            )
-        }
-    )
-)
-
-fun CreateAmendmentResult.convert() = CreateAmendmentResponse(
-    amendment = CreateAmendmentResponse.Amendment(
-        rationale = amendment.rationale,
-        description = amendment.description,
-        token = amendment.token,
-        date = amendment.date,
-        type = amendment.type,
-        id = amendment.id,
-        status = amendment.status,
-        relatesTo = amendment.relatesTo,
-        relatedItem = amendment.relatedItem,
-        documents = amendment.documents.map { document ->
-            CreateAmendmentResponse.Amendment.Document(
-                id = document.id,
-                description = document.description,
-                title = document.title,
-                documentType = document.documentType
             )
         }
     )

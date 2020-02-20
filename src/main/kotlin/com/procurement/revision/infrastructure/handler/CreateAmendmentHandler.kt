@@ -34,18 +34,16 @@ class CreateAmendmentHandler(
 
         val history = historyRepository.getHistory(id.toString(), action)
         if (history != null) {
-            val amendment = history.jsonData.toObject(CreateAmendmentResult::class.java)
-            val result = amendment.convert()
+            val result = history.jsonData.toObject(CreateAmendmentResult::class.java)
             return ApiSuccessResponse2(version = version, id = id, result = result)
         }
 
         val request = node.getBy("params").toObject(CreateAmendmentRequest::class.java)
         val params = request.convert()
 
-        val amendment = amendmentService.createAmendment(params)
-        historyRepository.saveHistory(id.toString(), action, amendment)
+        val result = amendmentService.createAmendment(params)
 
-        val result = amendment.convert()
+        historyRepository.saveHistory(id.toString(), action, result)
         if (log.isDebugEnabled)
             log.debug("Amendment has been created. Response: ${result.toJson()}")
 

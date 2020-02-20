@@ -13,16 +13,16 @@ class HistoryRepository(private val session: Session) {
     companion object {
         private const val KEYSPACE = "revision"
         private const val HISTORY_TABLE = "history"
-        private const val OPERATION_ID = "operation_id"
+        private const val COMMAND_ID = "command_id"
         private const val COMMAND = "command"
-        private const val OPERATION_DATE = "operation_date"
+        private const val COMMAND_DATE = "command_date"
         private const val JSON_DATA = "json_data"
 
         private const val SAVE_HISTORY_CQL = """
                INSERT INTO $KEYSPACE.$HISTORY_TABLE(
-                      $OPERATION_ID,
+                      $COMMAND_ID,
                       $COMMAND,
-                      $OPERATION_DATE,
+                      $COMMAND_DATE,
                       $JSON_DATA
                )
                VALUES(?, ?, ?, ?)
@@ -30,12 +30,12 @@ class HistoryRepository(private val session: Session) {
             """
 
         private const val FIND_HISTORY_ENTRY_CQL = """
-               SELECT $OPERATION_ID,
+               SELECT $COMMAND_ID,
                       $COMMAND,
-                      $OPERATION_DATE,
+                      $COMMAND_DATE,
                       $JSON_DATA
                  FROM $KEYSPACE.$HISTORY_TABLE
-                WHERE $OPERATION_ID=?
+                WHERE $COMMAND_ID=?
                   AND $COMMAND=?
                LIMIT 1
             """
@@ -47,14 +47,14 @@ class HistoryRepository(private val session: Session) {
     fun getHistory(operationId: String, command: String): HistoryEntity? {
         val query = preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
-                setString(OPERATION_ID, operationId)
+                setString(COMMAND_ID, operationId)
                 setString(COMMAND, command)
             }
         val row = session.execute(query).one()
         return if (row != null) HistoryEntity(
-            row.getString(OPERATION_ID),
+            row.getString(COMMAND_ID),
             row.getString(COMMAND),
-            row.getTimestamp(OPERATION_DATE),
+            row.getTimestamp(COMMAND_DATE),
             row.getString(JSON_DATA)
         ) else null
     }
@@ -69,9 +69,9 @@ class HistoryRepository(private val session: Session) {
 
         val insert = preparedSaveHistoryCQL.bind()
             .apply {
-                setString(OPERATION_ID, entity.operationId)
+                setString(COMMAND_ID, entity.operationId)
                 setString(COMMAND, entity.command)
-                setTimestamp(OPERATION_DATE, entity.operationDate)
+                setTimestamp(COMMAND_DATE, entity.operationDate)
                 setString(JSON_DATA, entity.jsonData)
             }
         session.execute(insert)

@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS revision.amendments
 
 CREATE TABLE IF NOT EXISTS  revision.history
 (
-    operation_id text,
+    command_id text,
     command text,
-    operation_date timestamp,
+    command_date timestamp,
     json_data text,
-    primary key(operation_id, command)
+    primary key(command_id, command)
 );

@@ -19,7 +19,6 @@ data class CreateAmendmentRequest(
     @param:JsonProperty("owner") @field:JsonProperty("owner") val owner: Owner
 ) {
     data class Amendment(
-        @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("rationale") @field:JsonProperty("rationale") val rationale: String,
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,

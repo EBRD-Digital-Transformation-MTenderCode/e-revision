@@ -41,37 +41,39 @@ fun CreateAmendmentRequest.convert() = CreateAmendmentParams(
 )
 
 fun Amendment.convertToCreateAmendmentResult() = CreateAmendmentResult(
-    rationale = rationale,
-    description = description,
-    relatedItem = relatedItem,
-    relatesTo = relatesTo,
-    status = status,
-    id = id,
-    type = type,
-    date = date,
-    xTOKEN = token,
-    documents = documents.map { document ->
-        CreateAmendmentResult.Document(
-            id = document.id,
-            description = document.description,
-            documentType = document.documentType,
-            title = document.title
-        )
-    }
+    amendment = CreateAmendmentResult.Amendment(
+        rationale = rationale,
+        description = description,
+        relatedItem = relatedItem,
+        relatesTo = relatesTo,
+        status = status,
+        id = id,
+        type = type,
+        date = date,
+        token = token,
+        documents = documents.map { document ->
+            CreateAmendmentResult.Amendment.Document(
+                id = document.id,
+                description = document.description,
+                documentType = document.documentType,
+                title = document.title
+            )
+        }
+    )
 )
 
 fun CreateAmendmentResult.convert() = CreateAmendmentResponse(
     amendment = CreateAmendmentResponse.Amendment(
-        rationale = rationale,
-        description = description,
-        xTOKEN = xTOKEN,
-        date = date,
-        type = type,
-        id = id,
-        status = status,
-        relatesTo = relatesTo,
-        relatedItem = relatedItem,
-        documents = documents.map { document ->
+        rationale = amendment.rationale,
+        description = amendment.description,
+        token = amendment.token,
+        date = amendment.date,
+        type = amendment.type,
+        id = amendment.id,
+        status = amendment.status,
+        relatesTo = amendment.relatesTo,
+        relatedItem = amendment.relatedItem,
+        documents = amendment.documents.map { document ->
             CreateAmendmentResponse.Amendment.Document(
                 id = document.id,
                 description = document.description,

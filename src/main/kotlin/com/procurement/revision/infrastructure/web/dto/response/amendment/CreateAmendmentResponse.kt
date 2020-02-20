@@ -1,5 +1,6 @@
 package com.procurement.revision.infrastructure.web.dto.response.amendment
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
@@ -15,6 +16,7 @@ data class CreateAmendmentResponse(
 ) {
     data class Amendment(
         @param:JsonProperty("rationale") @field:JsonProperty("rationale") val rationale: String,
+        @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
         @param:JsonProperty("documents") @field:JsonProperty("documents") val documents: List<Document>,
         @param:JsonProperty("id") @field:JsonProperty("id") val id: AmendmentId,
@@ -23,12 +25,13 @@ data class CreateAmendmentResponse(
         @param:JsonProperty("type") @field:JsonProperty("type") val type: AmendmentType,
         @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: AmendmentRelatesTo,
         @param:JsonProperty("relatedItem") @field:JsonProperty("relatedItem") val relatedItem: String,
-        @param:JsonProperty("X-TOKEN") @field:JsonProperty("X-TOKEN") val xTOKEN: Token
+        @param:JsonProperty("token") @field:JsonProperty("token") val token: Token
     ) {
         data class Document(
             @param:JsonProperty("documentType") @field:JsonProperty("documentType") val documentType: DocumentType,
             @param:JsonProperty("id") @field:JsonProperty("id") val id: DocumentId,
             @param:JsonProperty("title") @field:JsonProperty("title") val title: String,
+            @JsonInclude(JsonInclude.Include.NON_NULL)
             @param:JsonProperty("description") @field:JsonProperty("description") val description: String?
         )
     }

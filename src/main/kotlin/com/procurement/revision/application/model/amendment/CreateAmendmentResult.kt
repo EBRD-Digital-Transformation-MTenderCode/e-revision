@@ -10,21 +10,25 @@ import com.procurement.revision.domain.model.document.DocumentId
 import java.time.LocalDateTime
 
 data class CreateAmendmentResult(
-    val rationale: String,
-    val description: String?,
-    val documents: List<Document>,
-    val id: AmendmentId,
-    val date: LocalDateTime,
-    val status: AmendmentStatus,
-    val type: AmendmentType,
-    val relatesTo: AmendmentRelatesTo,
-    val relatedItem: String,
-    val xTOKEN: Token
+    val amendment: Amendment
 ) {
-    data class Document(
-        val documentType: DocumentType,
-        val id: DocumentId,
-        val title: String,
-        val description: String?
-    )
+    data class Amendment(
+        val rationale: String,
+        val description: String?,
+        val documents: List<Document>,
+        val id: AmendmentId,
+        val date: LocalDateTime,
+        val status: AmendmentStatus,
+        val type: AmendmentType,
+        val relatesTo: AmendmentRelatesTo,
+        val relatedItem: String,
+        val token: Token
+    ) {
+        data class Document(
+            val documentType: DocumentType,
+            val id: DocumentId,
+            val title: String,
+            val description: String?
+        )
+    }
 }

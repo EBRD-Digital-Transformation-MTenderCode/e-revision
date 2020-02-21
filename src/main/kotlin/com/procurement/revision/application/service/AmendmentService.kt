@@ -15,6 +15,7 @@ import com.procurement.revision.application.model.amendment.ProceedAmendmentLotC
 import com.procurement.revision.application.model.amendment.ProceedAmendmentResult
 import com.procurement.revision.application.model.amendment.ProceedAmendmentTenderCancellationContext
 import com.procurement.revision.application.repository.AmendmentRepository
+import com.procurement.revision.domain.ValidationResult
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
@@ -25,6 +26,7 @@ import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
 import com.procurement.revision.infrastructure.dto.converter.convert
+import com.procurement.revision.infrastructure.handler.validation.ValidationError
 import com.procurement.revision.infrastructure.model.OperationType
 import com.procurement.revision.infrastructure.service.GenerationService
 import org.springframework.stereotype.Service
@@ -152,7 +154,7 @@ class AmendmentService(
             .toList()
     }
 
-    fun validateDocumentsTypes(params: DataValidationParams) {
+    fun validateDocumentsTypes(params: DataValidationParams): ValidationResult<ValidationError> {
         val correctDocumentType = when (params.operationType) {
             OperationType.LOT_CANCELLATION, OperationType.TENDER_CANCELLATION -> DocumentType.CANCELLATION_DETAILS
         }
@@ -162,11 +164,9 @@ class AmendmentService(
             .firstOrNull { document ->
                 document.documentType != correctDocumentType
             }?.let { document ->
-                throw ErrorException(
-                    error = ErrorType.INVALID_DOCUMENT_TYPE,
-                    message = "Document '${document.id}' has invalid documentType."
-                )
+                return ValidationResult.error(ValidationError.InvalidDocumentType(document.id))
             }
+        return ValidationResult.ok()
     }
 
     fun createAmendment(params: CreateAmendmentParams): CreateAmendmentResult {

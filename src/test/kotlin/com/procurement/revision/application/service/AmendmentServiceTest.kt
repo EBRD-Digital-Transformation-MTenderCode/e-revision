@@ -1,8 +1,11 @@
 package com.procurement.revision.application.service
 
 import com.nhaarman.mockito_kotlin.any
+import com.nhaarman.mockito_kotlin.eq
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
+import com.procurement.revision.application.model.amendment.CreateAmendmentParams
+import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.repository.AmendmentRepository
@@ -12,7 +15,6 @@ import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.infrastructure.model.OperationType
-import com.procurement.revision.infrastructure.service.GenerationService
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -25,11 +27,13 @@ internal class AmendmentServiceTest {
 
     private lateinit var amendmentRepository: AmendmentRepository
     private lateinit var amendmentService: AmendmentService
+    private lateinit var generable: Generable
 
     @BeforeEach
     fun init() {
         amendmentRepository = mock()
-        amendmentService = AmendmentService(amendmentRepository, GenerationService())
+        generable = mock()
+        amendmentService = AmendmentService(amendmentRepository, generable)
     }
 
     private fun getTestAmendment() = Amendment(
@@ -349,6 +353,91 @@ internal class AmendmentServiceTest {
                     assertTrue(amendmentService.validateDocumentsTypes(params).isError)
                 }
             }
+        }
+    }
+
+    @Nested
+    inner class CreateAmendment {
+        @Test
+        fun successForTenderCancellation() {
+            val params = createAmendmentParams()
+
+            val token = UUID.randomUUID()
+
+            val expected = createAmendmentResult(params, token)
+
+            whenever(generable.generateToken()).thenReturn(token)
+            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), amendment = any())).thenReturn(true)
+            val actual = amendmentService.createAmendment(params)
+
+            assertEquals(expected, actual)
+        }
+
+        @Test
+        fun successForLotCancellation() {
+            val params = createAmendmentParams().copy(operationType = OperationType.LOT_CANCELLATION)
+
+            val token = UUID.randomUUID()
+
+            val expected = createAmendmentResult(
+                params,
+                token
+            ).run { copy(amendment = this.amendment.copy(relatesTo = AmendmentRelatesTo.LOT)) }
+
+            whenever(generable.generateToken()).thenReturn(token)
+            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), amendment = any())).thenReturn(true)
+            val actual = amendmentService.createAmendment(params)
+
+            assertEquals(expected, actual)
+        }
+
+        private fun createAmendmentResult(params: CreateAmendmentParams, token: UUID) =
+            CreateAmendmentResult(
+                amendment = params.amendment.let { amendment ->
+                    CreateAmendmentResult.Amendment(
+                        rationale = amendment.rationale,
+                        description = amendment.description,
+                        id = amendment.id,
+                        relatedItem = params.id.toString(),
+                        relatesTo = AmendmentRelatesTo.TENDER,
+                        status = AmendmentStatus.PENDING,
+                        type = AmendmentType.CANCELLATION,
+                        token = token,
+                        date = params.startDate,
+                        documents = amendment.documents.map { document ->
+                            CreateAmendmentResult.Amendment.Document(
+                                id = document.id,
+                                description = document.description,
+                                title = document.title,
+                                documentType = document.documentType
+                            )
+                        }
+                    )
+                }
+            )
+
+        private fun createAmendmentParams(): CreateAmendmentParams {
+            return CreateAmendmentParams(
+                id = UUID.randomUUID(),
+                cpid = "cpid",
+                ocid = "ocid",
+                operationType = OperationType.TENDER_CANCELLATION,
+                owner = "owner",
+                startDate = LocalDateTime.now(),
+                amendment = CreateAmendmentParams.Amendment(
+                    rationale = "rationale",
+                    description = "description",
+                    id = UUID.randomUUID(),
+                    documents = listOf(
+                        CreateAmendmentParams.Amendment.Document(
+                            id = "documentId",
+                            description = "description",
+                            documentType = DocumentType.CANCELLATION_DETAILS,
+                            title = "title"
+                        )
+                    )
+                )
+            )
         }
     }
 }

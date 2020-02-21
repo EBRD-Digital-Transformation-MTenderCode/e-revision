@@ -3,8 +3,6 @@ package com.procurement.revision.application.service
 import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.revision.application.exception.ErrorException
-import com.procurement.revision.application.exception.ErrorType
 import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.repository.AmendmentRepository
@@ -15,11 +13,11 @@ import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.infrastructure.model.OperationType
 import com.procurement.revision.infrastructure.service.GenerationService
-import org.junit.jupiter.api.Test
-
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 import java.util.*
 
@@ -328,7 +326,7 @@ internal class AmendmentServiceTest {
                         amendments = listOf(amendment),
                         operationType = operationType
                     )
-                    amendmentService.validateDocumentsTypes(params)
+                    assertTrue(amendmentService.validateDocumentsTypes(params).isOk)
                 }
             }
         }
@@ -348,11 +346,7 @@ internal class AmendmentServiceTest {
                         amendments = listOf(amendment),
                         operationType = operationType
                     )
-                    val actual = assertThrows(
-                        ErrorException::class.java,
-                        { amendmentService.validateDocumentsTypes(params) })
-                    val expected = ErrorType.INVALID_DOCUMENT_TYPE.code
-                    assertEquals(expected, actual.code)
+                    assertTrue(amendmentService.validateDocumentsTypes(params).isError)
                 }
             }
         }

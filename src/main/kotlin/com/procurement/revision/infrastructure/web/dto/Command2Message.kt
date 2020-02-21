@@ -77,7 +77,7 @@ fun createIncident(code: String, message: String, metadata: Any? = null): ApiInc
     )
 }
 
-private fun getFullErrorCode(code: String): String = "400.${GlobalProperties.serviceId}." + code
+fun getFullErrorCode(code: String): String = "400.${GlobalProperties.serviceId}." + code
 
 val NaN: UUID
     get() = UUID(0, 0)

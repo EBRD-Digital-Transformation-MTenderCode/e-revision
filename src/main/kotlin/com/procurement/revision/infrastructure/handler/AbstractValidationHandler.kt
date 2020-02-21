@@ -8,6 +8,7 @@ import com.procurement.revision.infrastructure.web.dto.Action
 import com.procurement.revision.infrastructure.web.dto.ApiFailResponse2
 import com.procurement.revision.infrastructure.web.dto.ApiResponse2
 import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse2
+import com.procurement.revision.infrastructure.web.dto.getFullErrorCode
 import com.procurement.revision.infrastructure.web.dto.getId
 import com.procurement.revision.infrastructure.web.dto.getVersion
 import org.slf4j.LoggerFactory
@@ -33,7 +34,7 @@ abstract class AbstractValidationHandler<ACTION : Action, E : ValidationError> :
                 id = id,
                 result = listOf(
                     ApiFailResponse2.Error(
-                        code = result.get.code,
+                        code = getFullErrorCode(result.get.code),
                         description = result.get.description
                     )
                 )

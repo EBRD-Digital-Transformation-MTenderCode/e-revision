@@ -10,10 +10,11 @@ sealed class ValidationResult<out T> {
     abstract val isOk: Boolean
     abstract val isError: Boolean
 
-    fun onError(block: (T) -> Unit) = when (this) {
-        is Error -> block(get)
-        is Ok -> Unit
-    }
+    fun onError(block: (T) -> Unit): Unit =
+        when (this) {
+            is Error -> block(get)
+            is Ok -> Unit
+        }
 
     fun <R> map(block: (T) -> R): ValidationResult<R> = flatMap { Error(block(it)) }
 

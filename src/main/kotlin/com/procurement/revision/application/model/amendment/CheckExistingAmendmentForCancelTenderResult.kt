@@ -1,3 +1,0 @@
-package com.procurement.revision.application.model.amendment
-
-class CheckExistingAmendmentForCancelTenderResult

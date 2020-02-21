@@ -15,13 +15,12 @@ import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
 import com.procurement.revision.infrastructure.handler.validation.ValidationError
 import com.procurement.revision.infrastructure.model.OperationType
-import com.procurement.revision.infrastructure.service.GenerationService
 import org.springframework.stereotype.Service
 
 @Service
 class AmendmentService(
     private val amendmentRepository: AmendmentRepository,
-    private val generationService: GenerationService
+    private val generable: Generable
 ) {
 
     fun getAmendmentIdsBy(params: GetAmendmentIdsParams): List<AmendmentId> {
@@ -83,7 +82,7 @@ class AmendmentService(
                         )
                     },
                     owner = params.owner,
-                    token = generationService.generateToken()
+                    token = generable.generateToken()
                 )
             }
         val isSaved = amendmentRepository.saveNewAmendment(cpid = params.cpid, amendment = createdAmendment)

@@ -416,6 +416,45 @@ internal class AmendmentServiceTest {
                 }
             )
 
+        @Test
+        fun successGetAmendmentFromHistory() {
+            val params = createAmendmentParams().copy(operationType = OperationType.LOT_CANCELLATION)
+
+            val token = UUID.randomUUID()
+
+            whenever(generable.generateToken()).thenReturn(token)
+            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), amendment = any())).thenReturn(false)
+
+            val amendmentFromDb = getTestAmendment()
+            whenever(amendmentRepository.findBy(params.cpid, params.amendment.id)).thenReturn(amendmentFromDb)
+
+            val expected = CreateAmendmentResult(
+                amendment = CreateAmendmentResult.Amendment(
+                    relatesTo = amendmentFromDb.relatesTo,
+                    description = amendmentFromDb.description,
+                    date = amendmentFromDb.date,
+                    token = amendmentFromDb.token,
+                    type = amendmentFromDb.type,
+                    status = amendmentFromDb.status,
+                    relatedItem = amendmentFromDb.relatedItem,
+                    id = amendmentFromDb.id,
+                    rationale = amendmentFromDb.rationale,
+                    documents = amendmentFromDb.documents.map { document ->
+                        CreateAmendmentResult.Amendment.Document(
+                            id = document.id,
+                            description = document.description,
+                            documentType = document.documentType,
+                            title = document.title
+                        )
+                    }
+                )
+            )
+
+            val actual = amendmentService.createAmendment(params)
+
+            assertEquals(expected, actual)
+        }
+
         private fun createAmendmentParams(): CreateAmendmentParams {
             return CreateAmendmentParams(
                 id = UUID.randomUUID(),

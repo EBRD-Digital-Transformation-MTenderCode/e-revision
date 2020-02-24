@@ -5,9 +5,9 @@ import com.procurement.revision.infrastructure.model.entity.HistoryEntity
 import com.procurement.revision.infrastructure.utils.localNowUTC
 import com.procurement.revision.infrastructure.utils.toDate
 import com.procurement.revision.infrastructure.utils.toJson
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Repository
 
-@Service
+@Repository
 class HistoryRepository(private val session: Session) {
 
     companion object {

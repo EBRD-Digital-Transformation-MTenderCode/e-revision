@@ -3,18 +3,18 @@ package com.procurement.revision.infrastructure.handler
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.web.dto.Action
-import com.procurement.revision.infrastructure.web.dto.ApiResponse2
-import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse2
+import com.procurement.revision.infrastructure.web.dto.ApiResponse
+import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
 import com.procurement.revision.infrastructure.web.dto.getId
 import com.procurement.revision.infrastructure.web.dto.getVersion
 import org.slf4j.LoggerFactory
 
-abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiResponse2> {
+abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiResponse> {
     companion object {
         private val log = LoggerFactory.getLogger(AbstractHandler::class.java)
     }
 
-    override fun handle(node: JsonNode): ApiResponse2 {
+    override fun handle(node: JsonNode): ApiResponse {
         val id = node.getId()
         val version = node.getVersion()
 
@@ -22,7 +22,7 @@ abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiRe
 
         if (log.isDebugEnabled)
             log.debug("${action.value} has been executed. Result: ${result?.toJson()}")
-        return ApiSuccessResponse2(version = version, id = id, result = result)
+        return ApiSuccessResponse(version = version, id = id, result = result)
     }
 
     abstract fun execute(node: JsonNode): R?

@@ -10,17 +10,17 @@ import com.procurement.revision.infrastructure.utils.toObject
 import java.time.LocalDateTime
 import java.util.*
 
-enum class Command2Type(@JsonValue override val value: String) : Action {
+enum class CommandType(@JsonValue override val value: String) : Action {
 
     GET_AMENDMENTS_IDS("getAmendmentIds"),
     DATA_VALIDATION("dataValidation"),
     CREATE_AMENDMENT("createAmendment");
 
     companion object {
-        private val elements: Map<String, Command2Type> = values().associateBy { it.value.toUpperCase() }
-        fun fromString(value: String): Command2Type = elements[value.toUpperCase()]
+        private val elements: Map<String, CommandType> = values().associateBy { it.value.toUpperCase() }
+        fun fromString(value: String): CommandType = elements[value.toUpperCase()]
             ?: throw EnumException(
-                enumType = Command2Type::class.java.canonicalName,
+                enumType = CommandType::class.java.canonicalName,
                 value = value,
                 values = values().joinToString { it.value }
             )
@@ -29,46 +29,46 @@ enum class Command2Type(@JsonValue override val value: String) : Action {
     override fun toString() = value
 }
 
-fun errorResponse2(exception: Exception, id: UUID = NaN, version: ApiVersion): ApiResponse2 =
+fun errorResponse(exception: Exception, id: UUID = NaN, version: ApiVersion): ApiResponse =
     when (exception) {
-        is ErrorException -> ApiFailResponse2(
+        is ErrorException -> ApiFailResponse(
             id = id,
             version = version,
             result = listOf(
-                ApiFailResponse2.Error(
+                ApiFailResponse.Error(
                     code = getFullErrorCode(exception.code),
                     description = exception.message!!
                 )
             )
         )
-        is EnumException -> ApiFailResponse2(
+        is EnumException -> ApiFailResponse(
             id = id,
             version = version,
             result = listOf(
-                ApiFailResponse2.Error(
+                ApiFailResponse.Error(
                     code = getFullErrorCode(exception.code),
                     description = exception.message!!
                 )
             )
         )
-        else -> ApiIncidentResponse2(
+        else -> ApiIncidentResponse(
             id = id,
             version = version,
             result = createIncident("00.00", exception.message ?: "Internal server error.")
         )
     }
 
-fun createIncident(code: String, message: String, metadata: Any? = null): ApiIncidentResponse2.Incident {
-    return ApiIncidentResponse2.Incident(
+fun createIncident(code: String, message: String, metadata: Any? = null): ApiIncidentResponse.Incident {
+    return ApiIncidentResponse.Incident(
         date = LocalDateTime.now(),
         id = UUID.randomUUID(),
-        service = ApiIncidentResponse2.Incident.Service(
+        service = ApiIncidentResponse.Incident.Service(
             id = GlobalProperties.serviceId,
             version = GlobalProperties.App.apiVersion,
             name = GlobalProperties.serviceName
         ),
         errors = listOf(
-            ApiIncidentResponse2.Incident.Error(
+            ApiIncidentResponse.Incident.Error(
                 code = getFullErrorCode(code),
                 description = message,
                 metadata = metadata
@@ -90,5 +90,5 @@ fun JsonNode.getBy(parameter: String): JsonNode {
 
 fun JsonNode.getId() = UUID.fromString(getBy("id").asText())
 fun JsonNode.getVersion() = ApiVersion.valueOf(getBy("version").asText())
-fun JsonNode.getAction() = Command2Type.fromString(getBy("action").asText())
+fun JsonNode.getAction() = CommandType.fromString(getBy("action").asText())
 fun <T : Any> JsonNode.getParams(target: Class<T>) = getBy("params").toObject(target)

@@ -1,7 +1,7 @@
 package com.procurement.revision.infrastructure.model.dto.amendment.proceed
 
 import com.procurement.revision.infrastructure.model.dto.AbstractDTOTestBase
-import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse2
+import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
 import com.procurement.revision.infrastructure.web.dto.ApiVersion
 import com.procurement.revision.json.JsonValidator
 import com.procurement.revision.json.loadJson
@@ -9,7 +9,7 @@ import com.procurement.revision.json.toJson
 import org.junit.jupiter.api.Test
 import java.util.*
 
-class ApiResponse2Test : AbstractDTOTestBase<ApiSuccessResponse2>(ApiSuccessResponse2::class.java) {
+class ApiResponseTest : AbstractDTOTestBase<ApiSuccessResponse>(ApiSuccessResponse::class.java) {
 
     companion object {
         private const val JSON_RESPONSE_WITH_NO_RESULT = "json/dto/api2/api_response_no_result.json"
@@ -20,7 +20,7 @@ class ApiResponse2Test : AbstractDTOTestBase<ApiSuccessResponse2>(ApiSuccessResp
     @Test
     fun nullResultTest() {
         val expectedJson = loadJson(JSON_RESPONSE_WITH_NO_RESULT)
-        val apiResponse2 = ApiSuccessResponse2(
+        val apiResponse2 = ApiSuccessResponse(
             version = getApiVersion(),
             result = null,
             id = getId()
@@ -32,7 +32,7 @@ class ApiResponse2Test : AbstractDTOTestBase<ApiSuccessResponse2>(ApiSuccessResp
     @Test
     fun emptyResultTest() {
         val expectedJson = loadJson(JSON_RESPONSE_WITH_NO_RESULT)
-        val apiResponse2 = ApiSuccessResponse2(
+        val apiResponse2 = ApiSuccessResponse(
             version = getApiVersion(),
             result = emptyList<String>(),
             id = getId()
@@ -45,7 +45,7 @@ class ApiResponse2Test : AbstractDTOTestBase<ApiSuccessResponse2>(ApiSuccessResp
     @Test
     fun listResultTest() {
         val expectedJson = loadJson(JSON_RESPONSE_WITH_RESULT_LIST)
-        val apiResponse2 = ApiSuccessResponse2(
+        val apiResponse2 = ApiSuccessResponse(
             version = getApiVersion(),
             result = listOf(
                 "7b1584b8-5eb0-43d8-ad72-f7c074cc6bac",
@@ -61,7 +61,7 @@ class ApiResponse2Test : AbstractDTOTestBase<ApiSuccessResponse2>(ApiSuccessResp
     @Test
     fun objectResultTest() {
         val expectedJson = loadJson(JSON_RESPONSE_WITH_RESULT_OBJECT)
-        val apiResponse2 = ApiSuccessResponse2(
+        val apiResponse2 = ApiSuccessResponse(
             version = getApiVersion(),
             result = object {
                 val first = "first"

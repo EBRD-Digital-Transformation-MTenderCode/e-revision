@@ -4,28 +4,28 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.infrastructure.handler.CreateAmendmentHandler
 import com.procurement.revision.infrastructure.handler.GetAmendmentIdsHandler
 import com.procurement.revision.infrastructure.handler.validation.DataValidationHandler
-import com.procurement.revision.infrastructure.web.dto.ApiResponse2
-import com.procurement.revision.infrastructure.web.dto.Command2Type
+import com.procurement.revision.infrastructure.web.dto.ApiResponse
+import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.getAction
 import org.springframework.stereotype.Service
 
 @Service
-class Command2Service(
+class CommandService(
     private val getAmendmentIdsHandler: GetAmendmentIdsHandler,
     private val dataValidationHandler: DataValidationHandler,
     private val createAmendmentHandler: CreateAmendmentHandler
 ) {
 
-    fun execute(node: JsonNode): ApiResponse2 {
+    fun execute(node: JsonNode): ApiResponse {
         val action = node.getAction()
         return when (action) {
-            Command2Type.GET_AMENDMENTS_IDS -> {
+            CommandType.GET_AMENDMENTS_IDS -> {
                 getAmendmentIdsHandler.handle(node)
             }
-            Command2Type.DATA_VALIDATION -> {
+            CommandType.DATA_VALIDATION -> {
                 dataValidationHandler.handle(node)
             }
-            Command2Type.CREATE_AMENDMENT ->{
+            CommandType.CREATE_AMENDMENT ->{
                 createAmendmentHandler.handle(node)
             }
         }

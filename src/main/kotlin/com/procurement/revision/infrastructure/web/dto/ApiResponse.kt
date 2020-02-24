@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonValue
 import java.time.LocalDateTime
 import java.util.*
 
-sealed class ApiResponse2(
+sealed class ApiResponse(
     @field:JsonProperty("version") @param:JsonProperty("version") val version: ApiVersion,
     @field:JsonProperty("id") @param:JsonProperty("id") val id: UUID,
     @field:JsonProperty("result") @param:JsonProperty("result") val result: Any?
@@ -14,10 +14,10 @@ sealed class ApiResponse2(
     abstract val status: ResponseStatus
 }
 
-class ApiSuccessResponse2(
+class ApiSuccessResponse(
     version: ApiVersion, id: UUID,
     @JsonInclude(JsonInclude.Include.NON_EMPTY) result: Any?
-) : ApiResponse2(
+) : ApiResponse(
     version = version,
     id = id,
     result = result
@@ -26,8 +26,8 @@ class ApiSuccessResponse2(
     override val status: ResponseStatus = ResponseStatus.SUCCESS
 }
 
-class ApiFailResponse2(version: ApiVersion, id: UUID, result: List<Error>) :
-    ApiResponse2(version = version, id = id, result = result) {
+class ApiFailResponse(version: ApiVersion, id: UUID, result: List<Error>) :
+    ApiResponse(version = version, id = id, result = result) {
 
     @field:JsonProperty("status")
     override val status: ResponseStatus = ResponseStatus.FAIL
@@ -35,8 +35,8 @@ class ApiFailResponse2(version: ApiVersion, id: UUID, result: List<Error>) :
     class Error(val code: String, val description: String?)
 }
 
-class ApiIncidentResponse2(version: ApiVersion, id: UUID, result: Incident) :
-    ApiResponse2(version = version, id = id, result = result) {
+class ApiIncidentResponse(version: ApiVersion, id: UUID, result: Incident) :
+    ApiResponse(version = version, id = id, result = result) {
 
     @field:JsonProperty("status")
     override val status: ResponseStatus = ResponseStatus.INCIDENT

@@ -64,7 +64,7 @@ internal class AmendmentServiceTest {
         fun getAmendmentIdsBySuccess() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(relatedItem = "someItem")
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams(
@@ -84,7 +84,7 @@ internal class AmendmentServiceTest {
         @Test
         fun handleNonMatchingStatuses() {
             val amendment = getTestAmendment()
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendment))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendment))
 
             val nonMatchingStatus = AmendmentStatus.ACTIVE
 
@@ -105,7 +105,7 @@ internal class AmendmentServiceTest {
         fun handleNoStatus() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(status = AmendmentStatus.ACTIVE)
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams(
@@ -126,7 +126,7 @@ internal class AmendmentServiceTest {
         @Test
         fun handleNonMatchingRelatesTo() {
             val amendment = getTestAmendment()
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendment))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendment))
 
             val nonMatchingRelatesTo = AmendmentRelatesTo.CAN
             val actualIds = amendmentService.getAmendmentIdsBy(
@@ -146,7 +146,7 @@ internal class AmendmentServiceTest {
         fun handleNoRelatesTo() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(relatesTo = AmendmentRelatesTo.CAN)
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams(
@@ -167,7 +167,7 @@ internal class AmendmentServiceTest {
         @Test
         fun handleNonMatchingRelatedItems() {
             val amendment = getTestAmendment()
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendment))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendment))
 
             val nonMatchingRelatedItems = listOf("someItem")
             val actualIds = amendmentService.getAmendmentIdsBy(
@@ -187,7 +187,7 @@ internal class AmendmentServiceTest {
         fun handleNoRelatedItems() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment()
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams(
@@ -208,7 +208,7 @@ internal class AmendmentServiceTest {
         @Test
         fun handleNonMatchingType() {
             val amendment = getTestAmendment()
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendment))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendment))
 
             val nonMatchingType = AmendmentType.TENDER_CHANGE
 
@@ -229,7 +229,7 @@ internal class AmendmentServiceTest {
         fun handleNoType() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(type = AmendmentType.TENDER_CHANGE)
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendmentFirst, amendmentSecond))
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams(
@@ -250,7 +250,7 @@ internal class AmendmentServiceTest {
         @Test
         fun handleNoParamsReceived() {
             val amendment = getTestAmendment()
-            whenever(amendmentRepository.findBy(any())).thenReturn(listOf(amendment))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(listOf(amendment))
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams(
@@ -271,7 +271,7 @@ internal class AmendmentServiceTest {
         fun handleDuplicateRelatedItems() {
             val amendment = getTestAmendment()
             val amendmentsInDb = listOf(amendment)
-            whenever(amendmentRepository.findBy(any())).thenReturn(amendmentsInDb)
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(amendmentsInDb)
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams(
@@ -367,7 +367,7 @@ internal class AmendmentServiceTest {
             val expected = createAmendmentResult(params, token)
 
             whenever(generable.generateToken()).thenReturn(token)
-            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), amendment = any())).thenReturn(true)
+            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), ocid = eq(params.ocid), amendment = any())).thenReturn(true)
             val actual = amendmentService.createAmendment(params)
 
             assertEquals(expected, actual)
@@ -385,7 +385,7 @@ internal class AmendmentServiceTest {
             ).run { copy(amendment = this.amendment.copy(relatesTo = AmendmentRelatesTo.LOT)) }
 
             whenever(generable.generateToken()).thenReturn(token)
-            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), amendment = any())).thenReturn(true)
+            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), ocid = eq(params.ocid), amendment = any())).thenReturn(true)
             val actual = amendmentService.createAmendment(params)
 
             assertEquals(expected, actual)
@@ -423,10 +423,10 @@ internal class AmendmentServiceTest {
             val token = UUID.randomUUID()
 
             whenever(generable.generateToken()).thenReturn(token)
-            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), amendment = any())).thenReturn(false)
+            whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), ocid = eq(params.ocid), amendment = any())).thenReturn(false)
 
             val amendmentFromDb = getTestAmendment()
-            whenever(amendmentRepository.findBy(params.cpid, params.amendment.id)).thenReturn(amendmentFromDb)
+            whenever(amendmentRepository.findBy(params.cpid, params.ocid, params.amendment.id)).thenReturn(amendmentFromDb)
 
             val expected = CreateAmendmentResult(
                 amendment = CreateAmendmentResult.Amendment(

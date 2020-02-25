@@ -11,7 +11,6 @@ import com.nhaarman.mockito_kotlin.any
 import com.nhaarman.mockito_kotlin.doThrow
 import com.nhaarman.mockito_kotlin.spy
 import com.nhaarman.mockito_kotlin.whenever
-import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
@@ -21,6 +20,7 @@ import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.revision.infrastructure.configuration.DatabaseTestConfiguration
+import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
 import com.procurement.revision.json.toJson
 import org.hamcrest.CoreMatchers.`is`
@@ -44,6 +44,7 @@ import java.util.*
 class AmendmentDataEntityRepositoryIT {
     companion object {
         private const val CPID = "cpid-1"
+        private const val OCID = "ocid-1"
         private val ID = UUID.randomUUID()
         private val TOKEN = UUID.randomUUID()
         private val DATE = JsonDateTimeDeserializer.deserialize(JsonDateTimeSerializer.serialize(LocalDateTime.now()))
@@ -91,7 +92,7 @@ class AmendmentDataEntityRepositoryIT {
     fun findBy() {
         insertAmendment()
 
-        val actualAmendments: List<Amendment> = amendmentRepository.findBy(cpid = CPID)
+        val actualAmendments: List<Amendment> = amendmentRepository.findBy(cpid = CPID, ocid = OCID)
 
         assertThat(actualAmendments, `is`(not(empty<Amendment>())))
         assertThat(actualAmendments, hasItem(stubAmendment()))
@@ -100,7 +101,7 @@ class AmendmentDataEntityRepositoryIT {
 
     @Test
     fun cnNotFound() {
-        val actualAmendments = amendmentRepository.findBy(cpid = "UNKNOWN")
+        val actualAmendments = amendmentRepository.findBy(cpid = "UNKNOWN", ocid = OCID)
         assertThat(actualAmendments, `is`(empty<Amendment>()))
     }
 
@@ -111,7 +112,7 @@ class AmendmentDataEntityRepositoryIT {
             .execute(any<BoundStatement>())
 
         assertThrows<DatabaseInteractionException> {
-            amendmentRepository.saveNewAmendment(CPID, stubAmendment())
+            amendmentRepository.saveNewAmendment(CPID, OCID, stubAmendment())
         }
     }
 
@@ -121,7 +122,7 @@ class AmendmentDataEntityRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        assertThrows<DatabaseInteractionException> { amendmentRepository.findBy(CPID) }
+        assertThrows<DatabaseInteractionException> { amendmentRepository.findBy(CPID, OCID) }
     }
 
     private fun createKeyspace() {

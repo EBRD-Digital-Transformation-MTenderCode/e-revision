@@ -24,7 +24,7 @@ class AmendmentService(
 ) {
 
     fun getAmendmentIdsBy(params: GetAmendmentIdsParams): List<AmendmentId> {
-        val amendments = amendmentRepository.findBy(params.cpid)
+        val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
         val relatedItems = params.relatedItems.toSet()
 
         return amendments.asSequence()
@@ -85,11 +85,11 @@ class AmendmentService(
                     token = generable.generateToken()
                 )
             }
-        val isSaved = amendmentRepository.saveNewAmendment(cpid = params.cpid, amendment = createdAmendment)
+        val isSaved = amendmentRepository.saveNewAmendment(cpid = params.cpid, ocid = params.ocid, amendment = createdAmendment)
         return if (isSaved)
             createdAmendment.convertToCreateAmendmentResult()
         else {
-            amendmentRepository.findBy(params.cpid, createdAmendment.id)!!.convertToCreateAmendmentResult()
+            amendmentRepository.findBy(params.cpid, params.ocid, createdAmendment.id)!!.convertToCreateAmendmentResult()
         }
     }
 

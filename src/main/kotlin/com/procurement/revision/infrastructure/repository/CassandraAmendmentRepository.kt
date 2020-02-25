@@ -4,10 +4,10 @@ import com.datastax.driver.core.BoundStatement
 import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
-import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
+import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.toObject
@@ -20,44 +20,46 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         private const val keySpace = "revision"
         private const val tableName = "amendments"
         private const val columnCpid = "cpid"
+        private const val columnOcid = "ocid"
         private const val columnId = "id"
         private const val columnData = "data"
 
         private const val SAVE_NEW_AMENDMENT = """
                INSERT INTO $keySpace.$tableName(
                       $columnCpid,
+                      $columnOcid,
                       $columnId,
                       $columnData
                )
-               VALUES(?, ?, ?)
+               VALUES(?, ?, ?, ?)
                IF NOT EXISTS
             """
 
-        private const val FIND_BY_CPID_CQL = """
-               SELECT $columnCpid,
-                      $columnData
-                 FROM $keySpace.$tableName
-                WHERE $columnCpid=?
-            """
-
-        private const val FIND_BY_CPID_AND_ID_CQL = """
-               SELECT $columnCpid,
-                      $columnId,
-                      $columnData
+        private const val FIND_BY_CPID_AND_OCID_CQL = """
+               SELECT $columnData
                  FROM $keySpace.$tableName
                 WHERE $columnCpid=? 
+                  AND $columnOcid=?
+            """
+
+        private const val FIND_BY_CPID_AND_OCID_AND_ID_CQL = """
+               SELECT $columnData
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
                   AND $columnId=?
             """
     }
 
-    private val preparedFindByCpidCQL = session.prepare(FIND_BY_CPID_CQL)
-    private val preparedFindByCpidAndIdCQL = session.prepare(FIND_BY_CPID_AND_ID_CQL)
+    private val preparedFindByCpidAndOcidCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
+    private val preparedFindByCpidAndOcidAndIdCQL = session.prepare(FIND_BY_CPID_AND_OCID_AND_ID_CQL)
     private val preparedSaveNewAmendmentCQL = session.prepare(SAVE_NEW_AMENDMENT)
 
-    override fun findBy(cpid: String): List<Amendment> {
-        val query = preparedFindByCpidCQL.bind()
+    override fun findBy(cpid: String, ocid: String): List<Amendment> {
+        val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
+                setString(columnOcid, ocid)
             }
 
         val resultSet = load(query)
@@ -66,10 +68,11 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         }
     }
 
-    override fun findBy(cpid: String, id: AmendmentId): Amendment? {
-        val query = preparedFindByCpidAndIdCQL.bind()
+    override fun findBy(cpid: String, ocid: String, id: AmendmentId): Amendment? {
+        val query = preparedFindByCpidAndOcidAndIdCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
+                setString(columnOcid, ocid)
                 setUUID(columnId, id)
             }
 
@@ -121,11 +124,12 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         }
     }
 
-    override fun saveNewAmendment(cpid: String, amendment: Amendment): Boolean {
+    override fun saveNewAmendment(cpid: String, ocid: String, amendment: Amendment): Boolean {
         val entity = convert(amendment)
         val statements = preparedSaveNewAmendmentCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
+                setString(columnOcid, ocid)
                 setUUID(columnId, amendment.id)
                 setString(columnData, entity.toJson())
             }

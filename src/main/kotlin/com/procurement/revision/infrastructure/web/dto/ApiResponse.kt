@@ -16,7 +16,7 @@ sealed class ApiResponse(
 
 class ApiSuccessResponse(
     version: ApiVersion, id: UUID,
-    @JsonInclude(JsonInclude.Include.NON_EMPTY) result: Any?
+    @JsonInclude(JsonInclude.Include.NON_EMPTY) result: Any? = null
 ) : ApiResponse(
     version = version,
     id = id,

@@ -2,13 +2,12 @@ package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.domain.util.Result
-import com.procurement.revision.infrastructure.handler.validation.ValidationError
+import com.procurement.revision.infrastructure.exception.Fail
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.web.dto.Action
-import com.procurement.revision.infrastructure.web.dto.ApiFailResponse
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
-import com.procurement.revision.infrastructure.web.dto.getFullErrorCode
+import com.procurement.revision.infrastructure.web.dto.generateResponseOnFailure
 import com.procurement.revision.infrastructure.web.dto.tryGetId
 import com.procurement.revision.infrastructure.web.dto.tryGetVersion
 import org.slf4j.LoggerFactory
@@ -28,19 +27,9 @@ abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiRe
                     log.debug("${action.value} has been executed. Result: ${result.get.toJson()}")
                 return ApiSuccessResponse(version = version, id = id, result = result.get)
             }
-            is Result.Failure ->
-                ApiFailResponse(
-                    version = version,
-                    id = id,
-                    result = listOf(
-                        ApiFailResponse.Error(
-                            code = getFullErrorCode(result.error.code),
-                            description = result.error.description
-                        )
-                    )
-                )
+            is Result.Failure -> generateResponseOnFailure(result.error, version, id)
         }
     }
 
-    abstract fun execute(node: JsonNode): Result<R, ValidationError>
+    abstract fun execute(node: JsonNode): Result<R, Fail>
 }

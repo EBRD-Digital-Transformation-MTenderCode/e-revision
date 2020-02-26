@@ -1,4 +1,4 @@
-package com.procurement.revision.domain
+package com.procurement.revision.domain.util
 
 sealed class ValidationResult<out T> {
     companion object {
@@ -10,13 +10,22 @@ sealed class ValidationResult<out T> {
     abstract val isOk: Boolean
     abstract val isError: Boolean
 
-    fun onError(block: (T) -> Unit): Unit =
+    val asOption: Option<T>
+        get() = when (this) {
+            is Error -> Option.pure(get)
+            is Ok -> Option.none()
+        }
+
+    fun onError(block: (T) -> Unit) {
         when (this) {
             is Error -> block(get)
             is Ok -> Unit
         }
+    }
 
-    fun <R> map(block: (T) -> R): ValidationResult<R> = flatMap { Error(block(it)) }
+    fun <R> map(block: (T) -> R): ValidationResult<R> = flatMap {
+        Error(block(it))
+    }
 
     fun <R> flatMap(block: (T) -> ValidationResult<R>): ValidationResult<R> = when (this) {
         is Ok -> this
@@ -35,5 +44,3 @@ sealed class ValidationResult<out T> {
         override val isError: Boolean = !isOk
     }
 }
-
-

@@ -14,7 +14,7 @@ import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.util.Result
 import com.procurement.revision.domain.util.ValidationResult
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
-import com.procurement.revision.infrastructure.handler.validation.ValidationError
+import com.procurement.revision.infrastructure.exception.Fail
 import com.procurement.revision.infrastructure.model.OperationType
 import org.springframework.stereotype.Service
 
@@ -24,7 +24,7 @@ class AmendmentService(
     private val generable: Generable
 ) {
 
-    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, ValidationError> {
+    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail> {
         val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
         val relatedItems = params.relatedItems.toSet()
 
@@ -39,7 +39,7 @@ class AmendmentService(
                                   .toList())
     }
 
-    fun validateDocumentsTypes(params: DataValidationParams): ValidationResult<ValidationError> {
+    fun validateDocumentsTypes(params: DataValidationParams): ValidationResult<Fail> {
         val correctDocumentType = when (params.operationType) {
             OperationType.LOT_CANCELLATION, OperationType.TENDER_CANCELLATION -> DocumentType.CANCELLATION_DETAILS
         }
@@ -49,12 +49,12 @@ class AmendmentService(
             .firstOrNull { document ->
                 document.documentType != correctDocumentType
             }?.let { document ->
-                return ValidationResult.error(ValidationError.InvalidDocumentType(document.id))
+                return ValidationResult.error(Fail.Error.ValidationError.InvalidDocumentType(document.id))
             }
         return ValidationResult.ok()
     }
 
-    fun createAmendment(params: CreateAmendmentParams): Result<CreateAmendmentResult, ValidationError> {
+    fun createAmendment(params: CreateAmendmentParams): Result<CreateAmendmentResult, Fail> {
         val relatesTo = when (params.operationType) {
             OperationType.TENDER_CANCELLATION -> {
                 AmendmentRelatesTo.TENDER

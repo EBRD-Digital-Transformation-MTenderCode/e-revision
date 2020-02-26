@@ -4,9 +4,13 @@ import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.revision.application.exception.ErrorException
+import com.procurement.revision.application.exception.ErrorType
 import com.procurement.revision.domain.exception.EnumException
+import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.util.flatMap
+import com.procurement.revision.exception.BadRequestException
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
-import com.procurement.revision.infrastructure.utils.toObject
+import com.procurement.revision.infrastructure.utils.tryToObject
 import java.time.LocalDateTime
 import java.util.*
 
@@ -24,12 +28,22 @@ enum class CommandType(@JsonValue override val value: String) : Action {
                 value = value,
                 values = values().joinToString { it.value }
             )
+
+        fun tryFromString(value: String): Result<CommandType, EnumException> =
+            elements[value.toUpperCase()]
+                ?.let { Result.success(it) }
+                ?: Result.failure(EnumException(
+                    enumType = CommandType::class.java.canonicalName,
+                    value = value,
+                    values = values().joinToString { it.value }
+                )
+                )
     }
 
     override fun toString() = value
 }
 
-fun errorResponse(exception: Exception, id: UUID = NaN, version: ApiVersion): ApiResponse =
+fun errorResponse(exception: Exception, id: UUID = NaN, version: ApiVersion = GlobalProperties.App.apiVersion): ApiResponse =
     when (exception) {
         is ErrorException -> ApiFailResponse(
             id = id,
@@ -82,13 +96,57 @@ fun getFullErrorCode(code: String): String = "400.${GlobalProperties.serviceId}.
 val NaN: UUID
     get() = UUID(0, 0)
 
-fun JsonNode.getBy(parameter: String): JsonNode {
-    val node = get(parameter)
-    if (node == null || node is NullNode) throw IllegalArgumentException("$parameter is absent")
-    return node
+fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, BadRequestException> {
+    val node = get(name)
+    if (node == null || node is NullNode) return Result.failure(
+        BadRequestException(
+            ErrorType.INVALID_JSON,
+            "$name is absent"
+        )
+    )
+    return Result.success(node)
 }
 
-fun JsonNode.getId() = UUID.fromString(getBy("id").asText())
-fun JsonNode.getVersion() = ApiVersion.valueOf(getBy("version").asText())
-fun JsonNode.getAction() = CommandType.fromString(getBy("action").asText())
-fun <T : Any> JsonNode.getParams(target: Class<T>) = getBy("params").toObject(target)
+fun JsonNode.tryGetVersion(): Result<ApiVersion, BadRequestException> =
+    tryGetAttribute("version").flatMap {
+        when (val result = ApiVersion.tryValueOf(it.asText())) {
+            is Result.Success -> result
+            is Result.Failure -> result.mapError {
+                BadRequestException(error = ErrorType.INVALID_JSON, message = result.error)
+            }
+        }
+    }
+
+fun JsonNode.tryGetAction(): Result<CommandType, BadRequestException> =
+    tryGetAttribute("action").flatMap {
+        when (val result = CommandType.tryFromString(it.asText())) {
+            is Result.Success -> result
+            is Result.Failure -> result.mapError {
+                BadRequestException(error = ErrorType.INVALID_JSON, message = result.error.message)
+            }
+        }
+    }
+
+fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, BadRequestException> =
+    tryGetAttribute("params").flatMap {
+        when (val result = it.tryToObject(target)) {
+            is Result.Success -> result
+            is Result.Failure -> result.mapError {
+                BadRequestException(error = ErrorType.INVALID_JSON, message = result.error)
+            }
+        }
+    }
+
+fun JsonNode.tryGetId(): Result<UUID, BadRequestException> = tryGetAttribute("id").flatMap { it.tryUUID() }
+
+fun JsonNode.tryUUID(): Result<UUID, BadRequestException> =
+    try {
+        Result.success(UUID.fromString(asText()))
+    } catch (ex: Exception) {
+        Result.failure(
+            BadRequestException(
+                ErrorType.INVALID_JSON,
+                "${ex.message}. ${asText()} is not a UUID type."
+            )
+        )
+    }

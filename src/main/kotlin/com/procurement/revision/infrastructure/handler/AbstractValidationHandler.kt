@@ -1,7 +1,7 @@
 package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.revision.domain.ValidationResult
+import com.procurement.revision.domain.util.ValidationResult
 import com.procurement.revision.infrastructure.handler.validation.ValidationError
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.web.dto.Action
@@ -9,8 +9,8 @@ import com.procurement.revision.infrastructure.web.dto.ApiFailResponse
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
 import com.procurement.revision.infrastructure.web.dto.getFullErrorCode
-import com.procurement.revision.infrastructure.web.dto.getId
-import com.procurement.revision.infrastructure.web.dto.getVersion
+import com.procurement.revision.infrastructure.web.dto.tryGetId
+import com.procurement.revision.infrastructure.web.dto.tryGetVersion
 import org.slf4j.LoggerFactory
 
 abstract class AbstractValidationHandler<ACTION : Action, E : ValidationError> : Handler<ACTION, ApiResponse> {
@@ -19,8 +19,8 @@ abstract class AbstractValidationHandler<ACTION : Action, E : ValidationError> :
     }
 
     override fun handle(node: JsonNode): ApiResponse {
-        val id = node.getId()
-        val version = node.getVersion()
+        val id = node.tryGetId().get
+        val version = node.tryGetVersion().get
 
         val result = execute(node)
 

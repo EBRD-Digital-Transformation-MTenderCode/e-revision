@@ -75,7 +75,7 @@ internal class AmendmentServiceTest {
                     ocid = "ocid",
                     type = amendmentFirst.type
                 )
-            )
+            ).get
             val expectedIds = listOf(amendmentFirst.id)
 
             assertEquals(expectedIds, actualIds)
@@ -98,7 +98,7 @@ internal class AmendmentServiceTest {
                     type = amendment.type
                 )
             )
-            assertTrue(actualIds.isEmpty())
+            assertTrue(actualIds.get.isEmpty())
         }
 
         @Test
@@ -116,7 +116,7 @@ internal class AmendmentServiceTest {
                     ocid = "ocid",
                     type = amendmentFirst.type
                 )
-            ).sorted()
+            ).get.sorted()
 
             val expectedIds = listOf(amendmentFirst.id, amendmentSecond.id).sorted()
 
@@ -139,7 +139,7 @@ internal class AmendmentServiceTest {
                     type = amendment.type
                 )
             )
-            assertTrue(actualIds.isEmpty())
+            assertTrue(actualIds.get.isEmpty())
         }
 
         @Test
@@ -157,7 +157,7 @@ internal class AmendmentServiceTest {
                     ocid = "ocid",
                     type = amendmentFirst.type
                 )
-            ).sorted()
+            ).get.sorted()
 
             val expectedIds = listOf(amendmentFirst.id, amendmentSecond.id).sorted()
 
@@ -180,7 +180,7 @@ internal class AmendmentServiceTest {
                     type = amendment.type
                 )
             )
-            assertTrue(actualIds.isEmpty())
+            assertTrue(actualIds.get.isEmpty())
         }
 
         @Test
@@ -198,7 +198,7 @@ internal class AmendmentServiceTest {
                     ocid = "ocid",
                     type = amendmentFirst.type
                 )
-            ).sorted()
+            ).get.sorted()
 
             val expectedIds = listOf(amendmentFirst.id, amendmentSecond.id).sorted()
 
@@ -222,7 +222,7 @@ internal class AmendmentServiceTest {
                     type = nonMatchingType
                 )
             )
-            assertTrue(actualIds.isEmpty())
+            assertTrue(actualIds.get.isEmpty())
         }
 
         @Test
@@ -240,7 +240,7 @@ internal class AmendmentServiceTest {
                     ocid = "ocid",
                     type = null
                 )
-            ).sorted()
+            ).get.sorted()
 
             val expectedIds = listOf(amendmentFirst.id, amendmentSecond.id).sorted()
 
@@ -261,7 +261,7 @@ internal class AmendmentServiceTest {
                     ocid = "ocid",
                     type = null
                 )
-            )
+            ).get
             val expectedIds = listOf(amendment.id)
 
             assertEquals(expectedIds, actualIds)
@@ -282,7 +282,7 @@ internal class AmendmentServiceTest {
                     ocid = "ocid",
                     type = amendment.type
                 )
-            ).sorted()
+            ).get.sorted()
 
             val expectedIds = amendmentsInDb.map { it.id }.sorted()
 
@@ -368,7 +368,7 @@ internal class AmendmentServiceTest {
 
             whenever(generable.generateToken()).thenReturn(token)
             whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), ocid = eq(params.ocid), amendment = any())).thenReturn(true)
-            val actual = amendmentService.createAmendment(params)
+            val actual = amendmentService.createAmendment(params).get
 
             assertEquals(expected, actual)
         }
@@ -386,7 +386,7 @@ internal class AmendmentServiceTest {
 
             whenever(generable.generateToken()).thenReturn(token)
             whenever(amendmentRepository.saveNewAmendment(cpid = eq(params.cpid), ocid = eq(params.ocid), amendment = any())).thenReturn(true)
-            val actual = amendmentService.createAmendment(params)
+            val actual = amendmentService.createAmendment(params).get
 
             assertEquals(expected, actual)
         }
@@ -450,7 +450,7 @@ internal class AmendmentServiceTest {
                 )
             )
 
-            val actual = amendmentService.createAmendment(params)
+            val actual = amendmentService.createAmendment(params).get
 
             assertEquals(expected, actual)
         }

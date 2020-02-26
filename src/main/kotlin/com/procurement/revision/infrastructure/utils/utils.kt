@@ -3,11 +3,10 @@ package com.procurement.revision.infrastructure.utils
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.procurement.revision.application.exception.ErrorException
-import com.procurement.revision.application.exception.ErrorType
 import com.procurement.revision.domain.util.Result
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.revision.infrastructure.bind.jackson.configuration
+import com.procurement.revision.infrastructure.exception.Fail.Error.RequestError.ParsingError
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
@@ -69,8 +68,8 @@ fun String.toNode(): JsonNode = try {
     throw IllegalArgumentException("Error parsing String to JsonNode.", exception)
 }
 
-fun String.tryToNode(): Result<JsonNode, ErrorException> = try {
+fun String.tryToNode(): Result<JsonNode, ParsingError> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(ErrorException(ErrorType.INVALID_JSON, "Error parsing String to JsonNode."))
+    Result.failure(ParsingError("Error parsing $this to JsonNode."))
 }

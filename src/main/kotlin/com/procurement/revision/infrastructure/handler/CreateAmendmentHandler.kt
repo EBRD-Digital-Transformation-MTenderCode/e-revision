@@ -5,7 +5,7 @@ import com.procurement.revision.application.model.amendment.CreateAmendmentResul
 import com.procurement.revision.application.service.AmendmentService
 import com.procurement.revision.domain.util.Result
 import com.procurement.revision.infrastructure.converter.convert
-import com.procurement.revision.infrastructure.handler.validation.ValidationError
+import com.procurement.revision.infrastructure.exception.Fail
 import com.procurement.revision.infrastructure.repository.HistoryRepository
 import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.request.amendment.CreateAmendmentRequest
@@ -22,11 +22,11 @@ class CreateAmendmentHandler(
 ) {
     override val action: CommandType = CommandType.CREATE_AMENDMENT
 
-    override fun execute(node: JsonNode): Result<CreateAmendmentResult, ValidationError> {
+    override fun execute(node: JsonNode): Result<CreateAmendmentResult, Fail> {
         val request = when (val result = node.tryGetParams(CreateAmendmentRequest::class.java)) {
             is Result.Success -> result.get
             is Result.Failure -> {
-                return Result.failure(ValidationError.ParamsParsingError(result.error.message))
+                return Result.failure(Fail.Error.RequestError.ParsingError(result.error.description))
             }
         }
         val params = request.convert()

@@ -2,8 +2,8 @@ package com.procurement.revision.infrastructure.service
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.infrastructure.handler.CreateAmendmentHandler
+import com.procurement.revision.infrastructure.handler.DataValidationHandler
 import com.procurement.revision.infrastructure.handler.GetAmendmentIdsHandler
-import com.procurement.revision.infrastructure.handler.validation.DataValidationHandler
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.tryGetAction

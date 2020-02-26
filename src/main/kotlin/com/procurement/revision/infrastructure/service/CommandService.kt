@@ -6,7 +6,7 @@ import com.procurement.revision.infrastructure.handler.GetAmendmentIdsHandler
 import com.procurement.revision.infrastructure.handler.validation.DataValidationHandler
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.CommandType
-import com.procurement.revision.infrastructure.web.dto.getAction
+import com.procurement.revision.infrastructure.web.dto.tryGetAction
 import org.springframework.stereotype.Service
 
 @Service
@@ -17,7 +17,8 @@ class CommandService(
 ) {
 
     fun execute(node: JsonNode): ApiResponse {
-        val action = node.getAction()
+        val action =node.tryGetAction().get
+
         return when (action) {
             CommandType.GET_AMENDMENTS_IDS -> {
                 getAmendmentIdsHandler.handle(node)
@@ -25,7 +26,7 @@ class CommandService(
             CommandType.DATA_VALIDATION -> {
                 dataValidationHandler.handle(node)
             }
-            CommandType.CREATE_AMENDMENT ->{
+            CommandType.CREATE_AMENDMENT -> {
                 createAmendmentHandler.handle(node)
             }
         }

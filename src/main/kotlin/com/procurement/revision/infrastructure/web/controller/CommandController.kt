@@ -1,13 +1,14 @@
 package com.procurement.revision.infrastructure.web.controller
 
-import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
+import com.procurement.revision.domain.util.Result
 import com.procurement.revision.infrastructure.service.CommandService
 import com.procurement.revision.infrastructure.utils.toJson
-import com.procurement.revision.infrastructure.utils.toNode
+import com.procurement.revision.infrastructure.utils.tryToNode
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
-import com.procurement.revision.infrastructure.web.dto.ApiVersion
 import com.procurement.revision.infrastructure.web.dto.errorResponse
-import com.procurement.revision.infrastructure.web.dto.getBy
+import com.procurement.revision.infrastructure.web.dto.tryGetAction
+import com.procurement.revision.infrastructure.web.dto.tryGetId
+import com.procurement.revision.infrastructure.web.dto.tryGetVersion
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-import java.util.*
 
 @RestController
 @RequestMapping("/command")
@@ -30,38 +30,38 @@ class CommandController(private val commandService: CommandService) {
         if (log.isDebugEnabled)
             log.debug("RECEIVED COMMAND: '$requestBody'.")
 
-        val node = try {
-            requestBody.toNode()
-        } catch (expected: Exception) {
-            log.debug("Error.", expected)
-            val response =
-                errorResponse(
-                    exception = expected,
-                    version = GlobalProperties.App.apiVersion
-                )
-            return ResponseEntity(response, HttpStatus.OK)
+        val node = when (val result = requestBody.tryToNode()) {
+            is Result.Success -> result.get
+            is Result.Failure -> {
+                log.debug("Error.", result.error.message)
+                val response = errorResponse(exception = result.error)
+                return ResponseEntity(response, HttpStatus.OK)
+            }
+        }
+        val id = when (val result = node.tryGetId()) {
+            is Result.Success -> result.get
+            is Result.Failure -> {
+                log.debug("Error.", result.error.message)
+                val response = errorResponse(exception = result.error)
+                return ResponseEntity(response, HttpStatus.OK)
+            }
+        }
+        val version = when (val result = node.tryGetVersion()) {
+            is Result.Success -> result.get
+            is Result.Failure -> {
+                log.debug("Error.", result.error.message)
+                val response = errorResponse(exception = result.error, id = id)
+                return ResponseEntity(response, HttpStatus.OK)
+            }
         }
 
-        val id = try {
-            UUID.fromString(node.getBy("id").asText())
-        } catch (expected: Exception) {
-            log.debug("Error.", expected)
-            val response = errorResponse(
-                exception = expected,
-                version = GlobalProperties.App.apiVersion
-            )
-            return ResponseEntity(response, HttpStatus.OK)
-        }
-        val version = try {
-            ApiVersion.valueOf(node.getBy("version").asText())
-        } catch (expected: Exception) {
-            log.debug("Error.", expected)
-            val response = errorResponse(
-                id = id,
-                exception = expected,
-                version = GlobalProperties.App.apiVersion
-            )
-            return ResponseEntity(response, HttpStatus.OK)
+        when (val result = node.tryGetAction()) {
+            is Result.Success -> result.get
+            is Result.Failure -> {
+                log.debug("Error.", result.error.message)
+                val response = errorResponse(exception = result.error, id = id, version = version)
+                return ResponseEntity(response, HttpStatus.OK)
+            }
         }
 
         val response = try {

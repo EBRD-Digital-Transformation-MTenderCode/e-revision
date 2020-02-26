@@ -5,13 +5,14 @@ import com.procurement.revision.application.model.amendment.CreateAmendmentResul
 import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.repository.AmendmentRepository
-import com.procurement.revision.domain.ValidationResult
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
+import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.util.ValidationResult
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
 import com.procurement.revision.infrastructure.handler.validation.ValidationError
 import com.procurement.revision.infrastructure.model.OperationType
@@ -23,19 +24,19 @@ class AmendmentService(
     private val generable: Generable
 ) {
 
-    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): List<AmendmentId> {
+    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, ValidationError> {
         val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
         val relatedItems = params.relatedItems.toSet()
 
-        return amendments.asSequence()
-            .filter { amendment ->
-                testEquals(amendment.status, pattern = params.status)
-                    && testEquals(amendment.type, pattern = params.type)
-                    && testEquals(amendment.relatesTo, pattern = params.relatesTo)
-                    && testContains(amendment.relatedItem, patterns = relatedItems)
-            }
-            .map { amendment -> amendment.id }
-            .toList()
+        return Result.success(amendments.asSequence()
+                                  .filter { amendment ->
+                                      testEquals(amendment.status, pattern = params.status)
+                                          && testEquals(amendment.type, pattern = params.type)
+                                          && testEquals(amendment.relatesTo, pattern = params.relatesTo)
+                                          && testContains(amendment.relatedItem, patterns = relatedItems)
+                                  }
+                                  .map { amendment -> amendment.id }
+                                  .toList())
     }
 
     fun validateDocumentsTypes(params: DataValidationParams): ValidationResult<ValidationError> {
@@ -53,7 +54,7 @@ class AmendmentService(
         return ValidationResult.ok()
     }
 
-    fun createAmendment(params: CreateAmendmentParams): CreateAmendmentResult {
+    fun createAmendment(params: CreateAmendmentParams): Result<CreateAmendmentResult, ValidationError> {
         val relatesTo = when (params.operationType) {
             OperationType.TENDER_CANCELLATION -> {
                 AmendmentRelatesTo.TENDER
@@ -85,11 +86,21 @@ class AmendmentService(
                     token = generable.generateToken()
                 )
             }
-        val isSaved = amendmentRepository.saveNewAmendment(cpid = params.cpid, ocid = params.ocid, amendment = createdAmendment)
+        val isSaved = amendmentRepository.saveNewAmendment(
+            cpid = params.cpid,
+            ocid = params.ocid,
+            amendment = createdAmendment
+        )
         return if (isSaved)
-            createdAmendment.convertToCreateAmendmentResult()
+            Result.success(createdAmendment.convertToCreateAmendmentResult())
         else {
-            amendmentRepository.findBy(params.cpid, params.ocid, createdAmendment.id)!!.convertToCreateAmendmentResult()
+            Result.success(
+                amendmentRepository.findBy(
+                    params.cpid,
+                    params.ocid,
+                    createdAmendment.id
+                )!!.convertToCreateAmendmentResult()
+            )
         }
     }
 

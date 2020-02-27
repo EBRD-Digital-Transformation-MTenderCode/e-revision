@@ -1,8 +1,10 @@
 package com.procurement.revision.domain.enums
 
 import com.procurement.revision.domain.exception.EnumException
+import com.procurement.revision.domain.util.Result
 import com.procurement.revision.infrastructure.bind.databinding.Enumable
 import com.procurement.revision.infrastructure.bind.databinding.Valuable
+import com.procurement.revision.infrastructure.fail.error.RequestError
 
 enum class DocumentType(override val text: String) : Valuable<DocumentType> {
 
@@ -43,5 +45,15 @@ enum class DocumentType(override val text: String) : Valuable<DocumentType> {
                 value = value,
                 values = values().joinToString { it.text }
             )
+
+        fun tryFromString(value: String): Result<DocumentType, RequestError.EnumError> =
+            elements[value.toUpperCase()]
+                ?.let { Result.success(it) }
+                ?: Result.failure(RequestError.EnumError(
+                    enumType = DocumentType::class.java.canonicalName,
+                    value = value,
+                    values = values().joinToString { it.text }
+                )
+                )
     }
 }

@@ -11,6 +11,7 @@ sealed class Result<out T, out E> {
     abstract val isFail: Boolean
 
     abstract val get: T
+    abstract val error: E
 
     val orNull: T?
         get() = when (this) {
@@ -35,26 +36,25 @@ sealed class Result<out T, out E> {
         )
     }
 
-    fun <R> mapError(block: (E) -> R): Result<T, R> = this.flatMapError {
-        Failure(
-            block(it)
-        )
-    }
+    fun <R> mapError(block: (E) -> R): Result<T, R> = this.flatMapError { Failure(block(it)) }
 
     data class Success<out T> internal constructor(private val value: T) : Result<T, Nothing>() {
         override val isSuccess: Boolean = true
         override val isFail: Boolean = false
 
         override val get: T = value
+        override val error: Nothing
+            get() = throw NoSuchElementException("The result does not contain a error.")
     }
 
     data class Failure<out E> internal constructor(private val value: E) : Result<Nothing, E>() {
         override val isSuccess: Boolean = true
         override val isFail: Boolean = false
 
-        override val get get(): Nothing = throw NoSuchElementException("The result does not contain a value.")
+        override val get: Nothing
+            get() = throw NoSuchElementException("The result does not contain a value.")
 
-        val error: E = value
+        override val error: E = value
     }
 }
 

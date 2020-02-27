@@ -10,8 +10,8 @@ sealed class ValidationError(code: String, description: String) : Fail.Error(cod
         description = "Document '${documentId}' has invalid documentType."
     )
 
-    class EmptyCollection(message: String) : ValidationError(
+    class EmptyCollection(collection: String, wrapper: String) : ValidationError(
         code = "12.01",
-        description = message
+        description = "$collection in $wrapper is empty."
     )
 }

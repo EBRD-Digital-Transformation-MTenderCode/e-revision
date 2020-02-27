@@ -5,8 +5,8 @@ import com.procurement.revision.application.service.AmendmentService
 import com.procurement.revision.domain.util.Result
 import com.procurement.revision.domain.util.ValidationResult
 import com.procurement.revision.infrastructure.converter.convert
-import com.procurement.revision.infrastructure.exception.Fail
-import com.procurement.revision.infrastructure.exception.Fail.Error.RequestError.ParsingError
+import com.procurement.revision.infrastructure.fail.Fail
+import com.procurement.revision.infrastructure.fail.error.RequestError
 import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.request.amendment.DataValidationRequest
 import com.procurement.revision.infrastructure.web.dto.tryGetParams
@@ -22,7 +22,7 @@ class DataValidationHandler(private val amendmentService: AmendmentService) : Ab
             is Result.Success -> result.get
             is Result.Failure -> {
                 return ValidationResult.Error(
-                    ParsingError(result.error.description)
+                    RequestError.ParsingError(result.error.description)
                 )
             }
         }

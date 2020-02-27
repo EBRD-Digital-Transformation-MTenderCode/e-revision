@@ -2,7 +2,7 @@ package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.domain.util.Result
-import com.procurement.revision.infrastructure.exception.Fail
+import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.repository.HistoryRepository
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.toObject

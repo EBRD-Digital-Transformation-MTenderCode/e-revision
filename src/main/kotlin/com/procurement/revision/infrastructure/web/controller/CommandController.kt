@@ -2,7 +2,7 @@ package com.procurement.revision.infrastructure.web.controller
 
 import com.procurement.revision.domain.util.Result
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
-import com.procurement.revision.infrastructure.exception.Fail
+import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.service.CommandService
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.tryToNode

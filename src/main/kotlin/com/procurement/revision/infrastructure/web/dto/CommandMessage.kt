@@ -8,8 +8,8 @@ import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.domain.util.Result
 import com.procurement.revision.domain.util.flatMap
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
-import com.procurement.revision.infrastructure.exception.Fail
-import com.procurement.revision.infrastructure.exception.Fail.Error.RequestError.ParsingError
+import com.procurement.revision.infrastructure.fail.Fail
+import com.procurement.revision.infrastructure.fail.error.RequestError
 import com.procurement.revision.infrastructure.utils.tryToObject
 import java.time.LocalDateTime
 import java.util.*
@@ -140,51 +140,51 @@ fun getFullErrorCode(code: String): String = "400.${GlobalProperties.serviceId}.
 val NaN: UUID
     get() = UUID(0, 0)
 
-fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, ParsingError> {
+fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, RequestError.ParsingError> {
     val node = get(name)
     if (node == null || node is NullNode) return Result.failure(
-        ParsingError("$name is absent")
+        RequestError.ParsingError("$name is absent")
     )
     return Result.success(node)
 }
 
-fun JsonNode.tryGetVersion(): Result<ApiVersion, ParsingError> =
+fun JsonNode.tryGetVersion(): Result<ApiVersion, RequestError.ParsingError> =
     tryGetAttribute("version").flatMap {
         when (val result = ApiVersion.tryValueOf(it.asText())) {
             is Result.Success -> result
             is Result.Failure -> result.mapError {
-                ParsingError(message = result.error)
+                RequestError.ParsingError(message = result.error)
             }
         }
     }
 
-fun JsonNode.tryGetAction(): Result<CommandType, ParsingError> =
+fun JsonNode.tryGetAction(): Result<CommandType, RequestError.ParsingError> =
     tryGetAttribute("action").flatMap { action ->
         when (val result = CommandType.tryFromString(action.asText())) {
             is Result.Success -> result
             is Result.Failure -> result.mapError {
-                ParsingError(message = result.error.message!!)
+                RequestError.ParsingError(message = result.error.message!!)
             }
         }
     }
 
-fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, ParsingError> =
+fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, RequestError.ParsingError> =
     tryGetAttribute("params").flatMap {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> result.mapError {
-                ParsingError(message = result.error)
+                RequestError.ParsingError(message = result.error)
             }
         }
     }
 
-fun JsonNode.tryGetId(): Result<UUID, ParsingError> = tryGetAttribute("id").flatMap { it.tryUUID() }
+fun JsonNode.tryGetId(): Result<UUID, RequestError.ParsingError> = tryGetAttribute("id").flatMap { it.tryUUID() }
 
-fun JsonNode.tryUUID(): Result<UUID, ParsingError> =
+fun JsonNode.tryUUID(): Result<UUID, RequestError.ParsingError> =
     try {
         Result.success(UUID.fromString(asText()))
     } catch (ex: Exception) {
         Result.failure(
-            ParsingError("${asText()} is not a UUID type. ${ex.message}")
+            RequestError.ParsingError("${asText()} is not a UUID type. ${ex.message}")
         )
     }

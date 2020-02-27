@@ -14,7 +14,8 @@ import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.util.Result
 import com.procurement.revision.domain.util.ValidationResult
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
-import com.procurement.revision.infrastructure.exception.Fail
+import com.procurement.revision.infrastructure.fail.Fail
+import com.procurement.revision.infrastructure.fail.error.ValidationError
 import com.procurement.revision.infrastructure.model.OperationType
 import org.springframework.stereotype.Service
 
@@ -49,7 +50,7 @@ class AmendmentService(
             .firstOrNull { document ->
                 document.documentType != correctDocumentType
             }?.let { document ->
-                return ValidationResult.error(Fail.Error.ValidationError.InvalidDocumentType(document.id))
+                return ValidationResult.error(ValidationError.InvalidDocumentType(document.id))
             }
         return ValidationResult.ok()
     }

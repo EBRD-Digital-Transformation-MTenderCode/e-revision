@@ -8,4 +8,9 @@ sealed class RequestError(code: String, description: String) : Fail.Error(code, 
         code = "11.00",
         description = "Invalid JSON. '${message}'"
     )
+
+    class EnumError(enumType: String, value: String, values: String) : RequestError(
+        code = "11.01",
+        description = "Unknown value for enumType $enumType: $value, Allowed values are $values"
+    )
 }

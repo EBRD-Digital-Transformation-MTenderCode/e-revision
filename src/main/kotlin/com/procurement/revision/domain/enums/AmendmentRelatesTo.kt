@@ -1,8 +1,10 @@
 package com.procurement.revision.domain.enums
 
 import com.procurement.revision.domain.exception.EnumException
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.bind.databinding.Enumable
 import com.procurement.revision.infrastructure.bind.databinding.Valuable
+import com.procurement.revision.infrastructure.fail.error.RequestError
 
 enum class AmendmentRelatesTo(override val text: String) : Valuable<AmendmentRelatesTo> {
     LOT("lot"),
@@ -20,5 +22,16 @@ enum class AmendmentRelatesTo(override val text: String) : Valuable<AmendmentRel
                 value = value,
                 values = values().joinToString { it.text }
             )
+
+        fun tryFromString(value: String): Result<AmendmentRelatesTo, RequestError.EnumError> =
+            elements[value.toUpperCase()]
+                ?.let { Result.success(it) }
+                ?: Result.failure(
+                    RequestError.EnumError(
+                        enumType = AmendmentRelatesTo::class.java.canonicalName,
+                        value = value,
+                        values = values().joinToString { it.text }
+                    )
+                )
     }
 }

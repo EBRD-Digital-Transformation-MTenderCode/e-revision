@@ -1,7 +1,7 @@
 package com.procurement.revision.infrastructure.model
 
 import com.procurement.revision.domain.exception.EnumException
-import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.bind.databinding.Enumable
 import com.procurement.revision.infrastructure.bind.databinding.Valuable
 import com.procurement.revision.infrastructure.fail.error.RequestError
@@ -23,7 +23,7 @@ enum class OperationType(override val text: String) : Valuable<OperationType> {
             )
 
         fun tryFromString(value: String): Result<OperationType, RequestError.EnumError> =
-            OperationType.elements[value.toUpperCase()]
+            elements[value.toUpperCase()]
                 ?.let { Result.success(it) }
                 ?: Result.failure(
                     RequestError.EnumError(

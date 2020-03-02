@@ -1,7 +1,7 @@
 package com.procurement.revision.infrastructure.converter
 
 import com.procurement.revision.application.model.amendment.DataValidationParams
-import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.util.extension.mapOptionalResult
 import com.procurement.revision.domain.util.extension.mapResult
 import com.procurement.revision.infrastructure.fail.Fail
@@ -12,7 +12,7 @@ fun DataValidationRequest.convert(): Result<DataValidationParams, Fail> {
     if (amendments.isFail)
         return Result.failure(amendments.error)
 
-    return DataValidationParams.create(
+    return DataValidationParams.tryCreate(
         amendments = amendments.get,
         ocid = ocid,
         cpid = cpid,
@@ -25,10 +25,11 @@ private fun DataValidationRequest.Amendment.convert(): Result<DataValidationPara
     if (documents.isFail)
         return Result.failure(documents.error)
 
-    return DataValidationParams.Amendment.create(
+    return DataValidationParams.Amendment.tryCreate(
         rationale = this.rationale,
         description = this.description,
-        documents = documents.get
+        documents = documents.get,
+        id = this.id
     )
 }
 

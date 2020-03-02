@@ -1,7 +1,7 @@
 package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.revision.domain.util.ValidationResult
+import com.procurement.revision.domain.functional.ValidationResult
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.web.dto.Action
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
@@ -26,7 +26,7 @@ abstract class AbstractValidationHandler<ACTION : Action, E : Fail> : Handler<AC
                     log.debug("${action.value} has been executed.")
                 ApiSuccessResponse(version = version, id = id)
             }
-            is ValidationResult.Error -> generateResponseOnFailure(result.value, version, id)
+            is ValidationResult.Error -> generateResponseOnFailure(result.error, version, id)
         }
     }
 

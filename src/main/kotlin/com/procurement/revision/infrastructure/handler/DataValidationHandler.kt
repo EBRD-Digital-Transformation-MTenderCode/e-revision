@@ -2,11 +2,10 @@ package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.service.AmendmentService
-import com.procurement.revision.domain.util.Result
-import com.procurement.revision.domain.util.ValidationResult
+import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.ValidationResult
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.fail.error.RequestError
 import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.request.amendment.DataValidationRequest
 import com.procurement.revision.infrastructure.web.dto.tryGetParams
@@ -21,13 +20,12 @@ class DataValidationHandler(private val amendmentService: AmendmentService) : Ab
         val request = when (val result = node.tryGetParams(DataValidationRequest::class.java)) {
             is Result.Success -> result.get
             is Result.Failure -> {
-                return ValidationResult.Error(
-                    RequestError.ParsingError(result.error.description)
-                )
+                return ValidationResult.error(result.error)
             }
         }
 
         val params = request.convert()
-        return amendmentService.validateDocumentsTypes(params)
+        if (params.isFail) return ValidationResult.error(params.error)
+        return amendmentService.validateDocumentsTypes(params.get)
     }
 }

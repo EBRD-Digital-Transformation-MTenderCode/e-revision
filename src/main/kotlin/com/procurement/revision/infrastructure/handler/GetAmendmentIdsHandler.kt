@@ -2,11 +2,10 @@ package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.service.AmendmentService
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.model.amendment.AmendmentId
-import com.procurement.revision.domain.util.Result
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.fail.error.RequestError
 import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.request.amendment.GetAmendmentIdsRequest
 import com.procurement.revision.infrastructure.web.dto.tryGetParams
@@ -21,10 +20,11 @@ class GetAmendmentIdsHandler(private val amendmentService: AmendmentService) : A
         val request = when (val result = node.tryGetParams(GetAmendmentIdsRequest::class.java)) {
             is Result.Success -> result.get
             is Result.Failure -> {
-                return Result.failure(RequestError.ParsingError(result.error.description))
+                return Result.failure(result.error)
             }
         }
         val params = request.convert()
-        return amendmentService.getAmendmentIdsBy(params)
+        if (params.isFail) return Result.failure(params.error)
+        return amendmentService.getAmendmentIdsBy(params.get)
     }
 }

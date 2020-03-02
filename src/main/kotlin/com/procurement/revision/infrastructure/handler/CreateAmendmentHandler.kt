@@ -3,10 +3,9 @@ package com.procurement.revision.infrastructure.handler
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.service.AmendmentService
-import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.fail.error.RequestError
 import com.procurement.revision.infrastructure.repository.HistoryRepository
 import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.request.amendment.CreateAmendmentRequest
@@ -27,10 +26,11 @@ class CreateAmendmentHandler(
         val request = when (val result = node.tryGetParams(CreateAmendmentRequest::class.java)) {
             is Result.Success -> result.get
             is Result.Failure -> {
-                return Result.failure(RequestError.ParsingError(result.error.description))
+                return Result.failure(result.error)
             }
         }
         val params = request.convert()
-        return amendmentService.createAmendment(params)
+        if (params.isFail) return Result.failure(params.error)
+        return amendmentService.createAmendment(params.get)
     }
 }

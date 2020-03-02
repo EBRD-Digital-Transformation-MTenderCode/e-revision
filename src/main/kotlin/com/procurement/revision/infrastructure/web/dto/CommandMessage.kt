@@ -5,8 +5,9 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.domain.exception.EnumException
-import com.procurement.revision.domain.util.Result
-import com.procurement.revision.domain.util.flatMap
+import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.bind
+import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.error.RequestError
@@ -149,7 +150,7 @@ fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, RequestError.Parsin
 }
 
 fun JsonNode.tryGetVersion(): Result<ApiVersion, RequestError.ParsingError> =
-    tryGetAttribute("version").flatMap {
+    tryGetAttribute("version").bind {
         when (val result = ApiVersion.tryValueOf(it.asText())) {
             is Result.Success -> result
             is Result.Failure -> result.mapError {
@@ -159,7 +160,7 @@ fun JsonNode.tryGetVersion(): Result<ApiVersion, RequestError.ParsingError> =
     }
 
 fun JsonNode.tryGetAction(): Result<CommandType, RequestError.ParsingError> =
-    tryGetAttribute("action").flatMap { action ->
+    tryGetAttribute("action").bind { action ->
         when (val result = CommandType.tryFromString(action.asText())) {
             is Result.Success -> result
             is Result.Failure -> result.mapError {
@@ -169,7 +170,7 @@ fun JsonNode.tryGetAction(): Result<CommandType, RequestError.ParsingError> =
     }
 
 fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, RequestError.ParsingError> =
-    tryGetAttribute("params").flatMap {
+    tryGetAttribute("params").bind {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> result.mapError {
@@ -178,13 +179,6 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, RequestError.Pa
         }
     }
 
-fun JsonNode.tryGetId(): Result<UUID, RequestError.ParsingError> = tryGetAttribute("id").flatMap { it.tryUUID() }
+fun JsonNode.tryGetId(): Result<UUID, RequestError.ParsingError> = tryGetAttribute("id").bind { it.asText().tryUUID("request") }
 
-fun JsonNode.tryUUID(): Result<UUID, RequestError.ParsingError> =
-    try {
-        Result.success(UUID.fromString(asText()))
-    } catch (ex: Exception) {
-        Result.failure(
-            RequestError.ParsingError("${asText()} is not a UUID type. ${ex.message}")
-        )
-    }
+

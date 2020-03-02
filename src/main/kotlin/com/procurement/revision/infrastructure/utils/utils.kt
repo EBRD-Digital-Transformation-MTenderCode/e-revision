@@ -3,7 +3,7 @@ package com.procurement.revision.infrastructure.utils
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.revision.infrastructure.bind.jackson.configuration
 import com.procurement.revision.infrastructure.fail.error.RequestError

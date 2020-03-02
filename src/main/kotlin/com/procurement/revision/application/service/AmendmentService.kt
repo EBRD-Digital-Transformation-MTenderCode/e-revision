@@ -9,10 +9,10 @@ import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
+import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.ValidationResult
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
-import com.procurement.revision.domain.util.Result
-import com.procurement.revision.domain.util.ValidationResult
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.error.ValidationError
@@ -73,7 +73,7 @@ class AmendmentService(
                     status = AmendmentStatus.PENDING,
                     type = AmendmentType.CANCELLATION,
                     relatesTo = relatesTo,
-                    relatedItem = params.id.toString(),
+                    relatedItem = params.id,
                     date = params.startDate,
                     documents = amendment.documents.map { document ->
                         Amendment.Document(

@@ -1,6 +1,6 @@
 package com.procurement.revision.infrastructure.web.dto
 
-import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.functional.Result
 
 data class ApiVersion(val major: Int, val minor: Int, val patch: Int) {
     companion object {

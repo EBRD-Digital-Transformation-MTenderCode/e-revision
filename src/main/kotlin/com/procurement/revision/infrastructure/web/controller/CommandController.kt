@@ -1,6 +1,6 @@
 package com.procurement.revision.infrastructure.web.controller
 
-import com.procurement.revision.domain.util.Result
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.service.CommandService

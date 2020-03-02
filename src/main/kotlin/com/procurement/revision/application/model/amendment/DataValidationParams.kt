@@ -1,13 +1,15 @@
 package com.procurement.revision.application.model.amendment
 
 import com.procurement.revision.domain.enums.DocumentType
-import com.procurement.revision.domain.util.Option
-import com.procurement.revision.domain.util.Result
-import com.procurement.revision.domain.util.flatMap
+import com.procurement.revision.domain.functional.Option
+import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.bind
+import com.procurement.revision.domain.model.amendment.AmendmentId
+import com.procurement.revision.domain.model.amendment.tryAmendmentId
+import com.procurement.revision.domain.model.document.tryDocumentId
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.error.ValidationError
 import com.procurement.revision.infrastructure.model.OperationType
-import java.util.*
 
 data class DataValidationParams private constructor(
     val amendments: List<Amendment>,
@@ -16,7 +18,7 @@ data class DataValidationParams private constructor(
     val operationType: OperationType
 ) {
     companion object {
-        fun create(
+        fun tryCreate(
             amendments: List<Amendment>,
             cpid: String,
             ocid: String,
@@ -27,7 +29,7 @@ data class DataValidationParams private constructor(
             }
 
             return OperationType.tryFromString(operationType)
-                .flatMap { type ->
+                .bind { type ->
                     Result.success(
                         DataValidationParams(
                             cpid = cpid,
@@ -41,14 +43,14 @@ data class DataValidationParams private constructor(
     }
 
     data class Amendment private constructor(
-        val id: UUID,
+        val id: AmendmentId,
         val rationale: String,
         val description: String?,
         val documents: List<Document>
     ) {
         companion object {
-            fun create(
-                id: UUID,
+            fun tryCreate(
+                id: String,
                 rationale: String,
                 description: String?,
                 documents: Option<List<Document>>
@@ -56,36 +58,18 @@ data class DataValidationParams private constructor(
                 if (documents.isDefined && documents.get.isEmpty())
                     return Result.failure(ValidationError.EmptyCollection("documents", "amendment"))
 
+                val idResult = id.tryAmendmentId()
+                if (idResult.isFail) return Result.failure(idResult.error)
+
                 return Result.success(
                     Amendment(
-                        id = id,
+                        id = idResult.get,
                         rationale = rationale,
                         description = description,
                         documents = if (documents.isDefined) documents.get else emptyList()
                     )
                 )
             }
-
-            /*fun create(
-                rationale: String,
-                description: String?,
-                documents: Result<List<Document>?, Fail>
-            ): Result<Amendment, Fail> {
-                val docs = when(documents) {
-                    is Result.Success -> documents.get
-                    is Result.Failure -> return Result.failure(documents.error)
-                }
-                if(docs != null && docs.isEmpty())
-                    return Result.failure(ValidationError.EmptyCollection("documents", "amendment"))
-
-                return Result.success(
-                    Amendment(
-                        rationale = rationale,
-                        description = description,
-                        documents = docs ?: emptyList()
-                    )
-                )
-            }*/
         }
 
         override fun equals(other: Any?): Boolean = if (this === other)
@@ -108,17 +92,23 @@ data class DataValidationParams private constructor(
                     id: String,
                     title: String,
                     description: String?
-                ): Result<Document, Fail> = DocumentType.tryFromString(documentType)
-                    .flatMap { type ->
-                        Result.success(
-                            Document(
-                                id = id,
-                                description = description,
-                                documentType = type,
-                                title = title
+                ): Result<Document, Fail> {
+
+                    val idResult = id.tryDocumentId()
+                    if (idResult.isFail) return Result.failure(idResult.error)
+
+                    return DocumentType.tryFromString(documentType)
+                        .bind { type ->
+                            Result.success(
+                                Document(
+                                    id = idResult.get,
+                                    description = description,
+                                    documentType = type,
+                                    title = title
+                                )
                             )
-                        )
-                    }
+                        }
+                }
             }
 
             override fun equals(other: Any?): Boolean = if (this === other)

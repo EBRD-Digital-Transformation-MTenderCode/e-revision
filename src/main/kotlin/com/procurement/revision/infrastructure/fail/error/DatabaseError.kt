@@ -2,10 +2,8 @@ package com.procurement.revision.infrastructure.fail.error
 
 import com.procurement.revision.infrastructure.fail.Fail
 
-sealed class DatabaseError(code: String, description: String) : Fail.Incident(code, description) {
+sealed class DatabaseError(numberError: String, override val description: String) : Fail.Error("DB-") {
+    override val code: String = prefix + numberError
 
-    class EntityNotFoundError(id: String) : DatabaseError(
-        code = "10.00",
-        description = "Entity '$id' is not found."
-    )
+    class EntityNotFoundError(id: String) : DatabaseError(numberError = "1", description = "Entity '$id' is not found.")
 }

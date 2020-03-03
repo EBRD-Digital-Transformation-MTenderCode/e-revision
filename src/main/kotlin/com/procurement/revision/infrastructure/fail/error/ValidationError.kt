@@ -3,15 +3,11 @@ package com.procurement.revision.infrastructure.fail.error
 import com.procurement.revision.domain.model.document.DocumentId
 import com.procurement.revision.infrastructure.fail.Fail
 
-sealed class ValidationError(code: String, description: String) : Fail.Error(code, description) {
+sealed class ValidationError(numberError: String, override val description: String) : Fail.Error("VR-") {
+    override val code: String = prefix + numberError
 
     class InvalidDocumentType(documentId: DocumentId) : ValidationError(
-        code = "12.00",
+        numberError = "1",
         description = "Document '${documentId}' has invalid documentType."
-    )
-
-    class EmptyCollection(collection: String, wrapper: String) : ValidationError(
-        code = "12.01",
-        description = "$collection in $wrapper is empty."
     )
 }

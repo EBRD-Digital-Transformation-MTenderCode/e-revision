@@ -3,12 +3,10 @@ package com.procurement.revision.application.model.amendment
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.functional.Option
 import com.procurement.revision.domain.functional.Result
-import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.amendment.tryAmendmentId
 import com.procurement.revision.domain.model.document.tryDocumentId
-import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.fail.error.ValidationError
+import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
 
 data class DataValidationParams private constructor(
@@ -23,22 +21,22 @@ data class DataValidationParams private constructor(
             cpid: String,
             ocid: String,
             operationType: String
-        ): Result<DataValidationParams, Fail> {
+        ): Result<DataValidationParams, DataErrors> {
             if (amendments.isEmpty()) {
-                return Result.failure(ValidationError.EmptyCollection("documents", "amendment"))
+                return Result.failure(DataErrors.EmptyArray("amendments"))
             }
 
-            return OperationType.tryFromString(operationType)
-                .bind { type ->
-                    Result.success(
-                        DataValidationParams(
-                            cpid = cpid,
-                            ocid = ocid,
-                            operationType = type,
-                            amendments = amendments
-                        )
-                    )
-                }
+            val operationTypeResult = OperationType.tryFromString(operationType)
+            if (operationTypeResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("operationType"))
+
+            return Result.success(
+                DataValidationParams(
+                    cpid = cpid,
+                    ocid = ocid,
+                    operationType = operationTypeResult.get,
+                    amendments = amendments
+                )
+            )
         }
     }
 
@@ -54,12 +52,12 @@ data class DataValidationParams private constructor(
                 rationale: String,
                 description: String?,
                 documents: Option<List<Document>>
-            ): Result<Amendment, Fail> {
+            ): Result<Amendment, DataErrors> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return Result.failure(ValidationError.EmptyCollection("documents", "amendment"))
+                    return Result.failure(DataErrors.EmptyArray("documents"))
 
                 val idResult = id.tryAmendmentId()
-                if (idResult.isFail) return Result.failure(idResult.error)
+                if (idResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("amendment.id"))
 
                 return Result.success(
                     Amendment(
@@ -92,22 +90,22 @@ data class DataValidationParams private constructor(
                     id: String,
                     title: String,
                     description: String?
-                ): Result<Document, Fail> {
+                ): Result<Document, DataErrors> {
 
                     val idResult = id.tryDocumentId()
-                    if (idResult.isFail) return Result.failure(idResult.error)
+                    if (idResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("document.id"))
 
-                    return DocumentType.tryFromString(documentType)
-                        .bind { type ->
-                            Result.success(
-                                Document(
-                                    id = idResult.get,
-                                    description = description,
-                                    documentType = type,
-                                    title = title
-                                )
-                            )
-                        }
+                    val documentTypeResult = DocumentType.tryFromString(documentType)
+                    if (documentTypeResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("documentType"))
+
+                    return Result.success(
+                        Document(
+                            id = idResult.get,
+                            description = description,
+                            documentType = documentTypeResult.get,
+                            title = title
+                        )
+                    )
                 }
             }
 

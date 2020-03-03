@@ -4,8 +4,7 @@ import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.functional.Result
-import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.fail.error.ValidationError
+import com.procurement.revision.infrastructure.fail.error.DataErrors
 
 data class GetAmendmentIdsParams private constructor(
     val status: AmendmentStatus?,
@@ -23,22 +22,17 @@ data class GetAmendmentIdsParams private constructor(
             relatedItems: List<String>?,
             cpid: String,
             ocid: String
-        ): Result<GetAmendmentIdsParams, Fail> {
+        ): Result<GetAmendmentIdsParams, DataErrors> {
             val statusResult = status?.let { AmendmentStatus.tryFromString(it) }
-            if (statusResult != null && statusResult.isFail) return Result.failure(statusResult.error)
+            if (statusResult != null && statusResult.isFail) return Result.failure(DataErrors.UnknownValue("status"))
 
             val typeResult = type?.let { AmendmentType.tryFromString(it) }
-            if (typeResult != null && typeResult.isFail) return Result.failure(typeResult.error)
+            if (typeResult != null && typeResult.isFail) return Result.failure(DataErrors.UnknownValue("type"))
 
             val relatesToResult = relatesTo?.let { AmendmentRelatesTo.tryFromString(it) }
-            if (relatesToResult != null && relatesToResult.isFail) return Result.failure(relatesToResult.error)
+            if (relatesToResult != null && relatesToResult.isFail) return Result.failure(DataErrors.UnknownValue("relatesTo"))
 
-            if (relatedItems != null && relatedItems.isEmpty()) return Result.failure(
-                ValidationError.EmptyCollection(
-                    "relatedItems",
-                    "getAmendmentIdsReauest"
-                )
-            )
+            if (relatedItems != null && relatedItems.isEmpty()) Result.failure(DataErrors.EmptyArray("relatedItems"))
 
             return Result.success(
                 GetAmendmentIdsParams(

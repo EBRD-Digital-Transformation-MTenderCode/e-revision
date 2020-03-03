@@ -4,7 +4,7 @@ import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.bind.databinding.Enumable
 import com.procurement.revision.infrastructure.bind.databinding.Valuable
-import com.procurement.revision.infrastructure.fail.error.RequestError
+import com.procurement.revision.infrastructure.fail.error.EnumError
 
 enum class AmendmentStatus(override val text: String) : Valuable<AmendmentStatus> {
 
@@ -23,11 +23,11 @@ enum class AmendmentStatus(override val text: String) : Valuable<AmendmentStatus
                 values = values().joinToString { it.text }
             )
 
-        fun tryFromString(value: String): Result<AmendmentStatus, RequestError.EnumError> =
+        fun tryFromString(value: String): Result<AmendmentStatus, EnumError> =
             elements[value.toUpperCase()]
                 ?.let { Result.success(it) }
                 ?: Result.failure(
-                    RequestError.EnumError(
+                    EnumError(
                         enumType = AmendmentStatus::class.java.canonicalName,
                         value = value,
                         values = values().joinToString { it.text }

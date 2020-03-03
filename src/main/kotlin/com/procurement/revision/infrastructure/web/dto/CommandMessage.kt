@@ -98,22 +98,36 @@ fun createIncident(code: String, message: String, metadata: Any? = null): ApiInc
 }
 
 fun generateResponseOnFailure(
-    fail: Fail,
+    fails: List<Fail>,
     version: ApiVersion,
     id: UUID
 ): ApiResponse =
-    when (fail) {
+    when (fails[0]) {
         is Fail.Error ->
-            ApiFailResponse(
-                version = version,
-                id = id,
-                result = listOf(
-                    ApiFailResponse.Error(
-                        code = getFullErrorCode(fail.code),
-                        description = fail.description
-                    )
+            if (fails[0] is DataErrors) {
+                ApiDataErrorResponse(
+                    version = version,
+                    id = id,
+                    result = fails.filterIsInstance<DataErrors>().map { dataError ->
+                        ApiDataErrorResponse.Error(
+                            code = getFullErrorCode(dataError.code),
+                            description = dataError.description,
+                            attributeName = dataError.attributeName
+                        )
+                    }
                 )
-            )
+            } else {
+                ApiFailResponse(
+                    version = version,
+                    id = id,
+                    result = fails.filterIsInstance<Fail.Error>().map { error ->
+                        ApiFailResponse.Error(
+                            code = getFullErrorCode(error.code),
+                            description = error.description
+                        )
+                    }
+                )
+            }
         is Fail.Incident ->
             ApiIncidentResponse(
                 version = version,
@@ -126,13 +140,13 @@ fun generateResponseOnFailure(
                         version = GlobalProperties.App.apiVersion,
                         name = GlobalProperties.serviceName
                     ),
-                    errors = listOf(
+                    errors = fails.filterIsInstance<Fail.Incident>().map { incident ->
                         ApiIncidentResponse.Incident.Error(
-                            code = getFullErrorCode(fail.code),
-                            description = fail.description,
+                            code = getFullErrorCode(incident.code),
+                            description = incident.description,
                             metadata = null
                         )
-                    )
+                    }
                 )
             )
     }
@@ -192,7 +206,7 @@ fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
         when (val result = it.asText().tryUUID()) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.DataFormatMismatch(name)
+                DataErrors.DataTypeMismatch(name)
             )
         }
     }

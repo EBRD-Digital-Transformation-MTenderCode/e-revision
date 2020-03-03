@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.revision.infrastructure.bind.jackson.configuration
-import com.procurement.revision.infrastructure.fail.error.RequestError
+import com.procurement.revision.infrastructure.fail.error.DataErrors
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
@@ -68,8 +68,8 @@ fun String.toNode(): JsonNode = try {
     throw IllegalArgumentException("Error parsing String to JsonNode.", exception)
 }
 
-fun String.tryToNode(): Result<JsonNode, RequestError.ParsingError> = try {
+fun String.tryToNode(): Result<JsonNode, DataErrors.DataFormatMismatch> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(RequestError.ParsingError("Error parsing $this to JsonNode."))
+    Result.failure(DataErrors.DataFormatMismatch("request."))
 }

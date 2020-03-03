@@ -10,7 +10,8 @@ import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.fail.error.RequestError
+import com.procurement.revision.infrastructure.fail.error.DataErrors
+import com.procurement.revision.infrastructure.fail.error.EnumError
 import com.procurement.revision.infrastructure.utils.tryToObject
 import java.time.LocalDateTime
 import java.util.*
@@ -30,10 +31,10 @@ enum class CommandType(@JsonValue override val value: String) : Action {
                 values = values().joinToString { it.value }
             )
 
-        fun tryFromString(value: String): Result<CommandType, EnumException> =
+        fun tryFromString(value: String): Result<CommandType, EnumError> =
             elements[value.toUpperCase()]
                 ?.let { Result.success(it) }
-                ?: Result.failure(EnumException(
+                ?: Result.failure(EnumError(
                     enumType = CommandType::class.java.canonicalName,
                     value = value,
                     values = values().joinToString { it.value }
@@ -141,44 +142,60 @@ fun getFullErrorCode(code: String): String = "400.${GlobalProperties.serviceId}.
 val NaN: UUID
     get() = UUID(0, 0)
 
-fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, RequestError.ParsingError> {
+fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, DataErrors> {
     val node = get(name)
     if (node == null || node is NullNode) return Result.failure(
-        RequestError.ParsingError("$name is absent")
+        DataErrors.MissingRequiredAttribute("$name is absent")
     )
     return Result.success(node)
 }
 
-fun JsonNode.tryGetVersion(): Result<ApiVersion, RequestError.ParsingError> =
-    tryGetAttribute("version").bind {
+fun JsonNode.tryGetVersion(): Result<ApiVersion, DataErrors> {
+    val name = "version"
+    return tryGetAttribute(name).bind {
         when (val result = ApiVersion.tryValueOf(it.asText())) {
             is Result.Success -> result
-            is Result.Failure -> result.mapError {
-                RequestError.ParsingError(message = result.error)
-            }
+            is Result.Failure -> Result.failure(
+                DataErrors.DataFormatMismatch(name)
+            )
         }
     }
+}
 
-fun JsonNode.tryGetAction(): Result<CommandType, RequestError.ParsingError> =
-    tryGetAttribute("action").bind { action ->
+fun JsonNode.tryGetAction(): Result<CommandType, DataErrors> {
+    val name = "action"
+    return tryGetAttribute(name).bind { action ->
         when (val result = CommandType.tryFromString(action.asText())) {
             is Result.Success -> result
-            is Result.Failure -> result.mapError {
-                RequestError.ParsingError(message = result.error.message!!)
-            }
+            is Result.Failure -> Result.failure(
+                DataErrors.UnknownValue(name)
+            )
         }
     }
+}
 
-fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, RequestError.ParsingError> =
-    tryGetAttribute("params").bind {
+fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
+    val name = "params"
+    return tryGetAttribute(name).bind {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
-            is Result.Failure -> result.mapError {
-                RequestError.ParsingError(message = result.error)
-            }
+            is Result.Failure -> Result.failure(
+                DataErrors.DataFormatMismatch(name)
+            )
         }
     }
+}
 
-fun JsonNode.tryGetId(): Result<UUID, RequestError.ParsingError> = tryGetAttribute("id").bind { it.asText().tryUUID("request") }
+fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
+    val name = "id"
+    return tryGetAttribute(name).bind {
+        when (val result = it.asText().tryUUID()) {
+            is Result.Success -> result
+            is Result.Failure -> Result.failure(
+                DataErrors.DataFormatMismatch(name)
+            )
+        }
+    }
+}
 
 

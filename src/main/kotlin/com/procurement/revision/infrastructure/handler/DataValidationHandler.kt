@@ -16,16 +16,16 @@ class DataValidationHandler(private val amendmentService: AmendmentService) : Ab
 
     override val action: CommandType = CommandType.DATA_VALIDATION
 
-    override fun execute(node: JsonNode): ValidationResult<Fail> {
+    override fun execute(node: JsonNode): ValidationResult<List<Fail>> {
         val request = when (val result = node.tryGetParams(DataValidationRequest::class.java)) {
             is Result.Success -> result.get
             is Result.Failure -> {
-                return ValidationResult.error(result.error)
+                return ValidationResult.error(listOf(result.error))
             }
         }
 
         val params = request.convert()
         if (params.isFail) return ValidationResult.error(params.error)
-        return amendmentService.validateDocumentsTypes(params.get)
+        return amendmentService.validateDocumentsTypes(params.get).map { fail -> listOf(fail) }
     }
 }

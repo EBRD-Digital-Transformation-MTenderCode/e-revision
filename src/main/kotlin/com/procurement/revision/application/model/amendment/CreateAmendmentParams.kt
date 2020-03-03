@@ -32,16 +32,16 @@ data class CreateAmendmentParams private constructor(
             cpid: String,
             ocid: String,
             owner: String
-        ): Result<CreateAmendmentParams, DataErrors> {
+        ): Result<CreateAmendmentParams, List<DataErrors>> {
 
             val operationTypeResult = OperationType.tryFromString(operationType)
-            if (operationTypeResult.isFail) return Result.failure(DataErrors.UnknownValue("operationType"))
+            if (operationTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("operationType")))
 
             val startDateResult = startDate.tryCreateLocalDateTime()
-            if (startDateResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("startDate"))
+            if (startDateResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("startDate")))
 
             val ownerResult = owner.tryOwner()
-            if (ownerResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("owner"))
+            if (ownerResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("owner")))
 
             return Result.success(
                 CreateAmendmentParams(
@@ -70,12 +70,12 @@ data class CreateAmendmentParams private constructor(
                 rationale: String,
                 description: String?,
                 documents: Option<List<Document>>
-            ): Result<Amendment, DataErrors> {
+            ): Result<Amendment, List<DataErrors>> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return Result.failure(DataErrors.EmptyArray("amendment.documents"))
+                    return Result.failure(listOf(DataErrors.EmptyArray("amendment.documents")))
 
                 val idResult = id.tryAmendmentId()
-                if (idResult is Result.Failure) return Result.failure(DataErrors.DataTypeMismatch("amendment.id"))
+                if (idResult is Result.Failure) return Result.failure(listOf(DataErrors.DataTypeMismatch("amendment.id")))
 
                 return Result.success(
                     Amendment(
@@ -100,12 +100,12 @@ data class CreateAmendmentParams private constructor(
                     id: String,
                     title: String,
                     description: String?
-                ): Result<Document, DataErrors> {
+                ): Result<Document, List<DataErrors>> {
                     val idResult = id.tryDocumentId()
-                    if (idResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("document.id"))
+                    if (idResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("document.id")))
 
                     val documentTypeResult = DocumentType.tryFromString(documentType)
-                    if (documentTypeResult.isFail) return Result.failure(DataErrors.UnknownValue("documentType"))
+                    if (documentTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("documentType")))
 
                     return Result.success(
                         Document(

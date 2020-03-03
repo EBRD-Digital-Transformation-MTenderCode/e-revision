@@ -7,7 +7,7 @@ import com.procurement.revision.domain.util.extension.mapResult
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.web.dto.request.amendment.DataValidationRequest
 
-fun DataValidationRequest.convert(): Result<DataValidationParams, DataErrors> {
+fun DataValidationRequest.convert(): Result<DataValidationParams, List<DataErrors>> {
     val amendments = amendments.mapResult { it.convert() }
     if (amendments.isFail)
         return Result.failure(amendments.error)
@@ -20,7 +20,7 @@ fun DataValidationRequest.convert(): Result<DataValidationParams, DataErrors> {
     )
 }
 
-private fun DataValidationRequest.Amendment.convert(): Result<DataValidationParams.Amendment, DataErrors> {
+private fun DataValidationRequest.Amendment.convert(): Result<DataValidationParams.Amendment, List<DataErrors>> {
     val documents = this.documents.mapOptionalResult { it.convert() }
     if (documents.isFail)
         return Result.failure(documents.error)
@@ -33,7 +33,7 @@ private fun DataValidationRequest.Amendment.convert(): Result<DataValidationPara
     )
 }
 
-private fun DataValidationRequest.Amendment.Document.convert(): Result<DataValidationParams.Amendment.Document, DataErrors> =
+private fun DataValidationRequest.Amendment.Document.convert(): Result<DataValidationParams.Amendment.Document, List<DataErrors>> =
     DataValidationParams.Amendment.Document.tryCreate(
         documentType = this.documentType,
         id = this.id,

@@ -21,13 +21,13 @@ data class DataValidationParams private constructor(
             cpid: String,
             ocid: String,
             operationType: String
-        ): Result<DataValidationParams, DataErrors> {
+        ): Result<DataValidationParams, List<DataErrors>> {
             if (amendments.isEmpty()) {
-                return Result.failure(DataErrors.EmptyArray("amendments"))
+                return Result.failure(listOf(DataErrors.EmptyArray("amendments")))
             }
 
             val operationTypeResult = OperationType.tryFromString(operationType)
-            if (operationTypeResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("operationType"))
+            if (operationTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("operationType")))
 
             return Result.success(
                 DataValidationParams(
@@ -52,12 +52,12 @@ data class DataValidationParams private constructor(
                 rationale: String,
                 description: String?,
                 documents: Option<List<Document>>
-            ): Result<Amendment, DataErrors> {
+            ): Result<Amendment, List<DataErrors>> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return Result.failure(DataErrors.EmptyArray("documents"))
+                    return Result.failure(listOf(DataErrors.EmptyArray("documents")))
 
                 val idResult = id.tryAmendmentId()
-                if (idResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("amendment.id"))
+                if (idResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("amendment.id")))
 
                 return Result.success(
                     Amendment(
@@ -90,13 +90,13 @@ data class DataValidationParams private constructor(
                     id: String,
                     title: String,
                     description: String?
-                ): Result<Document, DataErrors> {
+                ): Result<Document, List<DataErrors>> {
 
                     val idResult = id.tryDocumentId()
-                    if (idResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("document.id"))
+                    if (idResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("document.id")))
 
                     val documentTypeResult = DocumentType.tryFromString(documentType)
-                    if (documentTypeResult.isFail) return Result.failure(DataErrors.DataTypeMismatch("documentType"))
+                    if (documentTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("documentType")))
 
                     return Result.success(
                         Document(

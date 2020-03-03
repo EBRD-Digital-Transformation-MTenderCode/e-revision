@@ -45,6 +45,6 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
         }
     }
 
-    abstract fun execute(node: JsonNode): Result<R, Fail>
+    abstract fun execute(node: JsonNode): Result<R, List<Fail>>
 }
 

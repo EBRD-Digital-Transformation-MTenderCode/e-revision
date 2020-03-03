@@ -5,7 +5,7 @@ import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.web.dto.request.amendment.GetAmendmentIdsRequest
 
-fun GetAmendmentIdsRequest.convert(): Result<GetAmendmentIdsParams, DataErrors>  =
+fun GetAmendmentIdsRequest.convert(): Result<GetAmendmentIdsParams, List<DataErrors>>  =
     GetAmendmentIdsParams.tryCreate(
         status = status,
         relatedItems = relatedItems,

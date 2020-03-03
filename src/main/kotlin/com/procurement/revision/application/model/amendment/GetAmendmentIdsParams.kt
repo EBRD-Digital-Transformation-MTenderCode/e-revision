@@ -22,17 +22,19 @@ data class GetAmendmentIdsParams private constructor(
             relatedItems: List<String>?,
             cpid: String,
             ocid: String
-        ): Result<GetAmendmentIdsParams, DataErrors> {
+        ): Result<GetAmendmentIdsParams, List<DataErrors>> {
             val statusResult = status?.let { AmendmentStatus.tryFromString(it) }
-            if (statusResult != null && statusResult.isFail) return Result.failure(DataErrors.UnknownValue("status"))
+            if (statusResult != null && statusResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("status")))
 
             val typeResult = type?.let { AmendmentType.tryFromString(it) }
-            if (typeResult != null && typeResult.isFail) return Result.failure(DataErrors.UnknownValue("type"))
+            if (typeResult != null && typeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("type")))
 
             val relatesToResult = relatesTo?.let { AmendmentRelatesTo.tryFromString(it) }
-            if (relatesToResult != null && relatesToResult.isFail) return Result.failure(DataErrors.UnknownValue("relatesTo"))
+            if (relatesToResult != null && relatesToResult.isFail) return Result.failure(
+                listOf(DataErrors.UnknownValue("relatesTo"))
+            )
 
-            if (relatedItems != null && relatedItems.isEmpty()) Result.failure(DataErrors.EmptyArray("relatedItems"))
+            if (relatedItems != null && relatedItems.isEmpty()) return Result.failure(listOf(DataErrors.EmptyArray("relatedItems")))
 
             return Result.success(
                 GetAmendmentIdsParams(

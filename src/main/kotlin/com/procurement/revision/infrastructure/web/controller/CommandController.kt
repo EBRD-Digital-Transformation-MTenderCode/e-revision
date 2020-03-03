@@ -91,5 +91,5 @@ class CommandController(private val commandService: CommandService) {
         fail: Fail,
         version: ApiVersion = GlobalProperties.App.apiVersion,
         id: UUID = NaN
-    ) = generateResponseOnFailure(fail = fail, id = id, version = version)
+    ) = generateResponseOnFailure(fails = listOf(fail), id = id, version = version)
 }

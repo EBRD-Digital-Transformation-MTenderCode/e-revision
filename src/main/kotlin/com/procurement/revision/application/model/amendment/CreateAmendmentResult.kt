@@ -20,6 +20,7 @@ data class CreateAmendmentResult(
         @JsonInclude(JsonInclude.Include.NON_NULL)
         @param:JsonProperty("description") @field:JsonProperty("description") val description: String?,
 
+        @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @param:JsonProperty("documents") @field:JsonProperty("documents") val documents: List<Document>,
         @param:JsonProperty("id") @field:JsonProperty("id") val id: AmendmentId,
         @param:JsonProperty("date") @field:JsonProperty("date") val date: LocalDateTime,

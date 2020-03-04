@@ -43,7 +43,7 @@ data class DataValidationParams private constructor(
         }
     }
 
-    data class Amendment private constructor(
+    class Amendment private constructor(
         val id: AmendmentId,
         val rationale: String,
         val description: String?,

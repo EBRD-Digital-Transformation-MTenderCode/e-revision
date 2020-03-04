@@ -62,13 +62,12 @@ data class CreateAmendmentParams private constructor(
         }
     }
 
-    data class Amendment private constructor(
+    class Amendment private constructor(
         val rationale: String,
         val description: String?,
         val documents: List<Document>,
         val id: AmendmentId
     ) {
-
         companion object {
             fun tryCreate(
                 id: String,
@@ -94,7 +93,15 @@ data class CreateAmendmentParams private constructor(
             }
         }
 
-        data class Document private constructor(
+        override fun equals(other: Any?): Boolean = if (this === other)
+            true
+        else
+            other is Amendment
+                && this.id == other.id
+
+        override fun hashCode(): Int = id.hashCode()
+
+        class Document private constructor(
             val documentType: DocumentType,
             val id: DocumentId,
             val title: String,
@@ -130,7 +137,7 @@ data class CreateAmendmentParams private constructor(
             override fun equals(other: Any?): Boolean = if (this === other)
                 true
             else
-                other is DataValidationParams.Amendment.Document
+                other is Document
                     && this.id == other.id
 
             override fun hashCode(): Int = id.hashCode()

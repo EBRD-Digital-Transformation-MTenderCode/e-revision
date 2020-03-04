@@ -17,7 +17,7 @@ class CommandService(
 ) {
 
     fun execute(node: JsonNode): ApiResponse {
-        val action =node.tryGetAction().get
+        val action = node.tryGetAction().get
 
         return when (action) {
             CommandType.GET_AMENDMENTS_IDS -> {

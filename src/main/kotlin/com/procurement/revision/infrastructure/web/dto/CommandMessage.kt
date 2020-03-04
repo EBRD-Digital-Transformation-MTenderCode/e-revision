@@ -117,7 +117,7 @@ fun JsonNode.tryGetVersion(): Result<ApiVersion, DataErrors> {
 fun JsonNode.tryGetAction(): Result<CommandType, DataErrors> {
     val name = "action"
     return tryGetAttribute(name).bind { action ->
-        when (val result = CommandType.tryFromString(action.asText())) {
+        when (val result = CommandType.tryOf(action.asText())) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
                 DataErrors.UnknownValue(name)

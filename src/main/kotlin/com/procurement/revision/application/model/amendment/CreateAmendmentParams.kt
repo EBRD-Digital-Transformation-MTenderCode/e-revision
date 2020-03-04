@@ -36,7 +36,7 @@ data class CreateAmendmentParams private constructor(
             owner: String
         ): Result<CreateAmendmentParams, List<DataErrors>> {
 
-            val operationTypeParsed = OperationType.tryFromString(operationType)
+            val operationTypeParsed = OperationType.tryOf(operationType)
                 .doOnError { return failure(listOf(DataErrors.UnknownValue("operationType"))) }
                 .get
 
@@ -112,7 +112,7 @@ data class CreateAmendmentParams private constructor(
                         .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("document.id"))) }
                         .get
 
-                    val documentTypeParsed = DocumentType.tryFromString(documentType)
+                    val documentTypeParsed = DocumentType.tryOf(documentType)
                         .doOnError { return failure(listOf(DataErrors.UnknownValue("documentType"))) }
                         .get
 

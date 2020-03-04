@@ -27,17 +27,17 @@ data class GetAmendmentIdsParams private constructor(
         ): Result<GetAmendmentIdsParams, List<DataErrors>> {
 
             val statusParsed = status
-                ?.let { AmendmentStatus.tryFromString(it) }
+                ?.let { AmendmentStatus.tryOf(it) }
                 ?.doOnError { return failure(listOf(DataErrors.UnknownValue("status"))) }
                 ?.get
 
             val typeParsed = type
-                ?.let { AmendmentType.tryFromString(it) }
+                ?.let { AmendmentType.tryOf(it) }
                 ?.doOnError { return failure(listOf(DataErrors.UnknownValue("type"))) }
                 ?.get
 
             val relatesToParsed = relatesTo
-                ?.let { AmendmentRelatesTo.tryFromString(it) }
+                ?.let { AmendmentRelatesTo.tryOf(it) }
                 ?.doOnError { return failure(listOf(DataErrors.UnknownValue("relatesTo"))) }
                 ?.get
 

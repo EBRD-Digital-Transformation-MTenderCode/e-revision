@@ -27,6 +27,8 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
         val version = node.tryGetVersion().get
 
         val history = historyRepository.getHistory(id.toString(), action.value)
+            .doOnError { error ->  return generateResponseOnFailure(listOf(error), version, id)}
+            .get
         if (history != null) {
             val result = history.jsonData.toObject(target)
             return ApiSuccessResponse(version = version, id = id, result = result)

@@ -141,7 +141,7 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.DataFormatMismatch(name)
+                DataErrors.DataTypeMismatch(name)
             )
         }
     }
@@ -153,7 +153,7 @@ fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
         when (val result = it.asText().tryUUID()) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.DataTypeMismatch(name)
+                DataErrors.DataFormatMismatch(name)
             )
         }
     }

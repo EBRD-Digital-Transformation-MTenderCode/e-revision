@@ -41,11 +41,11 @@ data class CreateAmendmentParams private constructor(
                 .get
 
             val startDateParsed = startDate.tryCreateLocalDateTime()
-                .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("startDate"))) }
+                .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("startDate"))) }
                 .get
 
             val ownerParsed = owner.tryOwner()
-                .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("owner"))) }
+                .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("owner"))) }
                 .get
 
             return success(
@@ -80,7 +80,7 @@ data class CreateAmendmentParams private constructor(
                     return failure(listOf(DataErrors.EmptyArray("amendment.documents")))
 
                 val idParsed = id.tryAmendmentId()
-                    .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("amendment.id"))) }
+                    .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("amendment.id"))) }
                     .get
 
                 return success(
@@ -109,7 +109,7 @@ data class CreateAmendmentParams private constructor(
                 ): Result<Document, List<DataErrors>> {
 
                     val idParsed = id.tryDocumentId()
-                        .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("document.id"))) }
+                        .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("document.id"))) }
                         .get
 
                     val documentTypeParsed = DocumentType.tryFromString(documentType)

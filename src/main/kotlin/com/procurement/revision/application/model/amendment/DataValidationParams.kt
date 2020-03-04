@@ -60,7 +60,7 @@ data class DataValidationParams private constructor(
                     return failure(listOf(DataErrors.EmptyArray("documents")))
 
                 val idParsed = id.tryAmendmentId()
-                    .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("amendment.id"))) }
+                    .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("amendment.id"))) }
                     .get
 
                 return success(
@@ -97,7 +97,7 @@ data class DataValidationParams private constructor(
                 ): Result<Document, List<DataErrors>> {
 
                     val idParsed = id.tryDocumentId()
-                        .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("document.id"))) }
+                        .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("document.id"))) }
                         .get
 
                     val documentTypeParsed = DocumentType.tryFromString(documentType)

@@ -68,8 +68,8 @@ fun String.toNode(): JsonNode = try {
     throw IllegalArgumentException("Error parsing String to JsonNode.", exception)
 }
 
-fun String.tryToNode(): Result<JsonNode, DataErrors.DataFormatMismatch> = try {
+fun String.tryToNode(): Result<JsonNode, DataErrors> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(DataErrors.DataFormatMismatch("request."))
+    Result.failure(DataErrors.DataTypeMismatch("request."))
 }

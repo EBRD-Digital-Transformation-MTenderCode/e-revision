@@ -3,14 +3,12 @@ package com.procurement.revision.infrastructure.web.dto
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
-import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.error.DataErrors
-import com.procurement.revision.infrastructure.fail.error.EnumError
 import com.procurement.revision.infrastructure.utils.tryToObject
 import java.time.LocalDateTime
 import java.util.*
@@ -23,22 +21,15 @@ enum class CommandType(@JsonValue override val value: String) : Action {
 
     companion object {
         private val elements: Map<String, CommandType> = values().associateBy { it.value.toUpperCase() }
-        fun fromString(value: String): CommandType = elements[value.toUpperCase()]
-            ?: throw EnumException(
-                enumType = CommandType::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.value }
-            )
 
-        fun tryFromString(value: String): Result<CommandType, EnumError> =
-            elements[value.toUpperCase()]
+        fun tryOf(value: String): Result<CommandType, String> {
+            val key = value
+            val enumType = CommandType::class.java.canonicalName
+            val allowedValues = values().joinToString { it.value }
+            return elements[value.toUpperCase()]
                 ?.let { Result.success(it) }
-                ?: Result.failure(EnumError(
-                    enumType = CommandType::class.java.canonicalName,
-                    value = value,
-                    values = values().joinToString { it.value }
-                )
-                )
+                ?: Result.failure("Unknown value '$key' for enum type '$enumType'. Allowed values are '$allowedValues'.")
+        }
     }
 
     override fun toString() = value

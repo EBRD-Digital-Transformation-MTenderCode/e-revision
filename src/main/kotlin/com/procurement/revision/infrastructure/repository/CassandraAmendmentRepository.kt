@@ -6,6 +6,9 @@ import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
+import com.procurement.revision.domain.functional.Result.Companion.success
+import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
@@ -64,10 +67,11 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                 setString(columnOcid, ocid)
             }
 
-        val resultSet = load(query)
-        return resultSet.bind { resultSet ->
-            Result.success(resultSet.map { row -> converter(row = row) })
-        }
+        return load(query)
+            .doOnError { error -> return failure(error) }
+            .get
+            .map { row -> converter(row = row) }
+            .asSuccess()
     }
 
     override fun findBy(cpid: String, ocid: String, id: AmendmentId): Result<Amendment?, Fail> {
@@ -78,16 +82,18 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                 setUUID(columnId, id)
             }
 
-        val resultSet = load(query)
-        return resultSet.bind { resultSet ->
-            Result.success(resultSet.one()?.let{ row-> converter(row = row)})
-        }
+        return load(query)
+            .doOnError { error -> return failure(error) }
+            .get
+            .one()
+            ?.let { row -> converter(row = row) }
+            .asSuccess()
     }
 
     private fun load(statement: BoundStatement): Result<ResultSet, Fail.Incident.DatabaseInteractionIncident> = try {
-        Result.success(session.execute(statement))
+        success(session.execute(statement))
     } catch (expected: Exception) {
-        Result.failure(Fail.Incident.DatabaseInteractionIncident(expected.message))
+        failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 
     private fun converter(row: Row): Amendment {
@@ -133,14 +139,14 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             }
 
         return saveAmendment(statements).bind { resultSet ->
-            Result.success(resultSet.wasApplied())
+            success(resultSet.wasApplied())
         }
     }
 
     private fun saveAmendment(statement: BoundStatement): Result<ResultSet, Fail.Incident> = try {
-        Result.success(session.execute(statement))
+        success(session.execute(statement))
     } catch (expected: Exception) {
-        Result.failure(Fail.Incident.DatabaseInteractionIncident(expected.message))
+        failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 
     fun convert(amendment: Amendment) = AmendmentDataEntity(

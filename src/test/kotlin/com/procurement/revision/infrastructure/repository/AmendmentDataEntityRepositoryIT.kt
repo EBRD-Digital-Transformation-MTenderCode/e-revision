@@ -92,7 +92,7 @@ class AmendmentDataEntityRepositoryIT {
     fun findBy() {
         insertAmendment()
 
-        val actualAmendments: List<Amendment> = amendmentRepository.findBy(cpid = CPID, ocid = OCID)
+        val actualAmendments: List<Amendment> = amendmentRepository.findBy(cpid = CPID, ocid = OCID).get
 
         assertThat(actualAmendments, `is`(not(empty<Amendment>())))
         assertThat(actualAmendments, hasItem(stubAmendment()))
@@ -101,7 +101,7 @@ class AmendmentDataEntityRepositoryIT {
 
     @Test
     fun cnNotFound() {
-        val actualAmendments = amendmentRepository.findBy(cpid = "UNKNOWN", ocid = OCID)
+        val actualAmendments = amendmentRepository.findBy(cpid = "UNKNOWN", ocid = OCID).get
         assertThat(actualAmendments, `is`(empty<Amendment>()))
     }
 

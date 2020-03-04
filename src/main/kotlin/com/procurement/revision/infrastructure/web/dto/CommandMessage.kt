@@ -3,7 +3,6 @@ package com.procurement.revision.infrastructure.web.dto
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
-import com.procurement.revision.application.exception.ErrorException
 import com.procurement.revision.domain.exception.EnumException
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.bind
@@ -43,58 +42,6 @@ enum class CommandType(@JsonValue override val value: String) : Action {
     }
 
     override fun toString() = value
-}
-
-fun errorResponse(
-    exception: Exception,
-    id: UUID = NaN,
-    version: ApiVersion = GlobalProperties.App.apiVersion
-): ApiResponse =
-    when (exception) {
-        is ErrorException -> ApiFailResponse(
-            id = id,
-            version = version,
-            result = listOf(
-                ApiFailResponse.Error(
-                    code = getFullErrorCode(exception.code),
-                    description = exception.message!!
-                )
-            )
-        )
-        is EnumException -> ApiFailResponse(
-            id = id,
-            version = version,
-            result = listOf(
-                ApiFailResponse.Error(
-                    code = getFullErrorCode(exception.code),
-                    description = exception.message!!
-                )
-            )
-        )
-        else -> ApiIncidentResponse(
-            id = id,
-            version = version,
-            result = createIncident("00.00", exception.message ?: "Internal server error.")
-        )
-    }
-
-fun createIncident(code: String, message: String, metadata: Any? = null): ApiIncidentResponse.Incident {
-    return ApiIncidentResponse.Incident(
-        date = LocalDateTime.now(),
-        id = UUID.randomUUID(),
-        service = ApiIncidentResponse.Incident.Service(
-            id = GlobalProperties.serviceId,
-            version = GlobalProperties.App.apiVersion,
-            name = GlobalProperties.serviceName
-        ),
-        errors = listOf(
-            ApiIncidentResponse.Incident.Error(
-                code = getFullErrorCode(code),
-                description = message,
-                metadata = metadata
-            )
-        )
-    )
 }
 
 fun generateResponseOnFailure(

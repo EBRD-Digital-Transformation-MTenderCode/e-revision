@@ -1,8 +1,6 @@
 package com.procurement.revision.domain.functional
 
-inline fun <T, E> validationRule(crossinline block: (value: T) -> ValidationResult<E>) = ValidationRule.invoke(
-    block
-)
+inline fun <T, E> validationRule(crossinline block: (value: T) -> ValidationResult<E>) = ValidationRule.invoke(block)
 
 interface ValidationRule<T, out E> {
     fun test(value: T): ValidationResult<E>

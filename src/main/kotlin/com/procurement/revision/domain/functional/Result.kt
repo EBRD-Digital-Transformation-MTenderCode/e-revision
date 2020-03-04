@@ -1,5 +1,7 @@
 package com.procurement.revision.domain.functional
 
+fun <T, E> T.asSuccess(): Result<T, E> = Result.success(this)
+
 sealed class Result<out T, out E> {
     companion object {
         fun <T> pure(value: T) = Success(value)
@@ -12,6 +14,11 @@ sealed class Result<out T, out E> {
 
     abstract val get: T
     abstract val error: E
+
+    inline fun doOnError(block: (error: E) -> Unit): Result<T, E> {
+        if (this.isFail) block(this.error)
+        return this
+    }
 
     val orNull: T?
         get() = when (this) {
@@ -31,17 +38,13 @@ sealed class Result<out T, out E> {
     }
 
     infix fun <R> map(transform: (T) -> R): Result<R, E> = when (this) {
-        is Success -> Success(
-            transform(this.get)
-        )
+        is Success -> Success(transform(this.get))
         is Failure -> this
     }
 
     infix fun <R> mapError(transform: (E) -> R): Result<T, R> = when (this) {
         is Success -> this
-        is Failure -> Failure(
-            transform(this.error)
-        )
+        is Failure -> Failure(transform(this.error))
     }
 
     class Success<out T> internal constructor(value: T) : Result<T, Nothing>() {
@@ -62,12 +65,8 @@ sealed class Result<out T, out E> {
 }
 
 infix fun <T, E> T.validate(rule: ValidationRule<T, E>): Result<T, E> = when (val result = rule.test(this)) {
-    is ValidationResult.Ok -> Result.success(
-        this
-    )
-    is ValidationResult.Error -> Result.failure(
-        result.error
-    )
+    is ValidationResult.Ok -> Result.success(this)
+    is ValidationResult.Fail -> Result.failure(result.error)
 }
 
 infix fun <T, E> Result<T, E>.validate(rule: ValidationRule<T, E>): Result<T, E> = when (this) {

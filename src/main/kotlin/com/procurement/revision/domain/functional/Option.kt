@@ -3,13 +3,9 @@ package com.procurement.revision.domain.functional
 sealed class Option<out T> {
 
     companion object {
-        fun <T> pure(value: T): Option<T> = Some(
-            value
-        )
+        fun <T> pure(value: T): Option<T> = Some(value)
         fun <T> none(): Option<T> = None
-        fun <T> fromNullable(value: T?): Option<T> = if (value != null) Some(
-            value
-        ) else None
+        fun <T> fromNullable(value: T?): Option<T> = if (value != null) Some(value) else None
     }
 
     abstract val get: T
@@ -26,9 +22,7 @@ sealed class Option<out T> {
         get() = !isEmpty
 
     fun <R> map(transform: (T) -> R): Option<R> = when (this) {
-        is Some -> Some(
-            transform(this.get)
-        )
+        is Some -> Some(transform(this.get))
         is None -> this
     }
 

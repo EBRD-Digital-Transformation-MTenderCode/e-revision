@@ -3,6 +3,7 @@ package com.procurement.revision.infrastructure.handler
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.service.AmendmentService
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.fail.Fail
@@ -17,14 +18,14 @@ class GetAmendmentIdsHandler(private val amendmentService: AmendmentService) : A
     override val action: CommandType = CommandType.GET_AMENDMENTS_IDS
 
     override fun execute(node: JsonNode): Result<List<AmendmentId>, List<Fail>> {
-        val request = when (val result = node.tryGetParams(GetAmendmentIdsRequest::class.java)) {
-            is Result.Success -> result.get
-            is Result.Failure -> {
-                return Result.failure(listOf(result.error))
-            }
-        }
-        val params = request.convert()
-        if (params.isFail) return Result.failure(params.error)
-        return amendmentService.getAmendmentIdsBy(params.get).mapError { fail -> listOf(fail) }
+        val params = node
+            .tryGetParams(GetAmendmentIdsRequest::class.java)
+            .doOnError { error -> return failure(listOf(error)) }
+            .get
+            .convert()
+            .doOnError { error -> return failure(error) }
+            .get
+
+        return amendmentService.getAmendmentIdsBy(params).mapError { fail -> listOf(fail) }
     }
 }

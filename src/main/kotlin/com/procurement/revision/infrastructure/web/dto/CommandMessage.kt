@@ -98,7 +98,7 @@ fun generateResponseOnFailure(
             )
     }
 
-fun getFullErrorCode(code: String): String = "400.${GlobalProperties.serviceId}." + code
+fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties.serviceId}"
 
 val NaN: UUID
     get() = UUID(0, 0)

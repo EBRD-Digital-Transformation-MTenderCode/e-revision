@@ -71,5 +71,5 @@ fun String.toNode(): JsonNode = try {
 fun String.tryToNode(): Result<JsonNode, DataErrors> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(DataErrors.DataTypeMismatch("request."))
+    Result.failure(DataErrors.DataTypeMismatch("request"))
 }

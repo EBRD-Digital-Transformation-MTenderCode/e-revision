@@ -20,9 +20,9 @@ sealed class Fail {
         abstract val code: String
         abstract val description: String
 
-        class DatabaseInteractionIncident(message: String?) : Incident() {
-            override val code = "20.00"
-            override val description = "Database incident. $message"
+        class DatabaseInteractionIncident(exception: Exception) : Incident() {
+            override val code = "00.01"
+            override val description = "Database incident. ${exception.message}"
         }
     }
 }

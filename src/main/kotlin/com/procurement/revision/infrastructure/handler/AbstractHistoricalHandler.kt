@@ -1,9 +1,9 @@
 package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.revision.application.repository.HistoryRepository
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.repository.HistoryRepository
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.toObject
 import com.procurement.revision.infrastructure.web.dto.Action

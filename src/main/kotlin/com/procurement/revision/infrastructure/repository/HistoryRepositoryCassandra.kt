@@ -1,6 +1,7 @@
 package com.procurement.revision.infrastructure.repository
 
 import com.datastax.driver.core.Session
+import com.procurement.revision.application.repository.HistoryRepository
 import com.procurement.revision.infrastructure.model.entity.HistoryEntity
 import com.procurement.revision.infrastructure.utils.localNowUTC
 import com.procurement.revision.infrastructure.utils.toDate
@@ -8,7 +9,7 @@ import com.procurement.revision.infrastructure.utils.toJson
 import org.springframework.stereotype.Repository
 
 @Repository
-class HistoryRepository(private val session: Session) {
+class HistoryRepositoryCassandra(private val session: Session) : HistoryRepository {
 
     companion object {
         private const val KEYSPACE = "revision"
@@ -44,7 +45,7 @@ class HistoryRepository(private val session: Session) {
     private val preparedSaveHistoryCQL = session.prepare(SAVE_HISTORY_CQL)
     private val preparedFindHistoryByCpidAndCommandCQL = session.prepare(FIND_HISTORY_ENTRY_CQL)
 
-    fun getHistory(operationId: String, command: String): HistoryEntity? {
+    override fun getHistory(operationId: String, command: String): HistoryEntity? {
         val query = preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
                 setString(COMMAND_ID, operationId)
@@ -59,7 +60,7 @@ class HistoryRepository(private val session: Session) {
         ) else null
     }
 
-    fun saveHistory(operationId: String, command: String, result: Any): HistoryEntity {
+    override fun saveHistory(operationId: String, command: String, result: Any): HistoryEntity {
         val entity = HistoryEntity(
             operationId = operationId,
             command = command,

@@ -26,7 +26,7 @@ abstract class AbstractValidationHandler<ACTION : Action, E : Fail> : Handler<AC
                     log.debug("${action.value} has been executed.")
                 ApiSuccessResponse(version = version, id = id)
             }
-            is ValidationResult.Error -> generateResponseOnFailure(result.error, version, id)
+            is ValidationResult.Fail -> generateResponseOnFailure(result.error, version, id)
         }
     }
 

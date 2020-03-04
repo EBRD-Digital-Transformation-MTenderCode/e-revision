@@ -35,19 +35,19 @@ class CommandController(private val commandService: CommandService) {
             log.debug("RECEIVED COMMAND: '$requestBody'.")
 
         val node = requestBody.tryToNode()
-            .doOnError { error -> generateResponse(fail = error) }
+            .doOnError { error -> return generateResponse(fail = error) }
             .get
 
         val id = node.tryGetId()
-            .doOnError { error -> generateResponse(fail = error) }
+            .doOnError { error -> return generateResponse(fail = error) }
             .get
 
         val version = node.tryGetVersion()
-            .doOnError { error -> generateResponse(fail = error, id = id) }
+            .doOnError { error -> return generateResponse(fail = error, id = id) }
             .get
 
         node.tryGetAction()
-            .doOnError { error -> generateResponse(fail = error, id = id, version = version) }
+            .doOnError { error -> return generateResponse(fail = error, id = id, version = version) }
 
         val response =
             commandService.execute(node)

@@ -3,18 +3,20 @@ package com.procurement.revision.infrastructure.converter
 import com.procurement.revision.application.model.amendment.CreateAmendmentParams
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.util.extension.mapOptionalResult
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.web.dto.request.amendment.CreateAmendmentRequest
 
 fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, List<DataErrors>> {
-    val amendment = this.amendment.convert()
-    if (amendment.isFail)
-        return Result.failure(amendment.error)
+    val amendment = this.amendment
+        .convert()
+        .doOnError { error -> return failure(error) }
+        .get
 
     return CreateAmendmentParams.tryCreate(
-        amendment = amendment.get,
+        amendment = amendment,
         ocid = ocid,
         cpid = cpid,
         operationType = operationType,
@@ -25,14 +27,15 @@ fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, List<DataErr
 }
 
 private fun CreateAmendmentRequest.Amendment.convert(): Result<CreateAmendmentParams.Amendment, List<DataErrors>> {
-    val documents = this.documents.mapOptionalResult { it.convert() }
-    if (documents.isFail)
-        return Result.failure(documents.error)
+    val documents = this.documents
+        .mapOptionalResult { it.convert() }
+        .doOnError { error -> return failure(error) }
+        .get
 
     return CreateAmendmentParams.Amendment.tryCreate(
         rationale = this.rationale,
         description = this.description,
-        documents = documents.get,
+        documents = documents,
         id = this.id
     )
 }

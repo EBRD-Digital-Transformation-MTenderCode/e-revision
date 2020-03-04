@@ -8,12 +8,13 @@ import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.web.dto.request.amendment.DataValidationRequest
 
 fun DataValidationRequest.convert(): Result<DataValidationParams, List<DataErrors>> {
-    val amendments = amendments.mapResult { it.convert() }
-    if (amendments.isFail)
-        return Result.failure(amendments.error)
+    val amendments = amendments
+        .mapResult { it.convert() }
+        .doOnError { error -> return Result.failure(error) }
+        .get
 
     return DataValidationParams.tryCreate(
-        amendments = amendments.get,
+        amendments = amendments,
         ocid = ocid,
         cpid = cpid,
         operationType = operationType
@@ -21,14 +22,15 @@ fun DataValidationRequest.convert(): Result<DataValidationParams, List<DataError
 }
 
 private fun DataValidationRequest.Amendment.convert(): Result<DataValidationParams.Amendment, List<DataErrors>> {
-    val documents = this.documents.mapOptionalResult { it.convert() }
-    if (documents.isFail)
-        return Result.failure(documents.error)
+    val documents = this.documents
+        .mapOptionalResult { it.convert() }
+        .doOnError { error -> return Result.failure(error) }
+        .get
 
     return DataValidationParams.Amendment.tryCreate(
         rationale = this.rationale,
         description = this.description,
-        documents = documents.get,
+        documents = documents,
         id = this.id
     )
 }

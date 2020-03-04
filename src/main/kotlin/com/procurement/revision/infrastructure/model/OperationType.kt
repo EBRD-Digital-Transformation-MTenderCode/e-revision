@@ -1,36 +1,18 @@
 package com.procurement.revision.infrastructure.model
 
-import com.procurement.revision.domain.exception.EnumException
-import com.procurement.revision.domain.functional.Result
-import com.procurement.revision.infrastructure.bind.databinding.Enumable
-import com.procurement.revision.infrastructure.bind.databinding.Valuable
-import com.procurement.revision.infrastructure.fail.error.EnumError
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
+import com.procurement.revision.domain.enums.EnumElementProvider
 
-enum class OperationType(override val text: String) : Valuable<OperationType> {
+enum class OperationType(@JsonValue override val key: String) : EnumElementProvider.Key {
     TENDER_CANCELLATION("tenderCancellation"),
     LOT_CANCELLATION("lotCancellation");
 
-    override fun toString(): String = text
+    override fun toString(): String = key
 
-    companion object : Enumable<OperationType> {
-        private val elements: Map<String, OperationType> = values().associateBy { it.text.toUpperCase() }
-
-        override fun fromString(value: String): OperationType = elements[value.toUpperCase()]
-            ?: throw EnumException(
-                enumType = OperationType::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.text }
-            )
-
-        fun tryFromString(value: String): Result<OperationType, EnumError> =
-            elements[value.toUpperCase()]
-                ?.let { Result.success(it) }
-                ?: Result.failure(
-                    EnumError(
-                        enumType = OperationType::class.java.canonicalName,
-                        value = value,
-                        values = values().joinToString { it.text }
-                    )
-                )
+    companion object : EnumElementProvider<OperationType>(info = info()) {
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = OperationType.orThrow(name)
     }
 }

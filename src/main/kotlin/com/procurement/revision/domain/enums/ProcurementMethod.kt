@@ -1,10 +1,9 @@
 package com.procurement.revision.domain.enums
 
-import com.procurement.revision.domain.exception.EnumException
-import com.procurement.revision.infrastructure.bind.databinding.Enumable
-import com.procurement.revision.infrastructure.bind.databinding.Valuable
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 
-enum class ProcurementMethod(override val text: String) : Valuable<ProcurementMethod> {
+enum class ProcurementMethod(@JsonValue override val key: String) : EnumElementProvider.Key {
     MV("open"),
     OT("open"),
     RT("selective"),
@@ -22,20 +21,11 @@ enum class ProcurementMethod(override val text: String) : Valuable<ProcurementMe
     TEST_FA("limited"),
     TEST_OP("selective");
 
-    companion object: Enumable<ProcurementMethod> {
-        private val elements: Map<String, ProcurementMethod> = values().associateBy { it.text.toUpperCase() }
+    override fun toString(): String = key
 
-        fun <T : Exception> valueOrException(name: String, block: (Exception) -> T): ProcurementMethod = try {
-            valueOf(name)
-        } catch (expected: Exception) {
-            throw block(expected)
-        }
-
-        override fun fromString(value: String): ProcurementMethod = elements[value.toUpperCase()]
-            ?: throw EnumException(
-                enumType = ProcurementMethod::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.text }
-            )
+    companion object : EnumElementProvider<ProcurementMethod>(info = info()) {
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = ProcurementMethod.orThrow(name)
     }
 }

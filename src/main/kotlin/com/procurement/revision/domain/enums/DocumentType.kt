@@ -1,12 +1,9 @@
 package com.procurement.revision.domain.enums
 
-import com.procurement.revision.domain.exception.EnumException
-import com.procurement.revision.domain.functional.Result
-import com.procurement.revision.infrastructure.bind.databinding.Enumable
-import com.procurement.revision.infrastructure.bind.databinding.Valuable
-import com.procurement.revision.infrastructure.fail.error.EnumError
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 
-enum class DocumentType(override val text: String) : Valuable<DocumentType> {
+enum class DocumentType(@JsonValue override val key: String) : EnumElementProvider.Key {
 
     EVALUATION_CRITERIA("evaluationCriteria"),
     ELIGIBILITY_CRITERIA("eligibilityCriteria"),
@@ -34,26 +31,11 @@ enum class DocumentType(override val text: String) : Valuable<DocumentType> {
     CONTRACT_ARRANGEMENTS("contractArrangements"),
     CONTRACT_GUARANTEES("contractGuarantees");
 
-    override fun toString(): String = this.text
+    override fun toString(): String = key
 
-    companion object : Enumable<DocumentType> {
-        private val elements: Map<String, DocumentType> = values().associateBy { it.text.toUpperCase() }
-
-        override fun fromString(value: String): DocumentType = elements[value.toUpperCase()]
-            ?: throw EnumException(
-                enumType = DocumentType::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.text }
-            )
-
-        fun tryFromString(value: String): Result<DocumentType, EnumError> =
-            elements[value.toUpperCase()]
-                ?.let { Result.success(it) }
-                ?: Result.failure(EnumError(
-                    enumType = DocumentType::class.java.canonicalName,
-                    value = value,
-                    values = values().joinToString { it.text }
-                )
-                )
+    companion object : EnumElementProvider<DocumentType>(info = info()) {
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = DocumentType.orThrow(name)
     }
 }

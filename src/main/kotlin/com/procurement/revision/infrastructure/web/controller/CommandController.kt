@@ -1,6 +1,5 @@
 package com.procurement.revision.infrastructure.web.controller
 
-import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.service.CommandService
@@ -9,7 +8,6 @@ import com.procurement.revision.infrastructure.utils.tryToNode
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.ApiVersion
 import com.procurement.revision.infrastructure.web.dto.NaN
-import com.procurement.revision.infrastructure.web.dto.errorResponse
 import com.procurement.revision.infrastructure.web.dto.generateResponseOnFailure
 import com.procurement.revision.infrastructure.web.dto.tryGetAction
 import com.procurement.revision.infrastructure.web.dto.tryGetId
@@ -36,54 +34,28 @@ class CommandController(private val commandService: CommandService) {
         if (log.isDebugEnabled)
             log.debug("RECEIVED COMMAND: '$requestBody'.")
 
-        val node = when (val result = requestBody.tryToNode()) {
-            is Result.Success -> result.get
-            is Result.Failure -> {
-                log.debug("Error.", result.error.description)
-                val response = generateResponse(fail = result.error)
-                return ResponseEntity(response, HttpStatus.OK)
-            }
-        }
-        val id = when (val result = node.tryGetId()) {
-            is Result.Success -> result.get
-            is Result.Failure -> {
-                log.debug("Error.", result.error.description)
-                val response = generateResponse(fail = result.error)
-                return ResponseEntity(response, HttpStatus.OK)
-            }
-        }
-        val version = when (val result = node.tryGetVersion()) {
-            is Result.Success -> result.get
-            is Result.Failure -> {
-                log.debug("Error.", result.error.description)
-                val response = generateResponse(fail = result.error, id = id)
-                return ResponseEntity(response, HttpStatus.OK)
-            }
-        }
+        val node = requestBody.tryToNode()
+            .doOnError { error -> generateResponse(fail = error) }
+            .get
 
-        when (val result = node.tryGetAction()) {
-            is Result.Success -> result.get
-            is Result.Failure -> {
-                log.debug("Error.", result.error.description)
-                val response = generateResponse(fail = result.error, id = id, version = version)
-                return ResponseEntity(response, HttpStatus.OK)
-            }
-        }
+        val id = node.tryGetId()
+            .doOnError { error -> generateResponse(fail = error) }
+            .get
 
-        val response = try {
+        val version = node.tryGetVersion()
+            .doOnError { error -> generateResponse(fail = error, id = id) }
+            .get
+
+        node.tryGetAction()
+            .doOnError { error -> generateResponse(fail = error, id = id, version = version) }
+
+        val response =
             commandService.execute(node)
                 .also { response ->
                     if (log.isDebugEnabled)
                         log.debug("RESPONSE (id: '${id}'): '${response.toJson()}'.")
                 }
-        } catch (expected: Exception) {
-            log.debug("Error.", expected)
-            errorResponse(
-                exception = expected,
-                id = id,
-                version = version
-            )
-        }
+
         return ResponseEntity(response, HttpStatus.OK)
     }
 
@@ -91,5 +63,9 @@ class CommandController(private val commandService: CommandService) {
         fail: Fail,
         version: ApiVersion = GlobalProperties.App.apiVersion,
         id: UUID = NaN
-    ) = generateResponseOnFailure(fails = listOf(fail), id = id, version = version)
+    ): ResponseEntity<ApiResponse> {
+        log.debug("Error.", fail)
+        val response = generateResponseOnFailure(fails = listOf(fail), id = id, version = version)
+        return ResponseEntity(response, HttpStatus.OK)
+    }
 }

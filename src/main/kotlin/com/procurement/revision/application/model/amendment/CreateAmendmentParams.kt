@@ -3,6 +3,8 @@ package com.procurement.revision.application.model.amendment
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.functional.Option
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
+import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.amendment.tryAmendmentId
@@ -34,24 +36,27 @@ data class CreateAmendmentParams private constructor(
             owner: String
         ): Result<CreateAmendmentParams, List<DataErrors>> {
 
-            val operationTypeResult = OperationType.tryFromString(operationType)
-            if (operationTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("operationType")))
+            val operationTypeParsed = OperationType.tryFromString(operationType)
+                .doOnError { return failure(listOf(DataErrors.UnknownValue("operationType"))) }
+                .get
 
-            val startDateResult = startDate.tryCreateLocalDateTime()
-            if (startDateResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("startDate")))
+            val startDateParsed = startDate.tryCreateLocalDateTime()
+                .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("startDate"))) }
+                .get
 
-            val ownerResult = owner.tryOwner()
-            if (ownerResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("owner")))
+            val ownerParsed = owner.tryOwner()
+                .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("owner"))) }
+                .get
 
-            return Result.success(
+            return success(
                 CreateAmendmentParams(
                     cpid = cpid,
                     ocid = ocid,
-                    operationType = operationTypeResult.get,
+                    operationType = operationTypeParsed,
                     id = id,
-                    owner = ownerResult.get,
+                    owner = ownerParsed,
                     amendment = amendment,
-                    startDate = startDateResult.get
+                    startDate = startDateParsed
                 )
             )
         }
@@ -72,14 +77,15 @@ data class CreateAmendmentParams private constructor(
                 documents: Option<List<Document>>
             ): Result<Amendment, List<DataErrors>> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return Result.failure(listOf(DataErrors.EmptyArray("amendment.documents")))
+                    return failure(listOf(DataErrors.EmptyArray("amendment.documents")))
 
-                val idResult = id.tryAmendmentId()
-                if (idResult is Result.Failure) return Result.failure(listOf(DataErrors.DataTypeMismatch("amendment.id")))
+                val idParsed = id.tryAmendmentId()
+                    .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("amendment.id"))) }
+                    .get
 
-                return Result.success(
+                return success(
                     Amendment(
-                        id = idResult.get,
+                        id = idParsed,
                         rationale = rationale,
                         description = description,
                         documents = if (documents.isDefined) documents.get else emptyList()
@@ -101,17 +107,20 @@ data class CreateAmendmentParams private constructor(
                     title: String,
                     description: String?
                 ): Result<Document, List<DataErrors>> {
-                    val idResult = id.tryDocumentId()
-                    if (idResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("document.id")))
 
-                    val documentTypeResult = DocumentType.tryFromString(documentType)
-                    if (documentTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("documentType")))
+                    val idParsed = id.tryDocumentId()
+                        .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("document.id"))) }
+                        .get
 
-                    return Result.success(
+                    val documentTypeParsed = DocumentType.tryFromString(documentType)
+                        .doOnError { return failure(listOf(DataErrors.UnknownValue("documentType"))) }
+                        .get
+
+                    return success(
                         Document(
-                            id = idResult.get,
+                            id = idParsed,
                             description = description,
-                            documentType = documentTypeResult.get,
+                            documentType = documentTypeParsed,
                             title = title
                         )
                     )

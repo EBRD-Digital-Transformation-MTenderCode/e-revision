@@ -3,6 +3,8 @@ package com.procurement.revision.application.model.amendment
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.functional.Option
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
+import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.amendment.tryAmendmentId
 import com.procurement.revision.domain.model.document.tryDocumentId
@@ -23,17 +25,18 @@ data class DataValidationParams private constructor(
             operationType: String
         ): Result<DataValidationParams, List<DataErrors>> {
             if (amendments.isEmpty()) {
-                return Result.failure(listOf(DataErrors.EmptyArray("amendments")))
+                return failure(listOf(DataErrors.EmptyArray("amendments")))
             }
 
-            val operationTypeResult = OperationType.tryFromString(operationType)
-            if (operationTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("operationType")))
+            val operationTypeParsed = OperationType.tryFromString(operationType)
+                .doOnError { return failure(listOf(DataErrors.UnknownValue("operationType"))) }
+                .get
 
-            return Result.success(
+            return success(
                 DataValidationParams(
                     cpid = cpid,
                     ocid = ocid,
-                    operationType = operationTypeResult.get,
+                    operationType = operationTypeParsed,
                     amendments = amendments
                 )
             )
@@ -54,14 +57,15 @@ data class DataValidationParams private constructor(
                 documents: Option<List<Document>>
             ): Result<Amendment, List<DataErrors>> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return Result.failure(listOf(DataErrors.EmptyArray("documents")))
+                    return failure(listOf(DataErrors.EmptyArray("documents")))
 
-                val idResult = id.tryAmendmentId()
-                if (idResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("amendment.id")))
+                val idParsed = id.tryAmendmentId()
+                    .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("amendment.id"))) }
+                    .get
 
-                return Result.success(
+                return success(
                     Amendment(
-                        id = idResult.get,
+                        id = idParsed,
                         rationale = rationale,
                         description = description,
                         documents = if (documents.isDefined) documents.get else emptyList()
@@ -92,17 +96,19 @@ data class DataValidationParams private constructor(
                     description: String?
                 ): Result<Document, List<DataErrors>> {
 
-                    val idResult = id.tryDocumentId()
-                    if (idResult.isFail) return Result.failure(listOf(DataErrors.DataTypeMismatch("document.id")))
+                    val idParsed = id.tryDocumentId()
+                        .doOnError { return failure(listOf(DataErrors.DataTypeMismatch("document.id"))) }
+                        .get
 
-                    val documentTypeResult = DocumentType.tryFromString(documentType)
-                    if (documentTypeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("documentType")))
+                    val documentTypeParsed = DocumentType.tryFromString(documentType)
+                        .doOnError { return failure(listOf(DataErrors.UnknownValue("documentType"))) }
+                        .get
 
-                    return Result.success(
+                    return success(
                         Document(
-                            id = idResult.get,
+                            id = idParsed,
                             description = description,
-                            documentType = documentTypeResult.get,
+                            documentType = documentTypeParsed,
                             title = title
                         )
                     )

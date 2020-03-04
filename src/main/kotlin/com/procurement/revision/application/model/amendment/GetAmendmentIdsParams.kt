@@ -4,6 +4,8 @@ import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
+import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 
 data class GetAmendmentIdsParams private constructor(
@@ -23,27 +25,34 @@ data class GetAmendmentIdsParams private constructor(
             cpid: String,
             ocid: String
         ): Result<GetAmendmentIdsParams, List<DataErrors>> {
-            val statusResult = status?.let { AmendmentStatus.tryFromString(it) }
-            if (statusResult != null && statusResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("status")))
 
-            val typeResult = type?.let { AmendmentType.tryFromString(it) }
-            if (typeResult != null && typeResult.isFail) return Result.failure(listOf(DataErrors.UnknownValue("type")))
+            val statusParsed = status
+                ?.let { AmendmentStatus.tryFromString(it) }
+                ?.doOnError { return failure(listOf(DataErrors.UnknownValue("status"))) }
+                ?.get
 
-            val relatesToResult = relatesTo?.let { AmendmentRelatesTo.tryFromString(it) }
-            if (relatesToResult != null && relatesToResult.isFail) return Result.failure(
-                listOf(DataErrors.UnknownValue("relatesTo"))
-            )
+            val typeParsed = type
+                ?.let { AmendmentType.tryFromString(it) }
+                ?.doOnError { return failure(listOf(DataErrors.UnknownValue("type"))) }
+                ?.get
 
-            if (relatedItems != null && relatedItems.isEmpty()) return Result.failure(listOf(DataErrors.EmptyArray("relatedItems")))
+            val relatesToParsed = relatesTo
+                ?.let { AmendmentRelatesTo.tryFromString(it) }
+                ?.doOnError { return failure(listOf(DataErrors.UnknownValue("relatesTo"))) }
+                ?.get
 
-            return Result.success(
+            if (relatedItems != null && relatedItems.isEmpty())
+                return failure(listOf(DataErrors.EmptyArray("relatedItems")))
+            val relatedItemsTransformed = relatedItems?.toList().orEmpty()
+
+            return success(
                 GetAmendmentIdsParams(
                     ocid = ocid,
-                    status = statusResult?.get,
-                    type = typeResult?.get,
-                    relatesTo = relatesToResult?.get,
+                    status = statusParsed,
+                    type = typeParsed,
+                    relatesTo = relatesToParsed,
                     cpid = cpid,
-                    relatedItems = relatedItems?.toList().orEmpty()
+                    relatedItems = relatedItemsTransformed
                 )
             )
         }

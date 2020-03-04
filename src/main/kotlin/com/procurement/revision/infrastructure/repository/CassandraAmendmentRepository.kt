@@ -138,15 +138,9 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                 setString(columnData, entity.toJson())
             }
 
-        return saveAmendment(statements).bind { resultSet ->
+        return load(statements).bind { resultSet ->
             success(resultSet.wasApplied())
         }
-    }
-
-    private fun saveAmendment(statement: BoundStatement): Result<ResultSet, Fail.Incident> = try {
-        success(session.execute(statement))
-    } catch (expected: Exception) {
-        failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 
     fun convert(amendment: Amendment) = AmendmentDataEntity(

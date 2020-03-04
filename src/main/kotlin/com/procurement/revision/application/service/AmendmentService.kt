@@ -10,6 +10,8 @@ import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
+import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.functional.ValidationResult
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.model.amendment.Amendment
@@ -31,16 +33,16 @@ class AmendmentService(
         val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
         val relatedItems = params.relatedItems.toSet()
 
-        return amendments.bind { amendments ->
-            Result.success(amendments.asSequence()
-                               .filter { amendment ->
-                                   testEquals(amendment.status, pattern = params.status)
-                                       && testEquals(amendment.type, pattern = params.type)
-                                       && testEquals(amendment.relatesTo, pattern = params.relatesTo)
-                                       && testContains(amendment.relatedItem, patterns = relatedItems)
-                               }
-                               .map { amendment -> amendment.id }
-                               .toList())
+        return amendments.bind {
+            success(it.asSequence()
+                        .filter { amendment ->
+                            testEquals(amendment.status, pattern = params.status)
+                                && testEquals(amendment.type, pattern = params.type)
+                                && testEquals(amendment.relatesTo, pattern = params.relatesTo)
+                                && testContains(amendment.relatedItem, patterns = relatedItems)
+                        }
+                        .map { amendment -> amendment.id }
+                        .toList())
         }
     }
 
@@ -91,38 +93,27 @@ class AmendmentService(
                     token = generable.generateToken()
                 )
             }
-        val isSaved = amendmentRepository.saveNewAmendment(
+        val isSavedResult = amendmentRepository.saveNewAmendment(
             cpid = params.cpid,
             ocid = params.ocid,
             amendment = createdAmendment
         )
-        return isSaved.bind { isSaved ->
+
+        return isSavedResult.bind { isSaved ->
             if (isSaved) {
-                Result.success(createdAmendment.convertToCreateAmendmentResult())
+                success(createdAmendment.convertToCreateAmendmentResult())
             } else {
                 amendmentRepository.findBy(
                     params.cpid,
                     params.ocid,
                     createdAmendment.id
                 ).bind { amendment ->
-                    if (amendment != null) Result.success(amendment.convertToCreateAmendmentResult())
-                    else Result.failure(DatabaseError.EntityNotFoundError(createdAmendment.id.toString()))
+                    if (amendment != null) success(amendment.convertToCreateAmendmentResult())
+                    else failure(DatabaseError.EntityNotFoundError(createdAmendment.id.toString()))
                 }
             }
         }
     }
-
-/*    return if (isSaved)
-    Result.success(createdAmendment.convertToCreateAmendmentResult())
-    else {
-        Result.success(
-            amendmentRepository.findBy(
-                params.cpid,
-                params.ocid,
-                createdAmendment.id
-            )!!.convertToCreateAmendmentResult()
-        )
-    }*/
 
     private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =

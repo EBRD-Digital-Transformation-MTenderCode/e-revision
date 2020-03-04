@@ -1,7 +1,12 @@
 package com.procurement.revision.infrastructure.repository
 
+import com.datastax.driver.core.BoundStatement
+import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
 import com.procurement.revision.application.repository.HistoryRepository
+import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.asSuccess
+import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.model.entity.HistoryEntity
 import com.procurement.revision.infrastructure.utils.localNowUTC
 import com.procurement.revision.infrastructure.utils.toDate
@@ -45,22 +50,29 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
     private val preparedSaveHistoryCQL = session.prepare(SAVE_HISTORY_CQL)
     private val preparedFindHistoryByCpidAndCommandCQL = session.prepare(FIND_HISTORY_ENTRY_CQL)
 
-    override fun getHistory(operationId: String, command: String): HistoryEntity? {
+    override fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail> {
         val query = preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
                 setString(COMMAND_ID, operationId)
                 setString(COMMAND, command)
             }
-        val row = session.execute(query).one()
-        return if (row != null) HistoryEntity(
-            row.getString(COMMAND_ID),
-            row.getString(COMMAND),
-            row.getTimestamp(COMMAND_DATE),
-            row.getString(JSON_DATA)
-        ) else null
+
+        return load(query)
+            .doOnError { error -> return Result.failure(error) }
+            .get
+            .one()
+            ?.let { row ->
+                HistoryEntity(
+                    row.getString(COMMAND_ID),
+                    row.getString(COMMAND),
+                    row.getTimestamp(COMMAND_DATE),
+                    row.getString(JSON_DATA)
+                )
+            }
+            .asSuccess()
     }
 
-    override fun saveHistory(operationId: String, command: String, result: Any): HistoryEntity {
+    override fun saveHistory(operationId: String, command: String, result: Any): Result<HistoryEntity, Fail> {
         val entity = HistoryEntity(
             operationId = operationId,
             command = command,
@@ -75,7 +87,15 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
                 setTimestamp(COMMAND_DATE, entity.operationDate)
                 setString(JSON_DATA, entity.jsonData)
             }
-        session.execute(insert)
-        return entity
+
+        load(insert).doOnError { error -> return Result.failure(error) }
+
+        return entity.asSuccess()
+    }
+
+    private fun load(statement: BoundStatement): Result<ResultSet, Fail.Incident.DatabaseInteractionIncident> = try {
+        Result.success(session.execute(statement))
+    } catch (expected: Exception) {
+        Result.failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 }

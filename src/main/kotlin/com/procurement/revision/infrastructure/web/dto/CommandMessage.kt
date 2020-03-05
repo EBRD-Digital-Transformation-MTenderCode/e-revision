@@ -1,9 +1,12 @@
 package com.procurement.revision.infrastructure.web.dto
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
+import com.procurement.revision.domain.enums.EnumElementProvider
 import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
@@ -13,26 +16,19 @@ import com.procurement.revision.infrastructure.utils.tryToObject
 import java.time.LocalDateTime
 import java.util.*
 
-enum class CommandType(@JsonValue override val value: String) : Action {
+enum class CommandType(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
 
     GET_AMENDMENTS_IDS("getAmendmentIds"),
     DATA_VALIDATION("dataValidation"),
     CREATE_AMENDMENT("createAmendment");
 
-    companion object {
-        private val elements: Map<String, CommandType> = values().associateBy { it.value.toUpperCase() }
+    override fun toString(): String = key
 
-        fun tryOf(value: String): Result<CommandType, String> {
-            val key = value
-            val enumType = CommandType::class.java.canonicalName
-            val allowedValues = values().joinToString { it.value }
-            return elements[value.toUpperCase()]
-                ?.let { Result.success(it) }
-                ?: Result.failure("Unknown value '$key' for enum type '$enumType'. Allowed values are '$allowedValues'.")
-        }
+    companion object : EnumElementProvider<CommandType>(info = info()) {
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = CommandType.orThrow(name)
     }
-
-    override fun toString() = value
 }
 
 fun generateResponseOnFailure(
@@ -42,15 +38,15 @@ fun generateResponseOnFailure(
 ): ApiResponse =
     when (fails[0]) {
         is Fail.Error ->
-            if (fails[0] is DataErrors) {
+            if (fails[0] is DataErrors.Validation) {
                 ApiDataErrorResponse(
                     version = version,
                     id = id,
-                    result = fails.filterIsInstance<DataErrors>().map { dataError ->
+                    result = fails.filterIsInstance<DataErrors.Validation>().map { dataError ->
                         ApiDataErrorResponse.Error(
                             code = getFullErrorCode(dataError.code),
                             description = dataError.description,
-                            attributeName = dataError.attributeName
+                            attributeName = dataError.name
                         )
                     }
                 )
@@ -96,10 +92,14 @@ val NaN: UUID
 
 fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, DataErrors> {
     val node = get(name) ?: return Result.failure(
-        DataErrors.MissingRequiredAttribute(name)
+        DataErrors.Validation.MissingRequiredAttribute(name)
     )
     if (node is NullNode) return Result.failure(
-        DataErrors.DataTypeMismatch(name)
+        DataErrors.Validation.DataTypeMismatch(
+            name = name,
+            actualType = "null",
+            expectedType = "not null"
+        )
     )
 
     return Result.success(node)
@@ -111,7 +111,11 @@ fun JsonNode.tryGetVersion(): Result<ApiVersion, DataErrors> {
         when (val result = ApiVersion.tryValueOf(it.asText())) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.DataFormatMismatch(name)
+                DataErrors.Validation.DataFormatMismatch(
+                    name = name,
+                    expectedFormat = "00.00.00",
+                    actualValue = it.asText()
+                )
             )
         }
     }
@@ -120,12 +124,13 @@ fun JsonNode.tryGetVersion(): Result<ApiVersion, DataErrors> {
 fun JsonNode.tryGetAction(): Result<CommandType, DataErrors> {
     val name = "action"
     return tryGetAttribute(name).bind { action ->
-        when (val result = CommandType.tryOf(action.asText())) {
-            is Result.Success -> result
-            is Result.Failure -> Result.failure(
-                DataErrors.UnknownValue(name)
+        CommandType.orNull(action.asText())?.asSuccess<CommandType, DataErrors>() ?: Result.failure(
+            DataErrors.Validation.UnknownValue(
+                name = name,
+                actualValue = action.asText(),
+                expectedValues = CommandType.allowedValues
             )
-        }
+        )
     }
 }
 
@@ -135,7 +140,7 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.DataTypeMismatch(name)
+                DataErrors.Parsing("Error parsing '$name'")
             )
         }
     }
@@ -147,7 +152,11 @@ fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
         when (val result = it.asText().tryUUID()) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.DataFormatMismatch(name)
+                DataErrors.Validation.DataFormatMismatch(
+                    name = name,
+                    actualValue = it.asText(),
+                    expectedFormat = "uuid"
+                )
             )
         }
     }

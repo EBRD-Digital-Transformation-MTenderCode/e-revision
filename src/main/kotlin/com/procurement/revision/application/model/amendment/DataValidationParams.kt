@@ -25,12 +25,18 @@ class DataValidationParams private constructor(
             operationType: String
         ): Result<DataValidationParams, List<DataErrors>> {
             if (amendments.isEmpty()) {
-                return failure(listOf(DataErrors.EmptyArray("amendments")))
+                return failure(listOf(DataErrors.Validation.EmptyArray("amendments")))
             }
 
-            val operationTypeParsed = OperationType.tryOf(operationType)
-                .doOnError { return failure(listOf(DataErrors.UnknownValue("operationType"))) }
-                .get
+            val operationTypeParsed = OperationType.orNull(operationType) ?: return failure(
+                listOf(
+                    DataErrors.Validation.UnknownValue(
+                        name = "operationType",
+                        expectedValues = OperationType.allowedValues,
+                        actualValue = operationType
+                    )
+                )
+            )
 
             return success(
                 DataValidationParams(
@@ -57,10 +63,20 @@ class DataValidationParams private constructor(
                 documents: Option<List<Document>>
             ): Result<Amendment, List<DataErrors>> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return failure(listOf(DataErrors.EmptyArray("documents")))
+                    return failure(listOf(DataErrors.Validation.EmptyArray("documents")))
 
                 val idParsed = id.tryAmendmentId()
-                    .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("amendment.id"))) }
+                    .doOnError {
+                        return failure(
+                            listOf(
+                                DataErrors.Validation.DataFormatMismatch(
+                                    name = "amendment.id",
+                                    expectedFormat = "uuid",
+                                    actualValue = id
+                                )
+                            )
+                        )
+                    }
                     .get
 
                 return success(
@@ -97,12 +113,28 @@ class DataValidationParams private constructor(
                 ): Result<Document, List<DataErrors>> {
 
                     val idParsed = id.tryDocumentId()
-                        .doOnError { return failure(listOf(DataErrors.DataFormatMismatch("document.id"))) }
+                        .doOnError {
+                            return failure(
+                                listOf(
+                                    DataErrors.Validation.DataFormatMismatch(
+                                        name = "document.id",
+                                        actualValue = "string",
+                                        expectedFormat = "string"
+                                    )
+                                )
+                            )
+                        }
                         .get
 
-                    val documentTypeParsed = DocumentType.tryOf(documentType)
-                        .doOnError { return failure(listOf(DataErrors.UnknownValue("documentType"))) }
-                        .get
+                    val documentTypeParsed = DocumentType.orNull(documentType) ?: return failure(
+                        listOf(
+                            DataErrors.Validation.UnknownValue(
+                                name = "documentType",
+                                actualValue = documentType,
+                                expectedValues = DocumentType.allowedValues
+                            )
+                        )
+                    )
 
                     return success(
                         Document(

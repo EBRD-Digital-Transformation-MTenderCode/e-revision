@@ -27,22 +27,46 @@ class GetAmendmentIdsParams private constructor(
         ): Result<GetAmendmentIdsParams, List<DataErrors>> {
 
             val statusParsed = status
-                ?.let { AmendmentStatus.tryOf(it) }
-                ?.doOnError { return failure(listOf(DataErrors.UnknownValue("status"))) }
-                ?.get
+                ?.let {
+                    AmendmentStatus.orNull(it) ?: return failure(
+                        listOf(
+                            DataErrors.Validation.UnknownValue(
+                                name = "status",
+                                expectedValues = AmendmentStatus.allowedValues,
+                                actualValue = status
+                            )
+                        )
+                    )
+                }
 
             val typeParsed = type
-                ?.let { AmendmentType.tryOf(it) }
-                ?.doOnError { return failure(listOf(DataErrors.UnknownValue("type"))) }
-                ?.get
+                ?.let {
+                    AmendmentType.orNull(it) ?: return failure(
+                        listOf(
+                            DataErrors.Validation.UnknownValue(
+                                name = "type",
+                                actualValue = type,
+                                expectedValues = AmendmentType.allowedValues
+                            )
+                        )
+                    )
+                }
 
             val relatesToParsed = relatesTo
-                ?.let { AmendmentRelatesTo.tryOf(it) }
-                ?.doOnError { return failure(listOf(DataErrors.UnknownValue("relatesTo"))) }
-                ?.get
+                ?.let {
+                    AmendmentRelatesTo.orNull(it) ?: return failure(
+                        listOf(
+                            DataErrors.Validation.UnknownValue(
+                                name = "relatesTo",
+                                expectedValues = AmendmentRelatesTo.allowedValues,
+                                actualValue = relatesTo
+                            )
+                        )
+                    )
+                }
 
             if (relatedItems != null && relatedItems.isEmpty())
-                return failure(listOf(DataErrors.EmptyArray("relatedItems")))
+                return failure(listOf(DataErrors.Validation.EmptyArray("relatedItems")))
             val relatedItemsTransformed = relatedItems?.toList().orEmpty()
 
             return success(

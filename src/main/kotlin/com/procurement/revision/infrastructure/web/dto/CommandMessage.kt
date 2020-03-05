@@ -95,10 +95,13 @@ val NaN: UUID
     get() = UUID(0, 0)
 
 fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, DataErrors> {
-    val node = get(name)
-    if (node == null || node is NullNode) return Result.failure(
-        DataErrors.MissingRequiredAttribute("$name is absent")
+    val node = get(name) ?: return Result.failure(
+        DataErrors.MissingRequiredAttribute(name)
     )
+    if (node is NullNode) return Result.failure(
+        DataErrors.DataTypeMismatch(name)
+    )
+
     return Result.success(node)
 }
 

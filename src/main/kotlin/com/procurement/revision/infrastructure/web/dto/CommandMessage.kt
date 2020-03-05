@@ -74,9 +74,9 @@ fun generateResponseOnFailure(
                     date = LocalDateTime.now(),
                     id = UUID.randomUUID(),
                     service = ApiIncidentResponse.Incident.Service(
-                        id = GlobalProperties.serviceId,
-                        version = GlobalProperties.App.apiVersion,
-                        name = GlobalProperties.serviceName
+                        id = GlobalProperties.service.id,
+                        version = GlobalProperties.service.version,
+                        name = GlobalProperties.service.name
                     ),
                     errors = fails.filterIsInstance<Fail.Incident>().map { incident ->
                         ApiIncidentResponse.Incident.Error(
@@ -89,7 +89,7 @@ fun generateResponseOnFailure(
             )
     }
 
-fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties.serviceId}"
+fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties.service.id}"
 
 val NaN: UUID
     get() = UUID(0, 0)

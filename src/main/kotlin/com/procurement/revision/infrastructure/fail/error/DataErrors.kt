@@ -6,7 +6,7 @@ sealed class DataErrors(numberError: String, override val description: String) :
 
     override val code: String = prefix + numberError
 
-    class Parsing(description: String) : DataErrors(numberError = "0", description = description)
+    class Parsing(description: String = "Invalid json") : DataErrors(numberError = "0", description = description)
 
     sealed class Validation(numberError: String, val name: String, description: String) :
         DataErrors(numberError = numberError, description = description) {
@@ -28,10 +28,10 @@ sealed class DataErrors(numberError: String, override val description: String) :
                 name = name
             )
 
-        class DataFormatMismatch(name: String, expectedFormat: String, actualFormat: String) :
+        class DataFormatMismatch(name: String, expectedFormat: String, actualValue: String) :
             Validation(
                 numberError = "4",
-                description = "Data format mismatch. Expected data format: '$expectedFormat', actual data format: '$actualFormat'.",
+                description = "Data format mismatch. Expected data format: '$expectedFormat', actual value: '$actualValue'.",
                 name = name
             )
 

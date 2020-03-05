@@ -16,7 +16,7 @@ import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
 import java.time.LocalDateTime
 
-data class CreateAmendmentParams private constructor(
+class CreateAmendmentParams private constructor(
     val amendment: Amendment,
     val id: String,
     val operationType: OperationType,

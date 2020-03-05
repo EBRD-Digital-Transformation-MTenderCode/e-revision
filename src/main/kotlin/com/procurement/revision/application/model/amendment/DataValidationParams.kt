@@ -11,7 +11,7 @@ import com.procurement.revision.domain.model.document.tryDocumentId
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
 
-data class DataValidationParams private constructor(
+class DataValidationParams private constructor(
     val amendments: List<Amendment>,
     val cpid: String,
     val ocid: String,

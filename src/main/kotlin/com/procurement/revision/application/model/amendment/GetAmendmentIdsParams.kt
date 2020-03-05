@@ -8,7 +8,7 @@ import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 
-data class GetAmendmentIdsParams private constructor(
+class GetAmendmentIdsParams private constructor(
     val status: AmendmentStatus?,
     val type: AmendmentType?,
     val relatesTo: AmendmentRelatesTo?,

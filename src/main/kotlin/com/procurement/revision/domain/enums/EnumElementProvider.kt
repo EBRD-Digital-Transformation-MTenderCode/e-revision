@@ -20,7 +20,7 @@ abstract class EnumElementProvider<T>(val info: EnumInfo<T>) where T : Enum<T>,
 
     private val elements: Map<String, T> = info.values.associateBy { it.key.toUpperCase() }
 
-    val allowedValues: Array<T> = info.values
+    val allowedValues: List<String> = info.values.map { it.key }
 
     fun orNull(key: String): T? = elements[key.toUpperCase()]
 

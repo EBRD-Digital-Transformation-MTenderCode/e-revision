@@ -24,7 +24,7 @@ abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiRe
         return when (val result = execute(node)) {
             is Result.Success -> {
                 if (log.isDebugEnabled)
-                    log.debug("${action.value} has been executed. Result: ${result.get.toJson()}")
+                    log.debug("${action.key} has been executed. Result: ${result.get.toJson()}")
                 return ApiSuccessResponse(version = version, id = id, result = result.get)
             }
             is Result.Failure -> generateResponseOnFailure(result.error, version, id)

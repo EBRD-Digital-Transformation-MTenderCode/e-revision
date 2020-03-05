@@ -23,7 +23,7 @@ abstract class AbstractValidationHandler<ACTION : Action, E : Fail> : Handler<AC
         return when (val result = execute(node)) {
             is ValidationResult.Ok -> {
                 if (log.isDebugEnabled)
-                    log.debug("${action.value} has been executed.")
+                    log.debug("${action.key} has been executed.")
                 ApiSuccessResponse(version = version, id = id)
             }
             is ValidationResult.Fail -> generateResponseOnFailure(result.error, version, id)

@@ -323,7 +323,7 @@ internal class AmendmentServiceTest {
 
         @Test
         fun successForLotCancellation() {
-            val params = createAmendmentParams().copy(operationType = OperationType.LOT_CANCELLATION)
+            val params = createAmendmentParams(operationType = OperationType.LOT_CANCELLATION)
 
             val token = UUID.randomUUID()
 
@@ -372,7 +372,7 @@ internal class AmendmentServiceTest {
 
         @Test
         fun successGetAmendmentFromHistory() {
-            val params = createAmendmentParams().copy(operationType = OperationType.LOT_CANCELLATION)
+            val params = createAmendmentParams(operationType = OperationType.LOT_CANCELLATION)
 
             val token = UUID.randomUUID()
 
@@ -417,12 +417,12 @@ internal class AmendmentServiceTest {
             assertEquals(expected, actual)
         }
 
-        private fun createAmendmentParams(): CreateAmendmentParams {
+        private fun createAmendmentParams(operationType: OperationType = OperationType.TENDER_CANCELLATION): CreateAmendmentParams {
             return CreateAmendmentParams.tryCreate(
                 id = UUID.randomUUID().toString(),
                 cpid = "cpid",
                 ocid = "ocid",
-                operationType = OperationType.TENDER_CANCELLATION.toString(),
+                operationType = operationType.toString(),
                 owner = "owner",
                 startDate = "2019-10-04T15:51:23Z",
                 amendment = CreateAmendmentParams.Amendment.tryCreate(

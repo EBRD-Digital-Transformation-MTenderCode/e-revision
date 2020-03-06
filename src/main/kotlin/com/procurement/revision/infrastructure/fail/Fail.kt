@@ -32,6 +32,18 @@ sealed class Fail {
             description = "Database consistency incident. $message"
         )
 
+        class ParseFromDatabaseIncident(jsonData: String) : Incident(
+            level = Level.ERROR,
+            number = "3",
+            description = "Could not parse data '$jsonData' stored in database. "
+        )
+
+        class DatabaseIncident : Incident(
+            level = Level.ERROR,
+            number = "4",
+            description = "Could not process data from database. "
+        )
+
         enum class Level(override val key: String) : EnumElementProvider.Key {
             ERROR("error"),
             WARNING("warning"),

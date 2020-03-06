@@ -8,11 +8,10 @@ import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.amendment.tryAmendmentId
+import com.procurement.revision.domain.model.date.tryParse
 import com.procurement.revision.domain.model.document.DocumentId
 import com.procurement.revision.domain.model.document.tryDocumentId
 import com.procurement.revision.domain.model.tryOwner
-import com.procurement.revision.domain.util.extension.tryCreateLocalDateTime
-import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
 import java.time.LocalDateTime
@@ -47,14 +46,14 @@ class CreateAmendmentParams private constructor(
                 )
             )
 
-            val startDateParsed = startDate.tryCreateLocalDateTime()
-                .doOnError {
+            val startDateParsed = startDate.tryParse()
+                .doOnError {expectedFormat->
                     return failure(
                         listOf(
                             DataErrors.Validation.DataFormatMismatch(
                                 name = "startDate",
                                 actualValue = startDate,
-                                expectedFormat = JsonDateTimeFormatter.formatPattern
+                                expectedFormat = expectedFormat
                             )
                         )
                     )

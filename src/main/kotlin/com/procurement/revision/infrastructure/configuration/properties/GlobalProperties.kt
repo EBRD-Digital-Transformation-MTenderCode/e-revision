@@ -1,5 +1,8 @@
 package com.procurement.revision.infrastructure.configuration.properties
 
+import com.procurement.revision.infrastructure.io.getResourcePath
+import com.procurement.revision.infrastructure.io.load
+import com.procurement.revision.infrastructure.io.orThrow
 import com.procurement.revision.infrastructure.web.dto.ApiVersion
 import java.util.*
 
@@ -10,20 +13,15 @@ object GlobalProperties {
         val apiVersion = ApiVersion(major = 1, minor = 0, patch = 0)
     }
 
-    class Service(
-        val id: String = "21",
-        val name: String = "e-revision",
-        val version: String = getGitProperties()
-    )
-    private fun getGitProperties():String {
-        val prop = Properties()
-        val loader = Thread.currentThread().contextClassLoader
-        val stream = loader.getResourceAsStream("git.properties")
-        if (stream != null) {
-            prop.load(stream)
-            return prop.getProperty("git.commit.id.abbrev")
-        } else {
-            throw RuntimeException("Unable to find git.commit.id.abbrev")
+    class Service {
+        val id: String = "21"
+        val name: String = "e-revision"
+        val version: String = loadVersion()
+
+        private fun loadVersion(): String {
+            val pathToFile = this.javaClass.getResourcePath("git.properties")
+            val gitProps: Properties = Properties().load(pathToFile = pathToFile)
+            return gitProps.orThrow("git.commit.id.abbrev")
         }
     }
 }

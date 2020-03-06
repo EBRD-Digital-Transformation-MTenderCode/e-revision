@@ -104,9 +104,9 @@ class AmendmentService(
                 success(createdAmendment.convertToCreateAmendmentResult())
             } else {
                 amendmentRepository.findBy(
-                    params.cpid,
-                    params.ocid,
-                    createdAmendment.id
+                    cpid = params.cpid,
+                    ocid = params.ocid,
+                    id = createdAmendment.id
                 ).bind { amendment ->
                     if (amendment != null) success(amendment.convertToCreateAmendmentResult())
                     else failure(DatabaseConsistencyIncident("Could not find ${createdAmendment.id}"))

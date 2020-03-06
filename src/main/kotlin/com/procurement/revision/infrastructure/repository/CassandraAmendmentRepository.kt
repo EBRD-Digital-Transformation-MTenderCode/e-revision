@@ -15,7 +15,7 @@ import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
 import com.procurement.revision.infrastructure.utils.toJson
-import com.procurement.revision.infrastructure.utils.toObject
+import com.procurement.revision.infrastructure.utils.tryToObject
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -70,7 +70,11 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         return load(query)
             .doOnError { error -> return failure(error) }
             .get
-            .map { row -> converter(row = row) }
+            .map { row ->
+                converter(row = row)
+                    .doOnError { error -> return failure(error) }
+                    .get
+            }
             .asSuccess()
     }
 
@@ -87,6 +91,8 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             .get
             .one()
             ?.let { row -> converter(row = row) }
+            ?.doOnError { error -> return failure(error) }
+            ?.get
             .asSuccess()
     }
 
@@ -96,9 +102,12 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 
-    private fun converter(row: Row): Amendment {
-        val entity = row.getString(columnData)
-            .toObject(AmendmentDataEntity::class.java)
+    private fun converter(row: Row): Result<Amendment, Fail> {
+        val data = row.getString(columnData)
+        val entity = data
+            .tryToObject(AmendmentDataEntity::class.java)
+            .doOnError { return failure(Fail.Incident.ParseFromDatabaseIncident(data)) }
+            .get
 
         val token = entity.token
         val owner = entity.owner
@@ -125,7 +134,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                     }
                     .orEmpty()
             )
-        }
+        }.asSuccess()
     }
 
     override fun saveNewAmendment(cpid: String, ocid: String, amendment: Amendment): Result<Boolean, Fail> {

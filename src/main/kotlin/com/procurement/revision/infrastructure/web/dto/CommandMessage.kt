@@ -37,53 +37,71 @@ fun generateResponseOnFailure(
     id: UUID
 ): ApiResponse =
     when (fails[0]) {
-        is Fail.Error ->
-            if (fails[0] is DataErrors.Validation) {
-                ApiDataErrorResponse(
-                    version = version,
-                    id = id,
-                    result = fails.filterIsInstance<DataErrors.Validation>().map { dataError ->
-                        ApiDataErrorResponse.Error(
-                            code = getFullErrorCode(dataError.code),
-                            description = dataError.description,
-                            attributeName = dataError.name
-                        )
-                    }
-                )
-            } else {
-                ApiFailResponse(
-                    version = version,
-                    id = id,
-                    result = fails.filterIsInstance<Fail.Error>().map { error ->
-                        ApiFailResponse.Error(
-                            code = getFullErrorCode(error.code),
-                            description = error.description
-                        )
-                    }
-                )
-            }
-        is Fail.Incident ->
-            ApiIncidentResponse(
+        is DataErrors.Validation ->
+            ApiDataErrorResponse(
                 version = version,
                 id = id,
-                result = ApiIncidentResponse.Incident(
-                    date = LocalDateTime.now(),
-                    id = UUID.randomUUID(),
-                    service = ApiIncidentResponse.Incident.Service(
-                        id = GlobalProperties.service.id,
-                        version = GlobalProperties.service.version,
-                        name = GlobalProperties.service.name
-                    ),
-                    errors = fails.filterIsInstance<Fail.Incident>().map { incident ->
-                        ApiIncidentResponse.Incident.Error(
-                            code = getFullErrorCode(incident.code),
-                            description = incident.description,
-                            metadata = null
-                        )
-                    }
+                result = fails.filterIsInstance<DataErrors.Validation>().map { dataError ->
+                    ApiDataErrorResponse.Error(
+                        code = getFullErrorCode(dataError.code),
+                        description = dataError.description,
+                        attributeName = dataError.name
+                    )
+                }
+            )
+        is Fail.Error ->
+            ApiFailResponse(
+                version = version,
+                id = id,
+                result = fails.filterIsInstance<Fail.Error>().map { error ->
+                    ApiFailResponse.Error(
+                        code = getFullErrorCode(error.code),
+                        description = error.description
+                    )
+                }
+            )
+
+        is Fail.Incident.ParseFromDatabaseIncident -> {
+            val incidentToReturn = Fail.Incident.DatabaseIncident()
+            val errors = listOf(
+                ApiIncidentResponse.Incident.Error(
+                    code = getFullErrorCode(incidentToReturn.code),
+                    description = incidentToReturn.description,
+                    metadata = null
                 )
             )
+            generateIncident(errors, version, id)
+        }
+        is Fail.Incident -> {
+            val errors = fails.filterIsInstance<Fail.Incident>().map { incident ->
+                ApiIncidentResponse.Incident.Error(
+                    code = getFullErrorCode(incident.code),
+                    description = incident.description,
+                    metadata = null
+                )
+            }
+            generateIncident(errors, version, id)
+        }
+
     }
+
+private fun generateIncident(
+    errors: List<ApiIncidentResponse.Incident.Error>, version: ApiVersion, id: UUID
+): ApiIncidentResponse =
+    ApiIncidentResponse(
+        version = version,
+        id = id,
+        result = ApiIncidentResponse.Incident(
+            date = LocalDateTime.now(),
+            id = UUID.randomUUID(),
+            service = ApiIncidentResponse.Incident.Service(
+                id = GlobalProperties.service.id,
+                version = GlobalProperties.service.version,
+                name = GlobalProperties.service.name
+            ),
+            errors = errors
+        )
+    )
 
 fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties.service.id}"
 

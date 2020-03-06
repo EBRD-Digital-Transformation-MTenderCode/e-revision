@@ -18,7 +18,7 @@ import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.fail.error.DatabaseError
+import com.procurement.revision.infrastructure.fail.Fail.Incident.DatabaseConsistencyIncident
 import com.procurement.revision.infrastructure.fail.error.ValidationError
 import com.procurement.revision.infrastructure.model.OperationType
 import org.springframework.stereotype.Service
@@ -109,7 +109,7 @@ class AmendmentService(
                     createdAmendment.id
                 ).bind { amendment ->
                     if (amendment != null) success(amendment.convertToCreateAmendmentResult())
-                    else failure(DatabaseError.EntityNotFoundError(createdAmendment.id.toString()))
+                    else failure(DatabaseConsistencyIncident("Could not find ${createdAmendment.id}"))
                 }
             }
         }

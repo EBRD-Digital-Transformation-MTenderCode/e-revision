@@ -5,7 +5,7 @@ import com.procurement.revision.application.repository.HistoryRepository
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.utils.toJson
-import com.procurement.revision.infrastructure.utils.toObject
+import com.procurement.revision.infrastructure.utils.tryToObject
 import com.procurement.revision.infrastructure.web.dto.Action
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
@@ -27,10 +27,18 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
         val version = node.tryGetVersion().get
 
         val history = historyRepository.getHistory(id.toString(), action.key)
-            .doOnError { error ->  return generateResponseOnFailure(listOf(error), version, id)}
+            .doOnError { error -> return generateResponseOnFailure(listOf(error), version, id) }
             .get
         if (history != null) {
-            val result = history.jsonData.toObject(target)
+            val data = history.jsonData
+            val result = data.tryToObject(target)
+                .doOnError {
+                    return generateResponseOnFailure(
+                        fails = listOf(Fail.Incident.ParseFromDatabaseIncident(data)),
+                        id = id,
+                        version = version
+                    )
+                }.get
             return ApiSuccessResponse(version = version, id = id, result = result)
         }
 

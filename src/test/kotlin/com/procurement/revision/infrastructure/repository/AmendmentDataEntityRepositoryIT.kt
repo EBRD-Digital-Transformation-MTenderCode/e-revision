@@ -20,7 +20,7 @@ import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.revision.infrastructure.configuration.DatabaseTestConfiguration
-import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
+import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
 import com.procurement.revision.json.toJson
 import org.hamcrest.CoreMatchers.`is`
@@ -29,9 +29,9 @@ import org.hamcrest.CoreMatchers.not
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.collection.IsEmptyCollection.empty
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
@@ -53,6 +53,7 @@ class AmendmentDataEntityRepositoryIT {
         private const val KEYSPACE = "revision"
         private const val TABLE_NAME = "amendments"
         private const val COLUMN_CPID = "cpid"
+        private const val COLUMN_OCID = "ocid"
         private const val COLUMN_ID = "id"
         private const val COLUMN_DATA = "data"
     }
@@ -92,11 +93,10 @@ class AmendmentDataEntityRepositoryIT {
     fun findBy() {
         insertAmendment()
 
-        val actualAmendments: List<Amendment> = amendmentRepository.findBy(cpid = CPID, ocid = OCID).get
+        val actualAmendments = amendmentRepository.findBy(cpid = CPID, ocid = OCID).get
 
         assertThat(actualAmendments, `is`(not(empty<Amendment>())))
         assertThat(actualAmendments, hasItem(stubAmendment()))
-//        assertEquals(listOf(stubAmendment()), actualAmendments)
     }
 
     @Test
@@ -111,9 +111,10 @@ class AmendmentDataEntityRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        assertThrows<DatabaseInteractionException> {
-            amendmentRepository.saveNewAmendment(CPID, OCID, stubAmendment())
-        }
+        val actual = amendmentRepository.saveNewAmendment(CPID, OCID, stubAmendment())
+
+        assertTrue(actual.isFail)
+        assertTrue(actual.error is Fail.Incident.DatabaseInteractionIncident)
     }
 
     @Test
@@ -122,12 +123,18 @@ class AmendmentDataEntityRepositoryIT {
             .whenever(session)
             .execute(any<BoundStatement>())
 
-        assertThrows<DatabaseInteractionException> { amendmentRepository.findBy(CPID, OCID) }
+        val actual = amendmentRepository.findBy(CPID, OCID)
+
+        assertTrue(actual.isFail)
+        assertTrue(actual.error is Fail.Incident.DatabaseInteractionIncident)
+
     }
 
     private fun createKeyspace() {
-        session.execute("CREATE KEYSPACE $KEYSPACE " +
-                            "WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};")
+        session.execute(
+            "CREATE KEYSPACE $KEYSPACE " +
+                "WITH replication = {'class' : 'SimpleStrategy', 'replication_factor' : 1};"
+        )
     }
 
     private fun dropKeyspace() {
@@ -140,9 +147,10 @@ class AmendmentDataEntityRepositoryIT {
                 CREATE TABLE IF NOT EXISTS revision.amendments
                     (
                         cpid      text,
+                        ocid      text, 
                         id        uuid,
                         data      text,
-                        primary key (cpid, id)
+                        primary key (cpid, ocid, id)
                     );
             """
         )
@@ -150,12 +158,14 @@ class AmendmentDataEntityRepositoryIT {
 
     private fun insertAmendment(
         cpid: String = CPID,
-        id: UUID = ID
+        id: UUID = ID,
+        ocid: String = OCID
     ) {
 
         val entity = convert(stubAmendment())
         val record = QueryBuilder.insertInto(KEYSPACE, TABLE_NAME)
             .value(COLUMN_CPID, cpid)
+            .value(COLUMN_OCID, ocid)
             .value(COLUMN_ID, id)
             .value(COLUMN_DATA, entity.toJson())
         session.execute(record)

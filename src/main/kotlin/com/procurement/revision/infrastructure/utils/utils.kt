@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.revision.domain.functional.Result
-import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.revision.infrastructure.bind.jackson.configuration
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import java.io.IOException
@@ -20,10 +19,6 @@ private object JsonMapper {
 }
 
 /*Date utils*/
-fun String.toLocal(): LocalDateTime {
-    return LocalDateTime.parse(this, JsonDateTimeFormatter.formatter)
-}
-
 fun LocalDateTime.toDate(): Date {
     return Date.from(this.toInstant(ZoneOffset.UTC))
 }

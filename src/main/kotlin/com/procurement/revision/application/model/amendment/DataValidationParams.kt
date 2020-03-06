@@ -118,7 +118,7 @@ class DataValidationParams private constructor(
                                 listOf(
                                     DataErrors.Validation.DataFormatMismatch(
                                         name = "document.id",
-                                        actualValue = "string",
+                                        actualValue = id,
                                         expectedFormat = "string"
                                     )
                                 )

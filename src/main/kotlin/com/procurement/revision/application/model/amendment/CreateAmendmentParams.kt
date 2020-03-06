@@ -12,6 +12,7 @@ import com.procurement.revision.domain.model.document.DocumentId
 import com.procurement.revision.domain.model.document.tryDocumentId
 import com.procurement.revision.domain.model.tryOwner
 import com.procurement.revision.domain.util.extension.tryCreateLocalDateTime
+import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
 import java.time.LocalDateTime
@@ -53,7 +54,7 @@ class CreateAmendmentParams private constructor(
                             DataErrors.Validation.DataFormatMismatch(
                                 name = "startDate",
                                 actualValue = startDate,
-                                expectedFormat = "YYYY-MM-DD'T'HH:mm:ss'Z'"
+                                expectedFormat = JsonDateTimeFormatter.formatPattern
                             )
                         )
                     )

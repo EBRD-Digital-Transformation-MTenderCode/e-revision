@@ -17,6 +17,6 @@ fun String.tryUUID(): Result<UUID, String> =
         Result.success(UUID.fromString(this))
     } catch (ex: Exception) {
         Result.failure(
-            "Could not parse ${this} to UUID type. ${ex.message}"
+            "Could not parse $this to UUID type. ${ex.message}"
         )
     }

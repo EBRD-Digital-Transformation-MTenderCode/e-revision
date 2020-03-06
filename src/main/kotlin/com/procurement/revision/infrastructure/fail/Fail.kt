@@ -29,7 +29,7 @@ sealed class Fail {
         class DatabaseConsistencyIncident(message: String) : Incident(
             level = Level.ERROR,
             number = "2",
-            description = "Database consistency incident. ${message}"
+            description = "Database consistency incident. $message"
         )
 
         enum class Level(override val key: String) : EnumElementProvider.Key {

@@ -37,50 +37,56 @@ fun generateResponseOnFailure(
     id: UUID
 ): ApiResponse =
     when (fail) {
-        is DataErrors.Validation ->
-            ApiDataErrorResponse(
-                version = version,
-                id = id,
-                result = listOf(
-                    ApiDataErrorResponse.Error(
-                        code = getFullErrorCode(fail.code),
-                        description = fail.description,
-                        attributeName = fail.name
+        is Fail.Error -> {
+            when (fail) {
+                is DataErrors.Validation ->
+                    ApiDataErrorResponse(
+                        version = version,
+                        id = id,
+                        result = listOf(
+                            ApiDataErrorResponse.Error(
+                                code = getFullErrorCode(fail.code),
+                                description = fail.description,
+                                attributeName = fail.name
+                            )
+                        )
+                    )
+                else -> ApiFailResponse(
+                    version = version,
+                    id = id,
+                    result = listOf(
+                        ApiFailResponse.Error(
+                            code = getFullErrorCode(fail.code),
+                            description = fail.description
+                        )
                     )
                 )
-            )
-        is Fail.Error ->
-            ApiFailResponse(
-                version = version,
-                id = id,
-                result = listOf(
-                    ApiFailResponse.Error(
-                        code = getFullErrorCode(fail.code),
-                        description = fail.description
-                    )
-                )
-            )
-
-        is Fail.Incident.ParseFromDatabaseIncident -> {
-            val incidentToReturn = Fail.Incident.DatabaseIncident()
-            val errors = listOf(
-                ApiIncidentResponse.Incident.Details(
-                    code = getFullErrorCode(incidentToReturn.code),
-                    description = incidentToReturn.description,
-                    metadata = null
-                )
-            )
-            generateIncident(errors, version, id)
+            }
         }
         is Fail.Incident -> {
-            val errors = listOf(
-                ApiIncidentResponse.Incident.Details(
-                    code = getFullErrorCode(fail.code),
-                    description = fail.description,
-                    metadata = null
-                )
-            )
-            generateIncident(errors, version, id)
+            when (fail) {
+                is Fail.Incident.ParseFromDatabaseIncident -> {
+                    val incidentToReturn = Fail.Incident.DatabaseIncident()
+                    val errors = listOf(
+                        ApiIncidentResponse.Incident.Details(
+                            code = getFullErrorCode(incidentToReturn.code),
+                            description = incidentToReturn.description,
+                            metadata = null
+                        )
+                    )
+                    generateIncident(errors, version, id)
+                }
+                else -> {
+                    val errors = listOf(
+                        ApiIncidentResponse.Incident.Details(
+                            code = getFullErrorCode(fail.code),
+                            description = fail.description,
+                            metadata = null
+                        )
+                    )
+                    generateIncident(errors, version, id)
+                }
+            }
         }
 
     }

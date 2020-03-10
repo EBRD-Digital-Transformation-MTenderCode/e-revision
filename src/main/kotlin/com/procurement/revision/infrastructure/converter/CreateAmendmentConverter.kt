@@ -9,7 +9,7 @@ import com.procurement.revision.domain.util.extension.mapOptionalResult
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.web.dto.request.amendment.CreateAmendmentRequest
 
-fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, List<DataErrors>> {
+fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, DataErrors> {
     val amendment = this.amendment
         .convert()
         .doOnError { error -> return failure(error) }
@@ -26,7 +26,7 @@ fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, List<DataErr
     )
 }
 
-private fun CreateAmendmentRequest.Amendment.convert(): Result<CreateAmendmentParams.Amendment, List<DataErrors>> {
+private fun CreateAmendmentRequest.Amendment.convert(): Result<CreateAmendmentParams.Amendment, DataErrors> {
     val documents = this.documents
         .mapOptionalResult { it.convert() }
         .doOnError { error -> return failure(error) }

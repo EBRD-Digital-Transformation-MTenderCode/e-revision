@@ -17,15 +17,15 @@ class GetAmendmentIdsHandler(private val amendmentService: AmendmentService) : A
 
     override val action: CommandType = CommandType.GET_AMENDMENTS_IDS
 
-    override fun execute(node: JsonNode): Result<List<AmendmentId>, List<Fail>> {
+    override fun execute(node: JsonNode): Result<List<AmendmentId>, Fail> {
         val params = node
             .tryGetParams(GetAmendmentIdsRequest::class.java)
-            .doOnError { error -> return failure(listOf(error)) }
+            .doOnError { error -> return failure(error) }
             .get
             .convert()
             .doOnError { error -> return failure(error) }
             .get
 
-        return amendmentService.getAmendmentIdsBy(params).mapError { fail -> listOf(fail) }
+        return amendmentService.getAmendmentIdsBy(params)
     }
 }

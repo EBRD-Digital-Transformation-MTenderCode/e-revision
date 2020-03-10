@@ -34,27 +34,24 @@ class CreateAmendmentParams private constructor(
             cpid: String,
             ocid: String,
             owner: String
-        ): Result<CreateAmendmentParams, List<DataErrors>> {
+        ): Result<CreateAmendmentParams, DataErrors> {
 
-            val operationTypeParsed = OperationType.orNull(operationType) ?: return failure(
-                listOf(
+            val operationTypeParsed = OperationType.orNull(operationType)
+                ?: return failure(
                     DataErrors.Validation.UnknownValue(
                         name = "operationType",
                         actualValue = operationType,
                         expectedValues = OperationType.allowedValues
                     )
                 )
-            )
 
             val startDateParsed = startDate.tryParse()
-                .doOnError {expectedFormat->
+                .doOnError { expectedFormat ->
                     return failure(
-                        listOf(
-                            DataErrors.Validation.DataFormatMismatch(
-                                name = "startDate",
-                                actualValue = startDate,
-                                expectedFormat = expectedFormat
-                            )
+                        DataErrors.Validation.DataFormatMismatch(
+                            name = "startDate",
+                            actualValue = startDate,
+                            expectedFormat = expectedFormat
                         )
                     )
                 }
@@ -63,12 +60,10 @@ class CreateAmendmentParams private constructor(
             val ownerParsed = owner.tryOwner()
                 .doOnError {
                     return failure(
-                        listOf(
-                            DataErrors.Validation.DataFormatMismatch(
-                                name = "owner",
-                                actualValue = owner,
-                                expectedFormat = "string"
-                            )
+                        DataErrors.Validation.DataFormatMismatch(
+                            name = "owner",
+                            actualValue = owner,
+                            expectedFormat = "string"
                         )
                     )
                 }
@@ -100,19 +95,17 @@ class CreateAmendmentParams private constructor(
                 rationale: String,
                 description: String?,
                 documents: Option<List<Document>>
-            ): Result<Amendment, List<DataErrors>> {
+            ): Result<Amendment, DataErrors> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return failure(listOf(DataErrors.Validation.EmptyArray("amendment.documents")))
+                    return failure(DataErrors.Validation.EmptyArray("amendment.documents"))
 
                 val idParsed = id.tryAmendmentId()
                     .doOnError {
                         return failure(
-                            listOf(
-                                DataErrors.Validation.DataFormatMismatch(
-                                    name = "amendment.id",
-                                    expectedFormat = "UUID",
-                                    actualValue = id
-                                )
+                            DataErrors.Validation.DataFormatMismatch(
+                                name = "amendment.id",
+                                expectedFormat = "UUID",
+                                actualValue = id
                             )
                         )
                     }
@@ -149,29 +142,25 @@ class CreateAmendmentParams private constructor(
                     id: String,
                     title: String,
                     description: String?
-                ): Result<Document, List<DataErrors>> {
+                ): Result<Document, DataErrors> {
 
                     val idParsed = id.tryDocumentId()
                         .doOnError {
                             return failure(
-                                listOf(
-                                    DataErrors.Validation.DataFormatMismatch(
-                                        name = "document.id",
-                                        actualValue = id,
-                                        expectedFormat = "string"
-                                    )
+                                DataErrors.Validation.DataFormatMismatch(
+                                    name = "document.id",
+                                    actualValue = id,
+                                    expectedFormat = "string"
                                 )
                             )
                         }
                         .get
 
                     val documentTypeParsed = DocumentType.orNull(documentType) ?: return failure(
-                        listOf(
-                            DataErrors.Validation.UnknownValue(
-                                name = "documentType",
-                                actualValue = documentType,
-                                expectedValues = DocumentType.allowedValues
-                            )
+                        DataErrors.Validation.UnknownValue(
+                            name = "documentType",
+                            actualValue = documentType,
+                            expectedValues = DocumentType.allowedValues
                         )
                     )
 

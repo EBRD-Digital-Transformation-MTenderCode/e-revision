@@ -30,5 +30,5 @@ abstract class AbstractValidationHandler<ACTION : Action, E : Fail> : Handler<AC
         }
     }
 
-    abstract fun execute(node: JsonNode): ValidationResult<List<E>>
+    abstract fun execute(node: JsonNode): ValidationResult<E>
 }

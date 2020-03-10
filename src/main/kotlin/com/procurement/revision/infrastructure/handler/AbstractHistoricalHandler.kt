@@ -27,14 +27,14 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
         val version = node.tryGetVersion().get
 
         val history = historyRepository.getHistory(id.toString(), action.key)
-            .doOnError { error -> return generateResponseOnFailure(listOf(error), version, id) }
+            .doOnError { error -> return generateResponseOnFailure(error, version, id) }
             .get
         if (history != null) {
             val data = history.jsonData
             val result = data.tryToObject(target)
                 .doOnError {
                     return generateResponseOnFailure(
-                        fails = listOf(Fail.Incident.ParseFromDatabaseIncident(data)),
+                        fail = Fail.Incident.ParseFromDatabaseIncident(data),
                         id = id,
                         version = version
                     )
@@ -55,6 +55,6 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
         }
     }
 
-    abstract fun execute(node: JsonNode): Result<R, List<Fail>>
+    abstract fun execute(node: JsonNode): Result<R, Fail>
 }
 

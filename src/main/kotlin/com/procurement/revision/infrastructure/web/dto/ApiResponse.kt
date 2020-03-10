@@ -41,9 +41,9 @@ class ApiIncidentResponse(version: ApiVersion, id: UUID, result: Incident) :
     @field:JsonProperty("status")
     override val status: ResponseStatus = ResponseStatus.INCIDENT
 
-    class Incident(val id: UUID, val date: LocalDateTime, val service: Service, val errors: List<Error>) {
+    class Incident(val id: UUID, val date: LocalDateTime, val service: Service, val details: List<Details>) {
         class Service(val id: String, val name: String, val version: String)
-        class Error(val code: String, val description: String, val metadata: Any?)
+        class Details(val code: String, val description: String, val metadata: Any?)
     }
 }
 

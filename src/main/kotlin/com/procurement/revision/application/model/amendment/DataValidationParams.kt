@@ -23,20 +23,19 @@ class DataValidationParams private constructor(
             cpid: String,
             ocid: String,
             operationType: String
-        ): Result<DataValidationParams, List<DataErrors>> {
+        ): Result<DataValidationParams, DataErrors> {
             if (amendments.isEmpty()) {
-                return failure(listOf(DataErrors.Validation.EmptyArray("amendments")))
+                return failure(DataErrors.Validation.EmptyArray("amendments"))
             }
 
-            val operationTypeParsed = OperationType.orNull(operationType) ?: return failure(
-                listOf(
+            val operationTypeParsed = OperationType.orNull(operationType)
+                ?: return failure(
                     DataErrors.Validation.UnknownValue(
                         name = "operationType",
                         expectedValues = OperationType.allowedValues,
                         actualValue = operationType
                     )
                 )
-            )
 
             return success(
                 DataValidationParams(
@@ -61,19 +60,17 @@ class DataValidationParams private constructor(
                 rationale: String,
                 description: String?,
                 documents: Option<List<Document>>
-            ): Result<Amendment, List<DataErrors>> {
+            ): Result<Amendment, DataErrors> {
                 if (documents.isDefined && documents.get.isEmpty())
-                    return failure(listOf(DataErrors.Validation.EmptyArray("documents")))
+                    return failure(DataErrors.Validation.EmptyArray("documents"))
 
                 val idParsed = id.tryAmendmentId()
                     .doOnError {
                         return failure(
-                            listOf(
-                                DataErrors.Validation.DataFormatMismatch(
-                                    name = "amendment.id",
-                                    expectedFormat = "uuid",
-                                    actualValue = id
-                                )
+                            DataErrors.Validation.DataFormatMismatch(
+                                name = "amendment.id",
+                                expectedFormat = "uuid",
+                                actualValue = id
                             )
                         )
                     }
@@ -110,31 +107,28 @@ class DataValidationParams private constructor(
                     id: String,
                     title: String,
                     description: String?
-                ): Result<Document, List<DataErrors>> {
+                ): Result<Document, DataErrors> {
 
                     val idParsed = id.tryDocumentId()
                         .doOnError {
                             return failure(
-                                listOf(
-                                    DataErrors.Validation.DataFormatMismatch(
-                                        name = "document.id",
-                                        actualValue = id,
-                                        expectedFormat = "string"
-                                    )
+                                DataErrors.Validation.DataFormatMismatch(
+                                    name = "document.id",
+                                    actualValue = id,
+                                    expectedFormat = "string"
                                 )
                             )
                         }
                         .get
 
-                    val documentTypeParsed = DocumentType.orNull(documentType) ?: return failure(
-                        listOf(
+                    val documentTypeParsed = DocumentType.orNull(documentType)
+                        ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "documentType",
                                 actualValue = documentType,
                                 expectedValues = DocumentType.allowedValues
                             )
                         )
-                    )
 
                     return success(
                         Document(

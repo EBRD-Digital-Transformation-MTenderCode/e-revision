@@ -32,39 +32,39 @@ enum class CommandType(@JsonValue override val key: String) : Action, EnumElemen
 }
 
 fun generateResponseOnFailure(
-    fails: List<Fail>,
+    fail: Fail,
     version: ApiVersion,
     id: UUID
 ): ApiResponse =
-    when (fails[0]) {
+    when (fail) {
         is DataErrors.Validation ->
             ApiDataErrorResponse(
                 version = version,
                 id = id,
-                result = fails.filterIsInstance<DataErrors.Validation>().map { dataError ->
+                result = listOf(
                     ApiDataErrorResponse.Error(
-                        code = getFullErrorCode(dataError.code),
-                        description = dataError.description,
-                        attributeName = dataError.name
+                        code = getFullErrorCode(fail.code),
+                        description = fail.description,
+                        attributeName = fail.name
                     )
-                }
+                )
             )
         is Fail.Error ->
             ApiFailResponse(
                 version = version,
                 id = id,
-                result = fails.filterIsInstance<Fail.Error>().map { error ->
+                result = listOf(
                     ApiFailResponse.Error(
-                        code = getFullErrorCode(error.code),
-                        description = error.description
+                        code = getFullErrorCode(fail.code),
+                        description = fail.description
                     )
-                }
+                )
             )
 
         is Fail.Incident.ParseFromDatabaseIncident -> {
             val incidentToReturn = Fail.Incident.DatabaseIncident()
             val errors = listOf(
-                ApiIncidentResponse.Incident.Error(
+                ApiIncidentResponse.Incident.Details(
                     code = getFullErrorCode(incidentToReturn.code),
                     description = incidentToReturn.description,
                     metadata = null
@@ -73,20 +73,20 @@ fun generateResponseOnFailure(
             generateIncident(errors, version, id)
         }
         is Fail.Incident -> {
-            val errors = fails.filterIsInstance<Fail.Incident>().map { incident ->
-                ApiIncidentResponse.Incident.Error(
-                    code = getFullErrorCode(incident.code),
-                    description = incident.description,
+            val errors = listOf(
+                ApiIncidentResponse.Incident.Details(
+                    code = getFullErrorCode(fail.code),
+                    description = fail.description,
                     metadata = null
                 )
-            }
+            )
             generateIncident(errors, version, id)
         }
 
     }
 
 private fun generateIncident(
-    errors: List<ApiIncidentResponse.Incident.Error>, version: ApiVersion, id: UUID
+    details: List<ApiIncidentResponse.Incident.Details>, version: ApiVersion, id: UUID
 ): ApiIncidentResponse =
     ApiIncidentResponse(
         version = version,
@@ -99,7 +99,7 @@ private fun generateIncident(
                 version = GlobalProperties.service.version,
                 name = GlobalProperties.service.name
             ),
-            errors = errors
+            details = details
         )
     )
 

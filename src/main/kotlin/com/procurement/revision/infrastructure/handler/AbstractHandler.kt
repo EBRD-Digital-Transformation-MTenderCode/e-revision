@@ -31,5 +31,5 @@ abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiRe
         }
     }
 
-    abstract fun execute(node: JsonNode): Result<R, List<Fail>>
+    abstract fun execute(node: JsonNode): Result<R, Fail>
 }

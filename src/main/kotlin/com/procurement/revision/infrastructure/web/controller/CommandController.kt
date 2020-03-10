@@ -65,7 +65,7 @@ class CommandController(private val commandService: CommandService) {
         id: UUID = NaN
     ): ResponseEntity<ApiResponse> {
         log.debug("Error.", fail)
-        val response = generateResponseOnFailure(fails = listOf(fail), id = id, version = version)
+        val response = generateResponseOnFailure(fail = fail, id = id, version = version)
         return ResponseEntity(response, HttpStatus.OK)
     }
 }

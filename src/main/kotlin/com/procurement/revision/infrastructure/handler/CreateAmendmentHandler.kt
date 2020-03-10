@@ -22,16 +22,16 @@ class CreateAmendmentHandler(
 ) {
     override val action: CommandType = CommandType.CREATE_AMENDMENT
 
-    override fun execute(node: JsonNode): Result<CreateAmendmentResult, List<Fail>> {
+    override fun execute(node: JsonNode): Result<CreateAmendmentResult, Fail> {
         val params = node
             .tryGetParams(CreateAmendmentRequest::class.java)
-            .doOnError { error -> return Result.failure(listOf(error)) }
+            .doOnError { error -> return Result.failure(error) }
             .get
             .convert()
             .doOnError { errors -> return Result.failure(errors) }
             .get
 
 
-        return amendmentService.createAmendment(params).mapError { fail -> listOf(fail) }
+        return amendmentService.createAmendment(params)
     }
 }

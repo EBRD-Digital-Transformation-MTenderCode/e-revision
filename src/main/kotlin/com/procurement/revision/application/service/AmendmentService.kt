@@ -70,6 +70,13 @@ class AmendmentService(
                 AmendmentRelatesTo.LOT
             }
         }
+
+        val type = when (params.operationType) {
+            OperationType.TENDER_CANCELLATION,
+            OperationType.LOT_CANCELLATION -> {
+                AmendmentType.CANCELLATION
+            }
+        }
         val createdAmendment = params.amendment
             .let { amendment ->
                 Amendment(
@@ -77,7 +84,7 @@ class AmendmentService(
                     description = amendment.description,
                     rationale = amendment.rationale,
                     status = AmendmentStatus.PENDING,
-                    type = AmendmentType.CANCELLATION,
+                    type = type,
                     relatesTo = relatesTo,
                     relatedItem = params.id,
                     date = params.startDate,

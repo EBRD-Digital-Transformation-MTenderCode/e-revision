@@ -3,10 +3,14 @@ package com.procurement.revision.infrastructure.utils
 import com.fasterxml.jackson.core.JsonProcessingException
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeFormatter
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.bind.jackson.configuration
+import com.procurement.revision.infrastructure.fail.error.DataErrors
 import java.io.IOException
+import java.time.Instant
 import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.util.*
 
 private object JsonMapper {
     val mapper: ObjectMapper = ObjectMapper().apply {
@@ -15,8 +19,12 @@ private object JsonMapper {
 }
 
 /*Date utils*/
-fun String.toLocal(): LocalDateTime {
-    return LocalDateTime.parse(this, JsonDateTimeFormatter.formatter)
+fun LocalDateTime.toDate(): Date {
+    return Date.from(this.toInstant(ZoneOffset.UTC))
+}
+
+fun localNowUTC(): LocalDateTime {
+    return LocalDateTime.ofInstant(Instant.now(), ZoneOffset.UTC)
 }
 
 /**
@@ -35,10 +43,34 @@ fun <T : Any> String.toObject(target: Class<T>): T = try {
     throw IllegalArgumentException("Error binding JSON to an object of type '${target.canonicalName}'.", expected)
 }
 
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, String> = try {
+    Result.success(JsonMapper.mapper.readValue(this, target))
+} catch (expected: Exception) {
+    Result.failure("Error binding string to an object of type '${target.canonicalName}'.")
+}
+
+fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, String> = try {
+    Result.success(JsonMapper.mapper.treeToValue(this, target))
+} catch (expected: Exception) {
+    Result.failure("Error binding JSON to an object of type '${target.canonicalName}'.")
+}
+
 fun <T : Any> JsonNode.toObject(target: Class<T>): T {
     try {
         return JsonMapper.mapper.treeToValue(this, target)
     } catch (expected: IOException) {
         throw IllegalArgumentException("Error binding JSON to an object of type '${target.canonicalName}'.", expected)
     }
+}
+
+fun String.toNode(): JsonNode = try {
+    JsonMapper.mapper.readTree(this)
+} catch (exception: JsonProcessingException) {
+    throw IllegalArgumentException("Error parsing String to JsonNode.", exception)
+}
+
+fun String.tryToNode(): Result<JsonNode, DataErrors> = try {
+    Result.success(JsonMapper.mapper.readTree(this))
+} catch (exception: JsonProcessingException) {
+    Result.failure(DataErrors.Parsing())
 }

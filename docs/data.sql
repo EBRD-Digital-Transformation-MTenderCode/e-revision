@@ -7,7 +7,17 @@ CREATE KEYSPACE IF NOT EXISTS revision
 CREATE TABLE IF NOT EXISTS revision.amendments
 (
     cpid text,
+    ocid text,
     id   uuid,
     data text,
-    primary key (cpid, id)
+    primary key (cpid, ocid, id)
+);
+
+CREATE TABLE IF NOT EXISTS  revision.history
+(
+    command_id text,
+    command text,
+    command_date timestamp,
+    json_data text,
+    primary key(command_id, command)
 );

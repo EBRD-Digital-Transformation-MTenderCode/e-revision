@@ -1,16 +1,20 @@
 package com.procurement.revision.infrastructure.repository
 
-import com.datastax.driver.core.BoundStatement
-import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
-import com.procurement.revision.infrastructure.exception.DatabaseInteractionException
 import com.procurement.revision.application.repository.AmendmentRepository
+import com.procurement.revision.domain.functional.Result
+import com.procurement.revision.domain.functional.Result.Companion.failure
+import com.procurement.revision.domain.functional.Result.Companion.success
+import com.procurement.revision.domain.functional.asSuccess
+import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
+import com.procurement.revision.infrastructure.extension.cassandra.tryExecute
+import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
 import com.procurement.revision.infrastructure.utils.toJson
-import com.procurement.revision.infrastructure.utils.toObject
+import com.procurement.revision.infrastructure.utils.tryToObject
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -20,78 +24,83 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         private const val keySpace = "revision"
         private const val tableName = "amendments"
         private const val columnCpid = "cpid"
+        private const val columnOcid = "ocid"
         private const val columnId = "id"
         private const val columnData = "data"
 
         private const val SAVE_NEW_AMENDMENT = """
                INSERT INTO $keySpace.$tableName(
                       $columnCpid,
+                      $columnOcid,
                       $columnId,
                       $columnData
                )
-               VALUES(?, ?, ?)
+               VALUES(?, ?, ?, ?)
                IF NOT EXISTS
             """
 
-        private const val FIND_BY_CPID_CQL = """
-               SELECT $columnCpid,
-                      $columnData
-                 FROM $keySpace.$tableName
-                WHERE $columnCpid=?
-            """
-
-        private const val FIND_BY_CPID_AND_ID_CQL = """
-               SELECT $columnCpid,
-                      $columnId,
-                      $columnData
+        private const val FIND_BY_CPID_AND_OCID_CQL = """
+               SELECT $columnData
                  FROM $keySpace.$tableName
                 WHERE $columnCpid=? 
+                  AND $columnOcid=?
+            """
+
+        private const val FIND_BY_CPID_AND_OCID_AND_ID_CQL = """
+               SELECT $columnData
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
                   AND $columnId=?
             """
     }
 
-    private val preparedFindByCpidCQL = session.prepare(FIND_BY_CPID_CQL)
-    private val preparedFindByCpidAndIdCQL = session.prepare(FIND_BY_CPID_AND_ID_CQL)
+    private val preparedFindByCpidAndOcidCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
+    private val preparedFindByCpidAndOcidAndIdCQL = session.prepare(FIND_BY_CPID_AND_OCID_AND_ID_CQL)
     private val preparedSaveNewAmendmentCQL = session.prepare(SAVE_NEW_AMENDMENT)
 
-    override fun findBy(cpid: String): List<Amendment> {
-        val query = preparedFindByCpidCQL.bind()
+    override fun findBy(cpid: String, ocid: String): Result<List<Amendment>, Fail.Incident> {
+        val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
+                setString(columnOcid, ocid)
             }
 
-        val resultSet = load(query)
-        return resultSet.map { row ->
-            converter(row = row)
-        }
+        return query.tryExecute(session)
+            .doOnError { error -> return failure(error) }
+            .get
+            .map { row ->
+                converter(row = row)
+                    .doOnError { error -> return failure(error) }
+                    .get
+            }
+            .asSuccess()
     }
 
-    override fun findBy(cpid: String, id: AmendmentId): Amendment? {
-        val query = preparedFindByCpidAndIdCQL.bind()
+    override fun findBy(cpid: String, ocid: String, id: AmendmentId): Result<Amendment?, Fail.Incident> {
+        val query = preparedFindByCpidAndOcidAndIdCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
+                setString(columnOcid, ocid)
                 setUUID(columnId, id)
             }
 
-        val resultSet = load(query)
-        return resultSet.one()
-            ?.let { row ->
-                converter(row = row)
-            }
+        return query.tryExecute(session)
+            .doOnError { error -> return failure(error) }
+            .get
+            .one()
+            ?.let { row -> converter(row = row) }
+            ?.doOnError { error -> return failure(error) }
+            ?.get
+            .asSuccess()
     }
 
-    private fun load(statement: BoundStatement): ResultSet = try {
-        session.execute(statement)
-    } catch (expected: Exception) {
-        throw DatabaseInteractionException(
-            message = "Error read Amendments(s) from the database.",
-            cause = expected
-        )
-    }
-
-    private fun converter(row: Row): Amendment {
-        val entity = row.getString(columnData)
-            .toObject(AmendmentDataEntity::class.java)
+    private fun converter(row: Row): Result<Amendment, Fail.Incident> {
+        val data = row.getString(columnData)
+        val entity = data
+            .tryToObject(AmendmentDataEntity::class.java)
+            .doOnError { return failure(Fail.Incident.ParseFromDatabaseIncident(data)) }
+            .get
 
         val token = entity.token
         val owner = entity.owner
@@ -118,28 +127,22 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                     }
                     .orEmpty()
             )
-        }
+        }.asSuccess()
     }
 
-    override fun saveNewAmendment(cpid: String, amendment: Amendment): Boolean {
+    override fun saveNewAmendment(cpid: String, ocid: String, amendment: Amendment): Result<Boolean, Fail.Incident> {
         val entity = convert(amendment)
         val statements = preparedSaveNewAmendmentCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
+                setString(columnOcid, ocid)
                 setUUID(columnId, amendment.id)
                 setString(columnData, entity.toJson())
             }
 
-        return saveAmendment(statements).wasApplied()
-    }
-
-    private fun saveAmendment(statement: BoundStatement): ResultSet = try {
-        session.execute(statement)
-    } catch (expected: Exception) {
-        throw DatabaseInteractionException(
-            message = "Error writing Amendments.",
-            cause = expected
-        )
+        return statements.tryExecute(session).bind { resultSet ->
+            success(resultSet.wasApplied())
+        }
     }
 
     fun convert(amendment: Amendment) = AmendmentDataEntity(

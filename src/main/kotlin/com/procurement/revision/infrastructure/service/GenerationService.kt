@@ -7,4 +7,6 @@ class GenerationService : Generable {
 
     override fun generateAmendmentId(): UUID = UUID.randomUUID()
 
+    override fun generateToken(): UUID = UUID.randomUUID()
+
 }

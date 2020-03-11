@@ -1,24 +1,18 @@
 package com.procurement.revision.domain.enums
 
-import com.procurement.revision.domain.exception.EnumException
-import com.procurement.revision.infrastructure.bind.databinding.Enumable
-import com.procurement.revision.infrastructure.bind.databinding.Valuable
+import com.fasterxml.jackson.annotation.JsonCreator
+import com.fasterxml.jackson.annotation.JsonValue
 
-enum class AmendmentRelatesTo(override val text: String) : Valuable<AmendmentRelatesTo> {
+enum class AmendmentRelatesTo(@JsonValue override val key: String) : EnumElementProvider.Key {
     LOT("lot"),
     TENDER("tender"),
     CAN("can");
 
-    override fun toString(): String = this.text
+    override fun toString(): String = key
 
-    companion object : Enumable<AmendmentRelatesTo> {
-        private val elements: Map<String, AmendmentRelatesTo> = values().associateBy { it.text.toUpperCase() }
-
-        override fun fromString(value: String): AmendmentRelatesTo = elements[value.toUpperCase()]
-            ?: throw EnumException(
-                enumType = AmendmentRelatesTo::class.java.canonicalName,
-                value = value,
-                values = values().joinToString { it.text }
-            )
+    companion object : EnumElementProvider<AmendmentRelatesTo>(info = info()) {
+        @JvmStatic
+        @JsonCreator
+        fun creator(name: String) = AmendmentRelatesTo.orThrow(name)
     }
 }

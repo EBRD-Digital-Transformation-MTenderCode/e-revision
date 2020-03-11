@@ -63,12 +63,9 @@ class AmendmentService(
 
     fun createAmendment(params: CreateAmendmentParams): Result<CreateAmendmentResult, Fail.Incident> {
         val relatesTo = when (params.operationType) {
-            OperationType.TENDER_CANCELLATION -> {
-                AmendmentRelatesTo.TENDER
-            }
-            OperationType.LOT_CANCELLATION -> {
-                AmendmentRelatesTo.LOT
-            }
+            OperationType.TENDER_CANCELLATION -> AmendmentRelatesTo.TENDER
+            OperationType.LOT_CANCELLATION -> AmendmentRelatesTo.LOT
+
         }
 
         val type = when (params.operationType) {
@@ -100,13 +97,11 @@ class AmendmentService(
                     token = generable.generateToken()
                 )
             }
-        val isSavedResult = amendmentRepository.saveNewAmendment(
+        return amendmentRepository.saveNewAmendment(
             cpid = params.cpid,
             ocid = params.ocid,
             amendment = createdAmendment
-        )
-
-        return isSavedResult.bind { isSaved ->
+        ).bind { isSaved ->
             if (isSaved) {
                 success(createdAmendment.convertToCreateAmendmentResult())
             } else {
@@ -115,8 +110,10 @@ class AmendmentService(
                     ocid = params.ocid,
                     id = createdAmendment.id
                 ).bind { amendment ->
-                    if (amendment != null) success(amendment.convertToCreateAmendmentResult())
-                    else failure(DatabaseConsistencyIncident("Could not find ${createdAmendment.id}"))
+                    if (amendment != null)
+                        success(amendment.convertToCreateAmendmentResult())
+                    else
+                        failure(DatabaseConsistencyIncident("Could not find ${createdAmendment.id}"))
                 }
             }
         }

@@ -60,7 +60,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
     private val preparedFindByCpidAndOcidAndIdCQL = session.prepare(FIND_BY_CPID_AND_OCID_AND_ID_CQL)
     private val preparedSaveNewAmendmentCQL = session.prepare(SAVE_NEW_AMENDMENT)
 
-    override fun findBy(cpid: String, ocid: String): Result<List<Amendment>, Fail> {
+    override fun findBy(cpid: String, ocid: String): Result<List<Amendment>, Fail.Incident> {
         val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
@@ -78,7 +78,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             .asSuccess()
     }
 
-    override fun findBy(cpid: String, ocid: String, id: AmendmentId): Result<Amendment?, Fail> {
+    override fun findBy(cpid: String, ocid: String, id: AmendmentId): Result<Amendment?, Fail.Incident> {
         val query = preparedFindByCpidAndOcidAndIdCQL.bind()
             .apply {
                 setString(columnCpid, cpid)
@@ -102,7 +102,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 
-    private fun converter(row: Row): Result<Amendment, Fail> {
+    private fun converter(row: Row): Result<Amendment, Fail.Incident> {
         val data = row.getString(columnData)
         val entity = data
             .tryToObject(AmendmentDataEntity::class.java)
@@ -137,7 +137,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         }.asSuccess()
     }
 
-    override fun saveNewAmendment(cpid: String, ocid: String, amendment: Amendment): Result<Boolean, Fail> {
+    override fun saveNewAmendment(cpid: String, ocid: String, amendment: Amendment): Result<Boolean, Fail.Incident> {
         val entity = convert(amendment)
         val statements = preparedSaveNewAmendmentCQL.bind()
             .apply {

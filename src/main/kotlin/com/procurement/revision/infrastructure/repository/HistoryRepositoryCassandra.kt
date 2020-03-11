@@ -50,7 +50,7 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
     private val preparedSaveHistoryCQL = session.prepare(SAVE_HISTORY_CQL)
     private val preparedFindHistoryByCpidAndCommandCQL = session.prepare(FIND_HISTORY_ENTRY_CQL)
 
-    override fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail> {
+    override fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail.Incident> {
         val query = preparedFindHistoryByCpidAndCommandCQL.bind()
             .apply {
                 setString(COMMAND_ID, operationId)
@@ -72,7 +72,7 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
             .asSuccess()
     }
 
-    override fun saveHistory(operationId: String, command: String, result: Any): Result<HistoryEntity, Fail> {
+    override fun saveHistory(operationId: String, command: String, result: Any): Result<HistoryEntity, Fail.Incident> {
         val entity = HistoryEntity(
             operationId = operationId,
             command = command,

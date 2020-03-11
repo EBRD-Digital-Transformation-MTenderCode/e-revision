@@ -5,6 +5,6 @@ import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.model.entity.HistoryEntity
 
 interface HistoryRepository {
-    fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail>
-    fun saveHistory(operationId: String, command: String, result: Any): Result<HistoryEntity, Fail>
+    fun getHistory(operationId: String, command: String): Result<HistoryEntity?, Fail.Incident>
+    fun saveHistory(operationId: String, command: String, result: Any): Result<HistoryEntity, Fail.Incident>
 }

@@ -1,7 +1,5 @@
 package com.procurement.revision.infrastructure.repository
 
-import com.datastax.driver.core.BoundStatement
-import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Row
 import com.datastax.driver.core.Session
 import com.procurement.revision.application.repository.AmendmentRepository
@@ -12,6 +10,7 @@ import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
+import com.procurement.revision.infrastructure.extension.cassandra.tryExecute
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
 import com.procurement.revision.infrastructure.utils.toJson
@@ -67,7 +66,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                 setString(columnOcid, ocid)
             }
 
-        return load(query)
+        return query.tryExecute(session)
             .doOnError { error -> return failure(error) }
             .get
             .map { row ->
@@ -86,7 +85,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                 setUUID(columnId, id)
             }
 
-        return load(query)
+        return query.tryExecute(session)
             .doOnError { error -> return failure(error) }
             .get
             .one()
@@ -94,12 +93,6 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             ?.doOnError { error -> return failure(error) }
             ?.get
             .asSuccess()
-    }
-
-    private fun load(statement: BoundStatement): Result<ResultSet, Fail.Incident.DatabaseInteractionIncident> = try {
-        success(session.execute(statement))
-    } catch (expected: Exception) {
-        failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 
     private fun converter(row: Row): Result<Amendment, Fail.Incident> {
@@ -147,7 +140,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                 setString(columnData, entity.toJson())
             }
 
-        return load(statements).bind { resultSet ->
+        return statements.tryExecute(session).bind { resultSet ->
             success(resultSet.wasApplied())
         }
     }

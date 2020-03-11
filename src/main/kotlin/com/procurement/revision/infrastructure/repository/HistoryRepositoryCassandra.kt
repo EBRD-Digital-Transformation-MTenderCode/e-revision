@@ -1,11 +1,10 @@
 package com.procurement.revision.infrastructure.repository
 
-import com.datastax.driver.core.BoundStatement
-import com.datastax.driver.core.ResultSet
 import com.datastax.driver.core.Session
 import com.procurement.revision.application.repository.HistoryRepository
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.asSuccess
+import com.procurement.revision.infrastructure.extension.cassandra.tryExecute
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.model.entity.HistoryEntity
 import com.procurement.revision.infrastructure.utils.localNowUTC
@@ -57,7 +56,7 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
                 setString(COMMAND, command)
             }
 
-        return load(query)
+        return query.tryExecute(session)
             .doOnError { error -> return Result.failure(error) }
             .get
             .one()
@@ -88,14 +87,9 @@ class HistoryRepositoryCassandra(private val session: Session) : HistoryReposito
                 setString(JSON_DATA, entity.jsonData)
             }
 
-        load(insert).doOnError { error -> return Result.failure(error) }
+        insert.tryExecute(session)
+            .doOnError { error -> return Result.failure(error) }
 
         return entity.asSuccess()
-    }
-
-    private fun load(statement: BoundStatement): Result<ResultSet, Fail.Incident.DatabaseInteractionIncident> = try {
-        Result.success(session.execute(statement))
-    } catch (expected: Exception) {
-        Result.failure(Fail.Incident.DatabaseInteractionIncident(expected))
     }
 }

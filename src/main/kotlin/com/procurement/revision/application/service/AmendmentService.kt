@@ -31,19 +31,19 @@ class AmendmentService(
 
     fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
         val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
+            .doOnError { incident -> return failure(incident) }
+            .get
         val relatedItems = params.relatedItems.toSet()
 
-        return amendments.bind {
-            success(it.asSequence()
-                        .filter { amendment ->
-                            testEquals(amendment.status, pattern = params.status)
-                                && testEquals(amendment.type, pattern = params.type)
-                                && testEquals(amendment.relatesTo, pattern = params.relatesTo)
-                                && testContains(amendment.relatedItem, patterns = relatedItems)
-                        }
-                        .map { amendment -> amendment.id }
-                        .toList())
-        }
+        return success(amendments.asSequence()
+                           .filter { amendment ->
+                               testEquals(amendment.status, pattern = params.status)
+                                   && testEquals(amendment.type, pattern = params.type)
+                                   && testEquals(amendment.relatesTo, pattern = params.relatesTo)
+                                   && testContains(amendment.relatedItem, patterns = relatedItems)
+                           }
+                           .map { amendment -> amendment.id }
+                           .toList())
     }
 
     fun validateDocumentsTypes(params: DataValidationParams): ValidationResult<Fail.Error> {

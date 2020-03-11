@@ -8,12 +8,12 @@ import com.procurement.revision.domain.enums.EnumElementProvider
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
+import com.procurement.revision.domain.util.extension.nowDefaultUTC
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.utils.tryToObject
-import java.time.LocalDateTime
 import java.util.*
 
 enum class CommandType(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
@@ -64,31 +64,15 @@ fun generateResponseOnFailure(
             }
         }
         is Fail.Incident -> {
-            when (fail) {
-                is Fail.Incident.ParseFromDatabaseIncident -> {
-                    val incidentToReturn = Fail.Incident.DatabaseIncident()
-                    val errors = listOf(
-                        ApiIncidentResponse.Incident.Details(
-                            code = getFullErrorCode(incidentToReturn.code),
-                            description = incidentToReturn.description,
-                            metadata = null
-                        )
-                    )
-                    generateIncident(errors, version, id)
-                }
-                else -> {
-                    val errors = listOf(
-                        ApiIncidentResponse.Incident.Details(
-                            code = getFullErrorCode(fail.code),
-                            description = fail.description,
-                            metadata = null
-                        )
-                    )
-                    generateIncident(errors, version, id)
-                }
-            }
+            val errors = listOf(
+                ApiIncidentResponse.Incident.Details(
+                    code = getFullErrorCode(fail.code),
+                    description = fail.description,
+                    metadata = null
+                )
+            )
+            generateIncident(errors, version, id)
         }
-
     }
 
 private fun generateIncident(
@@ -98,7 +82,7 @@ private fun generateIncident(
         version = version,
         id = id,
         result = ApiIncidentResponse.Incident(
-            date = LocalDateTime.now(),
+            date = nowDefaultUTC(),
             id = UUID.randomUUID(),
             service = ApiIncidentResponse.Incident.Service(
                 id = GlobalProperties.service.id,

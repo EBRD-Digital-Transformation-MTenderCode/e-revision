@@ -29,7 +29,7 @@ class AmendmentService(
     private val generable: Generable
 ) {
 
-    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail> {
+    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
         val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
         val relatedItems = params.relatedItems.toSet()
 
@@ -46,7 +46,7 @@ class AmendmentService(
         }
     }
 
-    fun validateDocumentsTypes(params: DataValidationParams): ValidationResult<Fail> {
+    fun validateDocumentsTypes(params: DataValidationParams): ValidationResult<Fail.Error> {
         val correctDocumentType = when (params.operationType) {
             OperationType.LOT_CANCELLATION, OperationType.TENDER_CANCELLATION -> DocumentType.CANCELLATION_DETAILS
         }
@@ -61,7 +61,7 @@ class AmendmentService(
         return ValidationResult.ok()
     }
 
-    fun createAmendment(params: CreateAmendmentParams): Result<CreateAmendmentResult, Fail> {
+    fun createAmendment(params: CreateAmendmentParams): Result<CreateAmendmentResult, Fail.Incident> {
         val relatesTo = when (params.operationType) {
             OperationType.TENDER_CANCELLATION -> {
                 AmendmentRelatesTo.TENDER

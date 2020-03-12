@@ -102,13 +102,11 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             .doOnError { return failure(Fail.Incident.ParseFromDatabaseIncident(data)) }
             .get
 
-        val token = entity.token
-        val owner = entity.owner
         return entity.amendment.let { amendment ->
             Amendment(
                 id = amendment.id,
-                token = token,
-                owner = owner,
+                token = amendment.token,
+                owner = amendment.owner,
                 description = amendment.description,
                 rationale = amendment.rationale,
                 relatesTo = amendment.relatesTo,
@@ -146,8 +144,6 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
     }
 
     fun convert(amendment: Amendment) = AmendmentDataEntity(
-        token = amendment.token,
-        owner = amendment.owner,
         amendment = AmendmentDataEntity.AmendmentEntity(
             id = amendment.id,
             description = amendment.description,
@@ -157,6 +153,8 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             status = amendment.status,
             type = amendment.type,
             date = amendment.date,
+            token = amendment.token,
+            owner = amendment.owner,
             documents = amendment.documents
                 .map { document ->
                     AmendmentDataEntity.AmendmentEntity.Document(

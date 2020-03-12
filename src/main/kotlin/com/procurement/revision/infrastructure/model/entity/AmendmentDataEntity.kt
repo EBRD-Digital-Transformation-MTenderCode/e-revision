@@ -8,18 +8,16 @@ import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
-import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.Token
+import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.document.DocumentId
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
 import java.time.LocalDateTime
 
 data class AmendmentDataEntity(
-    @field:JsonProperty("amendment") @param:JsonProperty("amendment") val amendment: AmendmentEntity,
-    @field:JsonProperty("token") @param:JsonProperty("token") val token: Token,
-    @field:JsonProperty("owner") @param:JsonProperty("owner") val owner: Owner
+    @field:JsonProperty("amendment") @param:JsonProperty("amendment") val amendment: AmendmentEntity
 ) {
     data class AmendmentEntity(
         @field:JsonProperty("id") @param:JsonProperty("id") val id: AmendmentId,
@@ -36,8 +34,9 @@ data class AmendmentDataEntity(
         @field:JsonProperty("status") @param:JsonProperty("status") val status: AmendmentStatus,
         @field:JsonProperty("type") @param:JsonProperty("type") val type: AmendmentType,
         @field:JsonProperty("relatesTo") @param:JsonProperty("relatesTo") val relatesTo: AmendmentRelatesTo,
-
         @field:JsonProperty("relatedItem") @param:JsonProperty("relatedItem") val relatedItem: String,
+        @field:JsonProperty("token") @param:JsonProperty("token") val token: Token,
+        @field:JsonProperty("owner") @param:JsonProperty("owner") val owner: Owner,
 
         @JsonInclude(JsonInclude.Include.NON_EMPTY)
         @field:JsonProperty("documents") @param:JsonProperty("documents") val documents: List<Document>?

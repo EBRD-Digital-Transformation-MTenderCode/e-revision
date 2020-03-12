@@ -194,8 +194,6 @@ class AmendmentDataEntityRepositoryIT {
     )
 
     fun convert(amendment: Amendment) = AmendmentDataEntity(
-        token = amendment.token,
-        owner = amendment.owner,
         amendment = AmendmentDataEntity.AmendmentEntity(
             id = amendment.id,
             description = amendment.description,
@@ -205,6 +203,8 @@ class AmendmentDataEntityRepositoryIT {
             status = amendment.status,
             type = amendment.type,
             date = amendment.date,
+            token = amendment.token,
+            owner = amendment.owner,
             documents = amendment.documents
                 .map { document ->
                     AmendmentDataEntity.AmendmentEntity.Document(

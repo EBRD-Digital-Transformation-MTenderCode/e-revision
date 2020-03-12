@@ -47,7 +47,9 @@ fun generateResponseOnFailure(
                             ApiDataErrorResponse.Error(
                                 code = getFullErrorCode(fail.code),
                                 description = fail.description,
-                                attributeName = fail.name
+                                details = listOf(
+                                    ApiDataErrorResponse.Error.Detail(name = fail.name)
+                                )
                             )
                         )
                     )

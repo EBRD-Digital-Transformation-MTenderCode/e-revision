@@ -32,7 +32,7 @@ class ApiFailResponse(version: ApiVersion, id: UUID, result: List<Error>) :
     @field:JsonProperty("status")
     override val status: ResponseStatus = ResponseStatus.ERROR
 
-    class Error(val code: String, val description: String?)
+    class Error(val code: String, val description: String)
 }
 
 class ApiIncidentResponse(version: ApiVersion, id: UUID, result: Incident) :
@@ -53,7 +53,9 @@ class ApiDataErrorResponse(
     @field:JsonProperty("status")
     override val status: ResponseStatus = ResponseStatus.ERROR
 
-    class Error(val code: String?, val description: String?, val attributeName: String)
+    class Error(val code: String, val description: String, val details: List<Detail>){
+        class Detail(val name: String)
+    }
 }
 
 enum class ResponseStatus(private val value: String) {

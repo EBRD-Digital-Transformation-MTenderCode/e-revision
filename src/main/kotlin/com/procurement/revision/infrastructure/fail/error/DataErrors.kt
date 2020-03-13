@@ -7,8 +7,6 @@ sealed class DataErrors(numberError: String, override val description: String) :
 
     override val code: String = prefix + numberError
 
-    class BadRequest(description: String = "Invalid json") : DataErrors(numberError = "0", description = description)
-
     sealed class Validation(numberError: String, val name: String, description: String) :
         DataErrors(numberError = "1.$numberError", description = description) {
 

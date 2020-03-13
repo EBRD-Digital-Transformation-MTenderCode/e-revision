@@ -12,6 +12,7 @@ import com.procurement.revision.domain.util.extension.nowDefaultUTC
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
+import com.procurement.revision.infrastructure.fail.error.BadRequest
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.utils.tryToNode
 import com.procurement.revision.infrastructure.utils.tryToObject
@@ -102,16 +103,16 @@ val NaN: UUID
     get() = UUID(0, 0)
 
 fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, DataErrors> {
-    val node = get(name) ?: return Result.failure(
-        DataErrors.Validation.MissingRequiredAttribute(name)
-    )
-    if (node is NullNode) return Result.failure(
-        DataErrors.Validation.DataTypeMismatch(
-            name = name,
-            actualType = "null",
-            expectedType = "not null"
+    val node = get(name)
+        ?: return Result.failure(
+            DataErrors.Validation.MissingRequiredAttribute(name)
         )
-    )
+    if (node is NullNode)
+        return Result.failure(
+            DataErrors.Validation.DataTypeMismatch(
+                name = name, actualType = "null", expectedType = "not null"
+            )
+        )
 
     return Result.success(node)
 }
@@ -145,13 +146,13 @@ fun JsonNode.tryGetAction(): Result<CommandType, DataErrors> {
     }
 }
 
-fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
+fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
     val name = "params"
     return tryGetAttribute(name).bind {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.BadRequest("Error parsing '$name'")
+                BadRequest("Error parsing '$name'")
             )
         }
     }
@@ -159,24 +160,25 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
 
 fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
     val name = "id"
-    return tryGetAttribute(name).bind {
-        when (val result = it.asText().tryUUID()) {
-            is Result.Success -> result
-            is Result.Failure -> Result.failure(
-                DataErrors.Validation.DataFormatMismatch(
-                    name = name,
-                    actualValue = it.asText(),
-                    expectedFormat = "uuid"
+    return tryGetAttribute(name)
+        .bind {
+            when (val result = it.asText().tryUUID()) {
+                is Result.Success -> result
+                is Result.Failure -> Result.failure(
+                    DataErrors.Validation.DataFormatMismatch(
+                        name = name,
+                        actualValue = it.asText(),
+                        expectedFormat = "uuid"
+                    )
                 )
-            )
+            }
         }
-    }
 }
 
-fun String.tryGetNode(): Result<JsonNode, DataErrors> =
+fun String.tryGetNode(): Result<JsonNode, BadRequest> =
     when (val result = this.tryToNode()) {
         is Result.Success -> result
-        is Result.Failure -> Result.failure(DataErrors.BadRequest())
+        is Result.Failure -> Result.failure(BadRequest())
     }
 
 

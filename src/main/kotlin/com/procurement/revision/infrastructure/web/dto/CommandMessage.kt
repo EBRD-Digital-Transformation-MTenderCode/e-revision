@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
+import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.enums.EnumElementProvider
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.asSuccess
@@ -12,7 +13,9 @@ import com.procurement.revision.domain.util.extension.nowDefaultUTC
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
+import com.procurement.revision.infrastructure.fail.error.BadRequest
 import com.procurement.revision.infrastructure.fail.error.DataErrors
+import com.procurement.revision.infrastructure.utils.tryToNode
 import com.procurement.revision.infrastructure.utils.tryToObject
 import java.util.*
 
@@ -34,9 +37,11 @@ enum class CommandType(@JsonValue override val key: String) : Action, EnumElemen
 fun generateResponseOnFailure(
     fail: Fail,
     version: ApiVersion,
-    id: UUID
-): ApiResponse =
-    when (fail) {
+    id: UUID,
+    logger: Logger
+): ApiResponse {
+    fail.logging(logger)
+    return when (fail) {
         is Fail.Error -> {
             when (fail) {
                 is DataErrors.Validation ->
@@ -76,6 +81,7 @@ fun generateResponseOnFailure(
             generateIncident(errors, version, id)
         }
     }
+}
 
 private fun generateIncident(
     details: List<ApiIncidentResponse.Incident.Details>, version: ApiVersion, id: UUID
@@ -101,16 +107,16 @@ val NaN: UUID
     get() = UUID(0, 0)
 
 fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, DataErrors> {
-    val node = get(name) ?: return Result.failure(
-        DataErrors.Validation.MissingRequiredAttribute(name)
-    )
-    if (node is NullNode) return Result.failure(
-        DataErrors.Validation.DataTypeMismatch(
-            name = name,
-            actualType = "null",
-            expectedType = "not null"
+    val node = get(name)
+        ?: return Result.failure(
+            DataErrors.Validation.MissingRequiredAttribute(name)
         )
-    )
+    if (node is NullNode)
+        return Result.failure(
+            DataErrors.Validation.DataTypeMismatch(
+                name = name, actualType = "null", expectedType = "not null"
+            )
+        )
 
     return Result.success(node)
 }
@@ -144,13 +150,13 @@ fun JsonNode.tryGetAction(): Result<CommandType, DataErrors> {
     }
 }
 
-fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
+fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
     val name = "params"
     return tryGetAttribute(name).bind {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.Parsing("Error parsing '$name'")
+                BadRequest("Error parsing '$name'")
             )
         }
     }
@@ -158,18 +164,26 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
 
 fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
     val name = "id"
-    return tryGetAttribute(name).bind {
-        when (val result = it.asText().tryUUID()) {
-            is Result.Success -> result
-            is Result.Failure -> Result.failure(
-                DataErrors.Validation.DataFormatMismatch(
-                    name = name,
-                    actualValue = it.asText(),
-                    expectedFormat = "uuid"
+    return tryGetAttribute(name)
+        .bind {
+            when (val result = it.asText().tryUUID()) {
+                is Result.Success -> result
+                is Result.Failure -> Result.failure(
+                    DataErrors.Validation.DataFormatMismatch(
+                        name = name,
+                        actualValue = it.asText(),
+                        expectedFormat = "uuid"
+                    )
                 )
-            )
+            }
         }
-    }
 }
+
+fun String.tryGetNode(): Result<JsonNode, BadRequest> =
+    when (val result = this.tryToNode()) {
+        is Result.Success -> result
+        is Result.Failure -> Result.failure(BadRequest())
+    }
+
 
 

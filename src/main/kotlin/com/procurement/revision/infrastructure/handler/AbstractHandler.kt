@@ -1,6 +1,7 @@
 package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
+import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.utils.toJson
@@ -10,12 +11,8 @@ import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
 import com.procurement.revision.infrastructure.web.dto.generateResponseOnFailure
 import com.procurement.revision.infrastructure.web.dto.tryGetId
 import com.procurement.revision.infrastructure.web.dto.tryGetVersion
-import org.slf4j.LoggerFactory
 
-abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiResponse> {
-    companion object {
-        private val log = LoggerFactory.getLogger(AbstractHandler::class.java)
-    }
+abstract class AbstractHandler<ACTION : Action, R : Any>(private val logger: Logger) : Handler<ACTION, ApiResponse> {
 
     override fun handle(node: JsonNode): ApiResponse {
         val id = node.tryGetId().get
@@ -23,11 +20,16 @@ abstract class AbstractHandler<ACTION : Action, R : Any> : Handler<ACTION, ApiRe
 
         return when (val result = execute(node)) {
             is Result.Success -> {
-                if (log.isDebugEnabled)
-                    log.debug("${action.key} has been executed. Result: ${result.get.toJson()}")
+                if (logger.isDebugEnabled)
+                    logger.debug("${action.key} has been executed. Result: ${result.get.toJson()}")
                 return ApiSuccessResponse(version = version, id = id, result = result.get)
             }
-            is Result.Failure -> generateResponseOnFailure(result.error, version, id)
+            is Result.Failure -> generateResponseOnFailure(
+                fail = result.error,
+                version = version,
+                id = id,
+                logger = logger
+            )
         }
     }
 

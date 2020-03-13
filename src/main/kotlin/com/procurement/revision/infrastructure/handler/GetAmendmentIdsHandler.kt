@@ -2,6 +2,7 @@ package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.service.AmendmentService
+import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.model.amendment.AmendmentId
@@ -13,7 +14,9 @@ import com.procurement.revision.infrastructure.web.dto.tryGetParams
 import org.springframework.stereotype.Component
 
 @Component
-class GetAmendmentIdsHandler(private val amendmentService: AmendmentService) : AbstractHandler<CommandType, List<AmendmentId>>() {
+class GetAmendmentIdsHandler(
+    private val amendmentService: AmendmentService, logger: Logger
+) : AbstractHandler<CommandType, List<AmendmentId>>(logger) {
 
     override val action: CommandType = CommandType.GET_AMENDMENTS_IDS
 

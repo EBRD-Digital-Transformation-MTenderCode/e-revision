@@ -1,5 +1,6 @@
 package com.procurement.revision.infrastructure.web.controller
 
+import com.procurement.revision.application.service.Logger
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.service.CommandService
@@ -12,8 +13,6 @@ import com.procurement.revision.infrastructure.web.dto.tryGetAction
 import com.procurement.revision.infrastructure.web.dto.tryGetId
 import com.procurement.revision.infrastructure.web.dto.tryGetNode
 import com.procurement.revision.infrastructure.web.dto.tryGetVersion
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -24,15 +23,12 @@ import java.util.*
 
 @RestController
 @RequestMapping("/command")
-class CommandController(private val commandService: CommandService) {
-    companion object {
-        private val log: Logger = LoggerFactory.getLogger(CommandController::class.java)
-    }
+class CommandController(private val commandService: CommandService, private val logger: Logger) {
 
     @PostMapping
     fun command(@RequestBody requestBody: String): ResponseEntity<ApiResponse> {
-        if (log.isDebugEnabled)
-            log.debug("RECEIVED COMMAND: '$requestBody'.")
+        if (logger.isDebugEnabled)
+            logger.debug("RECEIVED COMMAND: '$requestBody'.")
 
         val node = requestBody.tryGetNode()
             .doOnError { error -> return generateResponse(fail = error) }
@@ -52,8 +48,8 @@ class CommandController(private val commandService: CommandService) {
         val response =
             commandService.execute(node)
                 .also { response ->
-                    if (log.isDebugEnabled)
-                        log.debug("RESPONSE (id: '${id}'): '${response.toJson()}'.")
+                    if (logger.isDebugEnabled)
+                        logger.debug("RESPONSE (id: '${id}'): '${response.toJson()}'.")
                 }
 
         return ResponseEntity(response, HttpStatus.OK)
@@ -64,8 +60,7 @@ class CommandController(private val commandService: CommandService) {
         version: ApiVersion = GlobalProperties.App.apiVersion,
         id: UUID = NaN
     ): ResponseEntity<ApiResponse> {
-        log.debug("Error.", fail)
-        val response = generateResponseOnFailure(fail = fail, id = id, version = version)
+        val response = generateResponseOnFailure(fail = fail, id = id, version = version, logger = logger)
         return ResponseEntity(response, HttpStatus.OK)
     }
 }

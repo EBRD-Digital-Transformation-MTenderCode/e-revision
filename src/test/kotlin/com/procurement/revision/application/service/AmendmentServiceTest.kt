@@ -113,7 +113,14 @@ internal class AmendmentServiceTest {
         fun handleNoStatus() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(status = AmendmentStatus.ACTIVE)
-            whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendmentFirst, amendmentSecond)))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(
+                Result.success(
+                    listOf(
+                        amendmentFirst,
+                        amendmentSecond
+                    )
+                )
+            )
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams.tryCreate(
@@ -154,7 +161,14 @@ internal class AmendmentServiceTest {
         fun handleNoRelatesTo() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(relatesTo = AmendmentRelatesTo.CAN)
-            whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendmentFirst, amendmentSecond)))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(
+                Result.success(
+                    listOf(
+                        amendmentFirst,
+                        amendmentSecond
+                    )
+                )
+            )
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams.tryCreate(
@@ -195,7 +209,14 @@ internal class AmendmentServiceTest {
         fun handleNoRelatedItems() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment()
-            whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendmentFirst, amendmentSecond)))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(
+                Result.success(
+                    listOf(
+                        amendmentFirst,
+                        amendmentSecond
+                    )
+                )
+            )
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams.tryCreate(
@@ -237,7 +258,14 @@ internal class AmendmentServiceTest {
         fun handleNoType() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(type = AmendmentType.TENDER_CHANGE)
-            whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendmentFirst, amendmentSecond)))
+            whenever(amendmentRepository.findBy(any(), any())).thenReturn(
+                Result.success(
+                    listOf(
+                        amendmentFirst,
+                        amendmentSecond
+                    )
+                )
+            )
 
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams.tryCreate(
@@ -330,7 +358,7 @@ internal class AmendmentServiceTest {
             val expected = createAmendmentResult(
                 params,
                 token
-            ).run { copy(amendment = this.amendment.copy(relatesTo = AmendmentRelatesTo.LOT)) }
+            ).run { this.copy(relatesTo = AmendmentRelatesTo.LOT) }
 
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
@@ -346,29 +374,27 @@ internal class AmendmentServiceTest {
         }
 
         private fun createAmendmentResult(params: CreateAmendmentParams, token: UUID) =
-            CreateAmendmentResult(
-                amendment = params.amendment.let { amendment ->
-                    CreateAmendmentResult.Amendment(
-                        rationale = amendment.rationale,
-                        description = amendment.description,
-                        id = amendment.id,
-                        relatedItem = params.id,
-                        relatesTo = AmendmentRelatesTo.TENDER,
-                        status = AmendmentStatus.PENDING,
-                        type = AmendmentType.CANCELLATION,
-                        token = token,
-                        date = params.startDate,
-                        documents = amendment.documents.map { document ->
-                            CreateAmendmentResult.Amendment.Document(
-                                id = document.id,
-                                description = document.description,
-                                title = document.title,
-                                documentType = document.documentType
-                            )
-                        }
-                    )
-                }
-            )
+            params.amendment.let { amendment ->
+                CreateAmendmentResult(
+                    rationale = amendment.rationale,
+                    description = amendment.description,
+                    id = amendment.id,
+                    relatedItem = params.id,
+                    relatesTo = AmendmentRelatesTo.TENDER,
+                    status = AmendmentStatus.PENDING,
+                    type = AmendmentType.CANCELLATION,
+                    token = token,
+                    date = params.startDate,
+                    documents = amendment.documents.map { document ->
+                        CreateAmendmentResult.Document(
+                            id = document.id,
+                            description = document.description,
+                            title = document.title,
+                            documentType = document.documentType
+                        )
+                    }
+                )
+            }
 
         @Test
         fun successGetAmendmentFromHistory() {
@@ -391,25 +417,23 @@ internal class AmendmentServiceTest {
             )
 
             val expected = CreateAmendmentResult(
-                amendment = CreateAmendmentResult.Amendment(
-                    relatesTo = amendmentFromDb.relatesTo,
-                    description = amendmentFromDb.description,
-                    date = amendmentFromDb.date,
-                    token = amendmentFromDb.token,
-                    type = amendmentFromDb.type,
-                    status = amendmentFromDb.status,
-                    relatedItem = amendmentFromDb.relatedItem,
-                    id = amendmentFromDb.id,
-                    rationale = amendmentFromDb.rationale,
-                    documents = amendmentFromDb.documents.map { document ->
-                        CreateAmendmentResult.Amendment.Document(
-                            id = document.id,
-                            description = document.description,
-                            documentType = document.documentType,
-                            title = document.title
-                        )
-                    }
-                )
+                relatesTo = amendmentFromDb.relatesTo,
+                description = amendmentFromDb.description,
+                date = amendmentFromDb.date,
+                token = amendmentFromDb.token,
+                type = amendmentFromDb.type,
+                status = amendmentFromDb.status,
+                relatedItem = amendmentFromDb.relatedItem,
+                id = amendmentFromDb.id,
+                rationale = amendmentFromDb.rationale,
+                documents = amendmentFromDb.documents.map { document ->
+                    CreateAmendmentResult.Document(
+                        id = document.id,
+                        description = document.description,
+                        documentType = document.documentType,
+                        title = document.title
+                    )
+                }
             )
 
             val actual = amendmentService.createAmendment(params).get

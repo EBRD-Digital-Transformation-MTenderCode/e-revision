@@ -49,23 +49,22 @@ fun CreateAmendmentRequest.Amendment.Document.convert() =
     )
 
 fun Amendment.convertToCreateAmendmentResult() = CreateAmendmentResult(
-    amendment = CreateAmendmentResult.Amendment(
-        rationale = rationale,
-        description = description,
-        relatedItem = relatedItem,
-        relatesTo = relatesTo,
-        status = status,
-        id = id,
-        type = type,
-        date = date,
-        token = token,
-        documents = documents.map { document ->
-            CreateAmendmentResult.Amendment.Document(
-                id = document.id,
-                description = document.description,
-                documentType = document.documentType,
-                title = document.title
-            )
-        }
-    )
+    rationale = rationale,
+    description = description,
+    relatedItem = relatedItem,
+    relatesTo = relatesTo,
+    status = status,
+    id = id,
+    type = type,
+    date = date,
+    token = token,
+    documents = documents.map { document ->
+        CreateAmendmentResult.Document(
+            id = document.id,
+            description = document.description,
+            documentType = document.documentType,
+            title = document.title
+        )
+    }
+
 )

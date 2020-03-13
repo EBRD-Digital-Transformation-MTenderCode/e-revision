@@ -2,6 +2,7 @@ package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.repository.HistoryRepository
+import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.utils.toJson
@@ -12,22 +13,26 @@ import com.procurement.revision.infrastructure.web.dto.ApiSuccessResponse
 import com.procurement.revision.infrastructure.web.dto.generateResponseOnFailure
 import com.procurement.revision.infrastructure.web.dto.tryGetId
 import com.procurement.revision.infrastructure.web.dto.tryGetVersion
-import org.slf4j.LoggerFactory
 
 abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
     private val target: Class<R>,
-    private val historyRepository: HistoryRepository
+    private val historyRepository: HistoryRepository,
+    private val logger: Logger
 ) : Handler<ACTION, ApiResponse> {
-    companion object {
-        private val log = LoggerFactory.getLogger(AbstractHistoricalHandler::class.java)
-    }
 
     override fun handle(node: JsonNode): ApiResponse {
         val id = node.tryGetId().get
         val version = node.tryGetVersion().get
 
         val history = historyRepository.getHistory(id.toString(), action.key)
-            .doOnError { error -> return generateResponseOnFailure(error, version, id) }
+            .doOnError { error ->
+                return generateResponseOnFailure(
+                    fail = error,
+                    version = version,
+                    id = id,
+                    logger = logger
+                )
+            }
             .get
         if (history != null) {
             val data = history.jsonData
@@ -36,7 +41,8 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
                     return generateResponseOnFailure(
                         fail = Fail.Incident.ParseFromDatabaseIncident(data),
                         id = id,
-                        version = version
+                        version = version,
+                        logger = logger
                     )
                 }.get
             return ApiSuccessResponse(version = version, id = id, result = result)
@@ -46,12 +52,12 @@ abstract class AbstractHistoricalHandler<ACTION : Action, R : Any>(
             is Result.Success -> {
                 val resultData = result.get
                 historyRepository.saveHistory(id.toString(), action.key, resultData)
-                if (log.isDebugEnabled)
-                    log.debug("${action.key} has been executed. Result: ${resultData.toJson()}")
+                if (logger.isDebugEnabled)
+                    logger.debug("${action.key} has been executed. Result: ${resultData.toJson()}")
 
                 ApiSuccessResponse(version = version, id = id, result = resultData)
             }
-            is Result.Failure -> generateResponseOnFailure(result.error, version, id)
+            is Result.Failure -> generateResponseOnFailure(fail = result.error, version = version, id = id, logger = logger)
         }
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.repository.HistoryRepository
 import com.procurement.revision.application.service.AmendmentService
+import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.fail.Fail
@@ -15,10 +16,12 @@ import org.springframework.stereotype.Component
 @Component
 class CreateAmendmentHandler(
     private val amendmentService: AmendmentService,
-    historyRepository: HistoryRepository
+    historyRepository: HistoryRepository,
+    logger: Logger
 ) : AbstractHistoricalHandler<CommandType, CreateAmendmentResult>(
     CreateAmendmentResult::class.java,
-    historyRepository
+    historyRepository,
+    logger
 ) {
     override val action: CommandType = CommandType.CREATE_AMENDMENT
 

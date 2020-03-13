@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.bind.jackson.configuration
-import com.procurement.revision.infrastructure.fail.error.DataErrors
+import com.procurement.revision.infrastructure.fail.Fail
 import java.io.IOException
 import java.time.Instant
 import java.time.LocalDateTime
@@ -49,10 +49,10 @@ fun <T : Any> String.tryToObject(target: Class<T>): Result<T, String> = try {
     Result.failure("Error binding string to an object of type '${target.canonicalName}'.")
 }
 
-fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, String> = try {
+fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
     Result.success(JsonMapper.mapper.treeToValue(this, target))
 } catch (expected: Exception) {
-    Result.failure("Error binding JSON to an object of type '${target.canonicalName}'.")
+    Result.failure(Fail.Incident.Parsing(target.canonicalName, expected))
 }
 
 fun <T : Any> JsonNode.toObject(target: Class<T>): T {
@@ -69,8 +69,8 @@ fun String.toNode(): JsonNode = try {
     throw IllegalArgumentException("Error parsing String to JsonNode.", exception)
 }
 
-fun String.tryToNode(): Result<JsonNode, DataErrors> = try {
+fun String.tryToNode(): Result<JsonNode, Fail.Incident.Parsing> = try {
     Result.success(JsonMapper.mapper.readTree(this))
 } catch (exception: JsonProcessingException) {
-    Result.failure(DataErrors.Parsing())
+    Result.failure(Fail.Incident.Parsing(JsonNode::class.java.canonicalName, exception))
 }

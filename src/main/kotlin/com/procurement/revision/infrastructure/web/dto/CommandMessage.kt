@@ -13,6 +13,7 @@ import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.error.DataErrors
+import com.procurement.revision.infrastructure.utils.tryToNode
 import com.procurement.revision.infrastructure.utils.tryToObject
 import java.util.*
 
@@ -150,7 +151,7 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, DataErrors> {
         when (val result = it.tryToObject(target)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
-                DataErrors.Parsing("Error parsing '$name'")
+                DataErrors.BadRequest("Error parsing '$name'")
             )
         }
     }
@@ -171,5 +172,12 @@ fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
         }
     }
 }
+
+fun String.tryGetNode(): Result<JsonNode, DataErrors> =
+    when (val result = this.tryToNode()) {
+        is Result.Success -> result
+        is Result.Failure -> Result.failure(DataErrors.BadRequest())
+    }
+
 
 

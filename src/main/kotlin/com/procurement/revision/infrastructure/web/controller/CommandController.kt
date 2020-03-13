@@ -4,13 +4,13 @@ import com.procurement.revision.infrastructure.configuration.properties.GlobalPr
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.service.CommandService
 import com.procurement.revision.infrastructure.utils.toJson
-import com.procurement.revision.infrastructure.utils.tryToNode
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.ApiVersion
 import com.procurement.revision.infrastructure.web.dto.NaN
 import com.procurement.revision.infrastructure.web.dto.generateResponseOnFailure
 import com.procurement.revision.infrastructure.web.dto.tryGetAction
 import com.procurement.revision.infrastructure.web.dto.tryGetId
+import com.procurement.revision.infrastructure.web.dto.tryGetNode
 import com.procurement.revision.infrastructure.web.dto.tryGetVersion
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -34,7 +34,7 @@ class CommandController(private val commandService: CommandService) {
         if (log.isDebugEnabled)
             log.debug("RECEIVED COMMAND: '$requestBody'.")
 
-        val node = requestBody.tryToNode()
+        val node = requestBody.tryGetNode()
             .doOnError { error -> return generateResponse(fail = error) }
             .get
 

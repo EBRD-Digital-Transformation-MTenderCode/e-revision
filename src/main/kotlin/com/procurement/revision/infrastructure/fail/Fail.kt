@@ -54,6 +54,12 @@ sealed class Fail {
             description = "Could not parse data stored in database."
         )
 
+        class Parsing(className: String, val exception: Exception) : Incident(
+            level = Level.ERROR,
+            number = "4",
+            description = "Error parsing to $className."
+        )
+
         enum class Level(override val key: String) : EnumElementProvider.Key {
             ERROR("error"),
             WARNING("warning"),

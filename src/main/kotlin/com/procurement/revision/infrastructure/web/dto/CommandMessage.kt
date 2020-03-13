@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.NullNode
+import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.enums.EnumElementProvider
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.asSuccess
@@ -36,9 +37,11 @@ enum class CommandType(@JsonValue override val key: String) : Action, EnumElemen
 fun generateResponseOnFailure(
     fail: Fail,
     version: ApiVersion,
-    id: UUID
-): ApiResponse =
-    when (fail) {
+    id: UUID,
+    logger: Logger
+): ApiResponse {
+    fail.logging(logger)
+    return when (fail) {
         is Fail.Error -> {
             when (fail) {
                 is DataErrors.Validation ->
@@ -78,6 +81,7 @@ fun generateResponseOnFailure(
             generateIncident(errors, version, id)
         }
     }
+}
 
 private fun generateIncident(
     details: List<ApiIncidentResponse.Incident.Details>, version: ApiVersion, id: UUID

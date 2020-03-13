@@ -3,15 +3,16 @@ package com.procurement.revision.infrastructure.web.dto
 import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonValue
 import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.NullNode
 import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.enums.EnumElementProvider
 import com.procurement.revision.domain.functional.Result
-import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.util.extension.nowDefaultUTC
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
+import com.procurement.revision.infrastructure.extension.tryGetAttribute
+import com.procurement.revision.infrastructure.extension.tryGetAttributeAsEnum
+import com.procurement.revision.infrastructure.extension.tryGetTextAttribute
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.error.BadRequest
 import com.procurement.revision.infrastructure.fail.error.DataErrors
@@ -106,49 +107,24 @@ fun getFullErrorCode(code: String): String = "${code}/${GlobalProperties.service
 val NaN: UUID
     get() = UUID(0, 0)
 
-fun JsonNode.tryGetAttribute(name: String): Result<JsonNode, DataErrors> {
-    val node = get(name)
-        ?: return Result.failure(
-            DataErrors.Validation.MissingRequiredAttribute(name)
-        )
-    if (node is NullNode)
-        return Result.failure(
-            DataErrors.Validation.DataTypeMismatch(
-                name = name, actualType = "null", expectedType = "not null"
-            )
-        )
-
-    return Result.success(node)
-}
-
 fun JsonNode.tryGetVersion(): Result<ApiVersion, DataErrors> {
     val name = "version"
-    return tryGetAttribute(name).bind {
-        when (val result = ApiVersion.tryValueOf(it.asText())) {
+    return tryGetTextAttribute(name).bind {
+        when (val result = ApiVersion.tryValueOf(it)) {
             is Result.Success -> result
             is Result.Failure -> Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
                     name = name,
                     expectedFormat = "00.00.00",
-                    actualValue = it.asText()
+                    actualValue = it
                 )
             )
         }
     }
 }
 
-fun JsonNode.tryGetAction(): Result<CommandType, DataErrors> {
-    val name = "action"
-    return tryGetAttribute(name).bind { action ->
-        CommandType.orNull(action.asText())?.asSuccess<CommandType, DataErrors>() ?: Result.failure(
-            DataErrors.Validation.UnknownValue(
-                name = name,
-                actualValue = action.asText(),
-                expectedValues = CommandType.allowedValues
-            )
-        )
-    }
-}
+fun JsonNode.tryGetAction(): Result<CommandType, DataErrors> =
+    tryGetAttributeAsEnum("action", CommandType)
 
 fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
     val name = "params"
@@ -164,14 +140,14 @@ fun <T : Any> JsonNode.tryGetParams(target: Class<T>): Result<T, Fail.Error> {
 
 fun JsonNode.tryGetId(): Result<UUID, DataErrors> {
     val name = "id"
-    return tryGetAttribute(name)
+    return tryGetTextAttribute(name)
         .bind {
-            when (val result = it.asText().tryUUID()) {
+            when (val result = it.tryUUID()) {
                 is Result.Success -> result
                 is Result.Failure -> Result.failure(
                     DataErrors.Validation.DataFormatMismatch(
                         name = name,
-                        actualValue = it.asText(),
+                        actualValue = it,
                         expectedFormat = "uuid"
                     )
                 )

@@ -5,6 +5,8 @@ import com.procurement.revision.domain.functional.Option
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.functional.Result.Companion.success
+import com.procurement.revision.domain.model.Cpid
+import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.domain.model.Owner
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.amendment.tryAmendmentId
@@ -21,8 +23,8 @@ class CreateAmendmentParams private constructor(
     val id: String,
     val operationType: OperationType,
     val startDate: LocalDateTime,
-    val cpid: String,
-    val ocid: String,
+    val cpid: Cpid,
+    val ocid: Ocid,
     val owner: Owner
 ) {
     companion object {
@@ -69,10 +71,34 @@ class CreateAmendmentParams private constructor(
                 }
                 .get
 
+            val cpidParsed = Cpid.tryCreate(cpid = cpid)
+                .doOnError { expectedPattern ->
+                    return failure(
+                        DataErrors.Validation.DataMismatchToPattern(
+                            name = "cpid",
+                            pattern = expectedPattern,
+                            actualValue = cpid
+                        )
+                    )
+                }
+                .get
+
+            val ocidParsed = Ocid.tryCreate(ocid = ocid)
+                .doOnError { expectedPattern ->
+                    return failure(
+                        DataErrors.Validation.DataMismatchToPattern(
+                            name = "ocid",
+                            pattern = expectedPattern,
+                            actualValue = ocid
+                        )
+                    )
+                }
+                .get
+
             return success(
                 CreateAmendmentParams(
-                    cpid = cpid,
-                    ocid = ocid,
+                    cpid = cpidParsed,
+                    ocid = ocidParsed,
                     operationType = operationTypeParsed,
                     id = id,
                     owner = ownerParsed,

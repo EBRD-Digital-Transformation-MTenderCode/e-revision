@@ -6,12 +6,12 @@ import com.procurement.revision.domain.model.Cpid
 import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 
-fun parseCpid(value: String, name: String = "cpid"): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
+fun parseCpid(value: String): Result<Cpid, DataErrors.Validation.DataMismatchToPattern> =
     Cpid.tryCreate(cpid = value)
         .doReturn { expectedPattern ->
             return Result.failure(
                 DataErrors.Validation.DataMismatchToPattern(
-                    name = name,
+                    name = "cpid",
                     pattern = expectedPattern,
                     actualValue = value
                 )
@@ -19,12 +19,12 @@ fun parseCpid(value: String, name: String = "cpid"): Result<Cpid, DataErrors.Val
         }
         .asSuccess()
 
-fun parseOcid(value: String, name: String = "ocid"): Result<Ocid, DataErrors.Validation.DataMismatchToPattern> =
+fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToPattern> =
     Ocid.tryCreate(ocid = value)
         .doReturn { expectedPattern ->
             return Result.failure(
                 DataErrors.Validation.DataMismatchToPattern(
-                    name = name,
+                    name = "ocid",
                     pattern = expectedPattern,
                     actualValue = value
                 )

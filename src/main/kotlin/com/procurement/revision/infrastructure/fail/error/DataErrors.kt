@@ -8,7 +8,7 @@ sealed class DataErrors(numberError: String, override val description: String) :
     override val code: String = prefix + numberError
 
     sealed class Validation(numberError: String, val name: String, description: String) :
-        DataErrors(numberError = "1.$numberError", description = description) {
+        DataErrors(numberError = numberError, description = description) {
 
         companion object {
             const val ATTRIBUTE_NAME_KEY = "attributeName"

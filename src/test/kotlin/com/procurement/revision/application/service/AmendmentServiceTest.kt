@@ -339,8 +339,8 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid),
-                    ocid = eq(params.ocid),
+                    cpid = eq(params.cpid.value),
+                    ocid = eq(params.ocid.value),
                     amendment = any()
                 )
             ).thenReturn(Result.success(true))
@@ -363,8 +363,8 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid),
-                    ocid = eq(params.ocid),
+                    cpid = eq(params.cpid.value),
+                    ocid = eq(params.ocid.value),
                     amendment = any()
                 )
             ).thenReturn(Result.success(true))
@@ -405,14 +405,14 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid),
-                    ocid = eq(params.ocid),
+                    cpid = eq(params.cpid.value),
+                    ocid = eq(params.ocid.value),
                     amendment = any()
                 )
             ).thenReturn(Result.success(false))
 
             val amendmentFromDb = getTestAmendment()
-            whenever(amendmentRepository.findBy(params.cpid, params.ocid, params.amendment.id)).thenReturn(
+            whenever(amendmentRepository.findBy(params.cpid.value, params.ocid.value, params.amendment.id)).thenReturn(
                 Result.success(amendmentFromDb)
             )
 
@@ -444,8 +444,8 @@ internal class AmendmentServiceTest {
         private fun createAmendmentParams(operationType: OperationType = OperationType.TENDER_CANCELLATION): CreateAmendmentParams {
             return CreateAmendmentParams.tryCreate(
                 id = UUID.randomUUID().toString(),
-                cpid = "cpid",
-                ocid = "ocid",
+                cpid = "ocds-t1s2t3-MD-1580306096762",
+                ocid = "ocds-t1s2t3-MD-1580306096762-EV-1582034422825",
                 operationType = operationType.toString(),
                 owner = "owner",
                 startDate = "2019-10-04T15:51:23Z",

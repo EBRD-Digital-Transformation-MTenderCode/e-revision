@@ -98,16 +98,16 @@ class AmendmentService(
                 )
             }
         return amendmentRepository.saveNewAmendment(
-            cpid = params.cpid,
-            ocid = params.ocid,
+            cpid = params.cpid.value,
+            ocid = params.ocid.value,
             amendment = createdAmendment
         ).bind { isSaved ->
             if (isSaved) {
                 success(createdAmendment.convertToCreateAmendmentResult())
             } else {
                 amendmentRepository.findBy(
-                    cpid = params.cpid,
-                    ocid = params.ocid,
+                    cpid = params.cpid.value,
+                    ocid = params.ocid.value,
                     id = createdAmendment.id
                 ).bind { amendment ->
                     if (amendment != null)

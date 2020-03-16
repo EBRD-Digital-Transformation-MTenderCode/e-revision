@@ -83,7 +83,7 @@ class AmendmentService(
                     status = AmendmentStatus.PENDING,
                     type = type,
                     relatesTo = relatesTo,
-                    relatedItem = params.id,
+                    relatedItem = params.relatedEntityId,
                     date = params.startDate,
                     documents = amendment.documents.map { document ->
                         Amendment.Document(

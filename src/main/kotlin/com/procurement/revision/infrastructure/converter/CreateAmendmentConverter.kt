@@ -22,7 +22,7 @@ fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, DataErrors> 
         operationType = operationType,
         startDate = startDate,
         owner = owner,
-        id = id
+        relatedEntityId = relatedEntityId
     )
 }
 

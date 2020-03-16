@@ -20,7 +20,7 @@ import java.time.LocalDateTime
 
 class CreateAmendmentParams private constructor(
     val amendment: Amendment,
-    val id: String,
+    val relatedEntityId: String,
     val operationType: OperationType,
     val startDate: LocalDateTime,
     val cpid: Cpid,
@@ -30,7 +30,7 @@ class CreateAmendmentParams private constructor(
     companion object {
         fun tryCreate(
             amendment: Amendment,
-            id: String,
+            relatedEntityId: String,
             operationType: String,
             startDate: String,
             cpid: String,
@@ -82,7 +82,7 @@ class CreateAmendmentParams private constructor(
                     cpid = cpidParsed,
                     ocid = ocidParsed,
                     operationType = operationTypeParsed,
-                    id = id,
+                    relatedEntityId = relatedEntityId,
                     owner = ownerParsed,
                     amendment = amendment,
                     startDate = startDateParsed

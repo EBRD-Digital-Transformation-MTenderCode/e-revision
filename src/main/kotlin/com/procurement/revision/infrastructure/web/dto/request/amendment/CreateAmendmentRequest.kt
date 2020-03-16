@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class CreateAmendmentRequest(
     @param:JsonProperty("amendment") @field:JsonProperty("amendment") val amendment: Amendment,
-    @param:JsonProperty("id") @field:JsonProperty("id") val id: String,
+    @param:JsonProperty("relatedEntityId") @field:JsonProperty("id") val relatedEntityId: String,
     @param:JsonProperty("operationType") @field:JsonProperty("operationType") val operationType: String,
     @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: String,
     @param:JsonProperty("cpid") @field:JsonProperty("cpid") val cpid: String,

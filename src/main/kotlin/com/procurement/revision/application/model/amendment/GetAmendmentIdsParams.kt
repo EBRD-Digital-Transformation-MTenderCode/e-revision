@@ -6,6 +6,8 @@ import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.functional.Result.Companion.success
+import com.procurement.revision.domain.model.Cpid
+import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 
 class GetAmendmentIdsParams private constructor(
@@ -13,8 +15,8 @@ class GetAmendmentIdsParams private constructor(
     val type: AmendmentType?,
     val relatesTo: AmendmentRelatesTo?,
     val relatedItems: List<String>,
-    val cpid: String,
-    val ocid: String
+    val cpid: Cpid,
+    val ocid: Ocid
 ) {
     companion object {
         fun tryCreate(
@@ -66,13 +68,37 @@ class GetAmendmentIdsParams private constructor(
                 return failure(DataErrors.Validation.EmptyArray("relatedItems"))
             val relatedItemsTransformed = relatedItems?.toList().orEmpty()
 
+            val cpidParsed = Cpid.tryCreate(cpid = cpid)
+                .doOnError { expectedPattern ->
+                    return failure(
+                        DataErrors.Validation.DataMismatchToPattern(
+                            name = "cpid",
+                            pattern = expectedPattern,
+                            actualValue = cpid
+                        )
+                    )
+                }
+                .get
+
+            val ocidParsed = Ocid.tryCreate(ocid = ocid)
+                .doOnError { expectedPattern ->
+                    return failure(
+                        DataErrors.Validation.DataMismatchToPattern(
+                            name = "ocid",
+                            pattern = expectedPattern,
+                            actualValue = ocid
+                        )
+                    )
+                }
+                .get
+
             return success(
                 GetAmendmentIdsParams(
-                    ocid = ocid,
+                    ocid = ocidParsed,
                     status = statusParsed,
                     type = typeParsed,
                     relatesTo = relatesToParsed,
-                    cpid = cpid,
+                    cpid = cpidParsed,
                     relatedItems = relatedItemsTransformed
                 )
             )

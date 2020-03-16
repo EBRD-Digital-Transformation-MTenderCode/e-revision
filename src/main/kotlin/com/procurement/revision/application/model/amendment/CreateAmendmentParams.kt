@@ -71,29 +71,11 @@ class CreateAmendmentParams private constructor(
                 }
                 .get
 
-            val cpidParsed = Cpid.tryCreate(cpid = cpid)
-                .doOnError { expectedPattern ->
-                    return failure(
-                        DataErrors.Validation.DataMismatchToPattern(
-                            name = "cpid",
-                            pattern = expectedPattern,
-                            actualValue = cpid
-                        )
-                    )
-                }
-                .get
+            val cpidParsed = parseCpid(cpid)
+                .doReturn { error -> return failure(error = error) }
 
-            val ocidParsed = Ocid.tryCreate(ocid = ocid)
-                .doOnError { expectedPattern ->
-                    return failure(
-                        DataErrors.Validation.DataMismatchToPattern(
-                            name = "ocid",
-                            pattern = expectedPattern,
-                            actualValue = ocid
-                        )
-                    )
-                }
-                .get
+            val ocidParsed = parseOcid(ocid)
+                .doReturn { error -> return failure(error = error) }
 
             return success(
                 CreateAmendmentParams(

@@ -34,12 +34,12 @@ class CommandController(private val commandService: CommandService, private val 
             .doOnError { error -> return generateResponse(fail = error) }
             .get
 
-        val id = node.tryGetId()
+        val version = node.tryGetVersion()
             .doOnError { error -> return generateResponse(fail = error) }
             .get
 
-        val version = node.tryGetVersion()
-            .doOnError { error -> return generateResponse(fail = error, id = id) }
+        val id = node.tryGetId()
+            .doOnError { error -> return generateResponse(fail = error, version = version) }
             .get
 
         node.tryGetAction()

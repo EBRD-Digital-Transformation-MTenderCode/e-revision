@@ -26,6 +26,11 @@ import java.util.*
 
 internal class AmendmentServiceTest {
 
+    companion object {
+        private const val CPID = "ocds-t1s2t3-MD-1580306096763"
+        private const val OCID = "ocds-t1s2t3-MD-1580306096762-EV-1582034422825"
+    }
+
     private lateinit var amendmentRepository: AmendmentRepository
     private lateinit var amendmentService: AmendmentService
     private lateinit var generable: Generable
@@ -79,8 +84,8 @@ internal class AmendmentServiceTest {
                     status = amendmentFirst.status.toString(),
                     relatesTo = amendmentFirst.relatesTo.toString(),
                     relatedItems = listOf(amendmentFirst.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendmentFirst.type.toString()
                 ).get
             ).get
@@ -101,8 +106,8 @@ internal class AmendmentServiceTest {
                     status = nonMatchingStatus.toString(),
                     relatesTo = amendment.relatesTo.toString(),
                     relatedItems = listOf(amendment.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendment.type.toString()
                 ).get
             )
@@ -127,8 +132,8 @@ internal class AmendmentServiceTest {
                     status = null,
                     relatesTo = amendmentFirst.relatesTo.toString(),
                     relatedItems = listOf(amendmentFirst.relatedItem, amendmentSecond.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendmentFirst.type.toString()
                 ).get
             ).get.sorted()
@@ -149,8 +154,8 @@ internal class AmendmentServiceTest {
                     status = amendment.status.toString(),
                     relatesTo = nonMatchingRelatesTo.toString(),
                     relatedItems = listOf(amendment.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendment.type.toString()
                 ).get
             )
@@ -175,8 +180,8 @@ internal class AmendmentServiceTest {
                     status = amendmentFirst.status.toString(),
                     relatesTo = null,
                     relatedItems = listOf(amendmentFirst.relatedItem, amendmentSecond.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendmentFirst.type.toString()
                 ).get
             ).get.sorted()
@@ -197,8 +202,8 @@ internal class AmendmentServiceTest {
                     status = amendment.status.toString(),
                     relatesTo = amendment.relatesTo.toString(),
                     relatedItems = nonMatchingRelatedItems,
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendment.type.toString()
                 ).get
             )
@@ -223,8 +228,8 @@ internal class AmendmentServiceTest {
                     status = amendmentFirst.status.toString(),
                     relatesTo = null,
                     relatedItems = null,
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendmentFirst.type.toString()
                 ).get
             ).get.sorted()
@@ -246,8 +251,8 @@ internal class AmendmentServiceTest {
                     status = amendment.status.toString(),
                     relatesTo = amendment.relatesTo.toString(),
                     relatedItems = listOf(amendment.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = nonMatchingType.toString()
                 ).get
             )
@@ -272,8 +277,8 @@ internal class AmendmentServiceTest {
                     status = amendmentFirst.status.toString(),
                     relatesTo = null,
                     relatedItems = listOf(amendmentFirst.relatedItem, amendmentSecond.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = null
                 ).get
             ).get.sorted()
@@ -293,8 +298,8 @@ internal class AmendmentServiceTest {
                     status = null,
                     relatesTo = null,
                     relatedItems = null,
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = null
                 ).get
             ).get
@@ -314,8 +319,8 @@ internal class AmendmentServiceTest {
                     status = amendment.status.toString(),
                     relatesTo = amendment.relatesTo.toString(),
                     relatedItems = listOf(amendment.relatedItem, amendment.relatedItem),
-                    cpid = "cpid",
-                    ocid = "ocid",
+                    cpid = CPID,
+                    ocid = OCID,
                     type = amendment.type.toString()
                 ).get
             ).get.sorted()

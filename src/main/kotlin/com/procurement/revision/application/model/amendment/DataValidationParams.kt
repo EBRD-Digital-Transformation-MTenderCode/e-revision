@@ -5,6 +5,8 @@ import com.procurement.revision.domain.functional.Option
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.functional.Result.Companion.success
+import com.procurement.revision.domain.model.Cpid
+import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.model.amendment.tryAmendmentId
 import com.procurement.revision.domain.model.document.tryDocumentId
@@ -13,8 +15,8 @@ import com.procurement.revision.infrastructure.model.OperationType
 
 class DataValidationParams private constructor(
     val amendments: List<Amendment>,
-    val cpid: String,
-    val ocid: String,
+    val cpid: Cpid,
+    val ocid: Ocid,
     val operationType: OperationType
 ) {
     companion object {
@@ -37,10 +39,16 @@ class DataValidationParams private constructor(
                     )
                 )
 
+            val cpidParsed = parseCpid(cpid)
+                .doReturn { error -> return failure(error = error) }
+
+            val ocidParsed = parseOcid(ocid)
+                .doReturn { error -> return failure(error = error) }
+
             return success(
                 DataValidationParams(
-                    cpid = cpid,
-                    ocid = ocid,
+                    cpid = cpidParsed,
+                    ocid = ocidParsed,
                     operationType = operationTypeParsed,
                     amendments = amendments
                 )

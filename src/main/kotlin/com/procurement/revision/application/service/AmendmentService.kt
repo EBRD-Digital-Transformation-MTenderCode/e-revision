@@ -30,7 +30,7 @@ class AmendmentService(
 ) {
 
     fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
-        val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
+        val amendments = amendmentRepository.findBy(params.cpid.value, params.ocid.value)
             .doOnError { incident -> return failure(incident) }
             .get
         val relatedItems = params.relatedItems.toSet()

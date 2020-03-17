@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class DataValidationRequest(
-    @param:JsonProperty("amendments") @field:JsonProperty("amendments") val amendments: List<Amendment>,
+    @param:JsonProperty("amendment") @field:JsonProperty("amendment") val amendment: Amendment,
     @param:JsonProperty("cpid") @field:JsonProperty("cpid") val cpid: String,
     @param:JsonProperty("ocid") @field:JsonProperty("ocid") val ocid: String,
     @param:JsonProperty("operationType") @field:JsonProperty("operationType") val operationType: String

@@ -14,22 +14,18 @@ import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
 
 class DataValidationParams private constructor(
-    val amendments: List<Amendment>,
+    val amendment: Amendment,
     val cpid: Cpid,
     val ocid: Ocid,
     val operationType: OperationType
 ) {
     companion object {
         fun tryCreate(
-            amendments: List<Amendment>,
+            amendment: Amendment,
             cpid: String,
             ocid: String,
             operationType: String
         ): Result<DataValidationParams, DataErrors> {
-            if (amendments.isEmpty()) {
-                return failure(DataErrors.Validation.EmptyArray("amendments"))
-            }
-
             val operationTypeParsed = OperationType.orNull(operationType)
                 ?: return failure(
                     DataErrors.Validation.UnknownValue(
@@ -50,7 +46,7 @@ class DataValidationParams private constructor(
                     cpid = cpidParsed,
                     ocid = ocidParsed,
                     operationType = operationTypeParsed,
-                    amendments = amendments
+                    amendment = amendment
                 )
             )
         }

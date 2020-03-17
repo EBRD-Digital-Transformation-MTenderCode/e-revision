@@ -50,9 +50,7 @@ class AmendmentService(
         val correctDocumentType = when (params.operationType) {
             OperationType.LOT_CANCELLATION, OperationType.TENDER_CANCELLATION -> DocumentType.CANCELLATION_DETAILS
         }
-        params.amendments
-            .asSequence()
-            .flatMap { amendment -> amendment.documents.asSequence() }
+        params.amendment.documents
             .firstOrNull { document ->
                 document.documentType != correctDocumentType
             }?.let { document ->

@@ -13,6 +13,7 @@ import com.procurement.revision.infrastructure.web.dto.tryGetAction
 import com.procurement.revision.infrastructure.web.dto.tryGetId
 import com.procurement.revision.infrastructure.web.dto.tryGetNode
 import com.procurement.revision.infrastructure.web.dto.tryGetVersion
+import com.procurement.revision.domain.functional.Result
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -34,9 +35,15 @@ class CommandController(private val commandService: CommandService, private val 
             .doOnError { error -> return generateResponse(fail = error) }
             .get
 
-        val version = node.tryGetVersion()
-            .doOnError { error -> return generateResponse(fail = error) }
-            .get
+        val version = when (val versionResult = node.tryGetVersion()) {
+            is Result.Success -> versionResult.get
+            is Result.Failure -> {
+                when (val idResult = node.tryGetId()) {
+                    is Result.Success -> return generateResponse(fail = versionResult.error, id = idResult.get)
+                    is Result.Failure -> return generateResponse(fail = versionResult.error)
+                }
+            }
+        }
 
         val id = node.tryGetId()
             .doOnError { error -> return generateResponse(fail = error, version = version) }

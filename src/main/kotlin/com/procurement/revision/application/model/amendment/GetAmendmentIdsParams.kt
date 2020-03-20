@@ -28,6 +28,15 @@ class GetAmendmentIdsParams private constructor(
             ocid: String
         ): Result<GetAmendmentIdsParams, DataErrors> {
 
+            val allowedStatuses = AmendmentStatus.values().filter { value ->
+                when (value) {
+                    AmendmentStatus.PENDING -> true
+                    AmendmentStatus.CANCELLED,
+                    AmendmentStatus.ACTIVE,
+                    AmendmentStatus.WITHDRAWN -> false
+                }
+            }.map { it.key }
+
             val statusParsed = status
                 ?.let {
                     AmendmentStatus.orNull(it)
@@ -35,6 +44,15 @@ class GetAmendmentIdsParams private constructor(
                             DataErrors.Validation.UnknownValue(
                                 name = "status",
                                 expectedValues = AmendmentStatus.allowedValues,
+                                actualValue = status
+                            )
+                        )
+                }?.also { amendmentStatus ->
+                    if (amendmentStatus.key !in allowedStatuses)
+                        return failure(
+                            DataErrors.Validation.UnknownValue(
+                                name = "status",
+                                expectedValues = allowedStatuses,
                                 actualValue = status
                             )
                         )

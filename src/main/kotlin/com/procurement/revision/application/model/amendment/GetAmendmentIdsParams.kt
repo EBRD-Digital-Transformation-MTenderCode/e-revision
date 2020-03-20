@@ -9,6 +9,31 @@ import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.model.Cpid
 import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.infrastructure.fail.error.DataErrors
+import com.procurement.revision.lib.toSetBy
+
+val allowedStatuses = AmendmentStatus.values().filter { value ->
+    when (value) {
+        AmendmentStatus.PENDING -> true
+        AmendmentStatus.CANCELLED,
+        AmendmentStatus.ACTIVE,
+        AmendmentStatus.WITHDRAWN -> false
+    }
+}.toSetBy { it.key }
+
+val allowedTypes = AmendmentType.values().filter { value ->
+    when (value) {
+        AmendmentType.CANCELLATION -> true
+        AmendmentType.TENDER_CHANGE -> false
+    }
+}.toSetBy { it.key }
+
+val allowedRelatesTo = AmendmentRelatesTo.values().filter { value ->
+    when (value) {
+        AmendmentRelatesTo.LOT,
+        AmendmentRelatesTo.TENDER -> true
+        AmendmentRelatesTo.CAN -> false
+    }
+}.toSetBy { it.key }
 
 class GetAmendmentIdsParams private constructor(
     val status: AmendmentStatus?,
@@ -27,16 +52,6 @@ class GetAmendmentIdsParams private constructor(
             cpid: String,
             ocid: String
         ): Result<GetAmendmentIdsParams, DataErrors> {
-
-            val allowedStatuses = AmendmentStatus.values().filter { value ->
-                when (value) {
-                    AmendmentStatus.PENDING -> true
-                    AmendmentStatus.CANCELLED,
-                    AmendmentStatus.ACTIVE,
-                    AmendmentStatus.WITHDRAWN -> false
-                }
-            }.map { it.key }
-
             val statusParsed = status
                 ?.let {
                     AmendmentStatus.orNull(it)
@@ -48,14 +63,16 @@ class GetAmendmentIdsParams private constructor(
                             )
                         )
                 }?.also { amendmentStatus ->
-                    if (amendmentStatus.key !in allowedStatuses)
+                    val amendmentStatusKey = amendmentStatus.key
+                    if (amendmentStatusKey !in allowedStatuses) {
                         return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "status",
                                 expectedValues = allowedStatuses,
-                                actualValue = status
+                                actualValue = amendmentStatusKey
                             )
                         )
+                    }
                 }
 
             val typeParsed = type
@@ -68,6 +85,17 @@ class GetAmendmentIdsParams private constructor(
                                 expectedValues = AmendmentType.allowedValues
                             )
                         )
+                }?.also { amendmentType ->
+                    val amendmentTypeKey = amendmentType.key
+                    if (amendmentTypeKey !in allowedTypes) {
+                        return failure(
+                            DataErrors.Validation.UnknownValue(
+                                name = "type",
+                                expectedValues = allowedTypes,
+                                actualValue = amendmentTypeKey
+                            )
+                        )
+                    }
                 }
 
             val relatesToParsed = relatesTo
@@ -80,6 +108,17 @@ class GetAmendmentIdsParams private constructor(
                                 actualValue = relatesTo
                             )
                         )
+                }?.also { amendmentRelatesTo ->
+                    val amendmentRelatesToKey = amendmentRelatesTo.key
+                    if (amendmentRelatesToKey !in allowedRelatesTo) {
+                        return failure(
+                            DataErrors.Validation.UnknownValue(
+                                name = "relatesTo",
+                                expectedValues = allowedRelatesTo,
+                                actualValue = amendmentRelatesToKey
+                            )
+                        )
+                    }
                 }
 
             if (relatedItems != null && relatedItems.isEmpty())

@@ -21,7 +21,7 @@ import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDese
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
 import com.procurement.revision.infrastructure.configuration.DatabaseTestConfiguration
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
+import com.procurement.revision.infrastructure.model.entity.AmendmentEntity
 import com.procurement.revision.json.toJson
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.CoreMatchers.hasItem
@@ -127,7 +127,6 @@ class AmendmentDataEntityRepositoryIT {
 
         assertTrue(actual.isFail)
         assertTrue(actual.error is Fail.Incident.DatabaseInteractionIncident)
-
     }
 
     private fun createKeyspace() {
@@ -193,27 +192,25 @@ class AmendmentDataEntityRepositoryIT {
 
     )
 
-    fun convert(amendment: Amendment) = AmendmentDataEntity(
-        amendment = AmendmentDataEntity.AmendmentEntity(
-            id = amendment.id,
-            description = amendment.description,
-            rationale = amendment.rationale,
-            relatesTo = amendment.relatesTo,
-            relatedItem = amendment.relatedItem,
-            status = amendment.status,
-            type = amendment.type,
-            date = amendment.date,
-            token = amendment.token,
-            owner = amendment.owner,
-            documents = amendment.documents
-                .map { document ->
-                    AmendmentDataEntity.AmendmentEntity.Document(
-                        id = document.id,
-                        documentType = document.documentType,
-                        description = document.description,
-                        title = document.title
-                    )
-                }
-        )
+    fun convert(amendment: Amendment) = AmendmentEntity(
+        id = amendment.id,
+        description = amendment.description,
+        rationale = amendment.rationale,
+        relatesTo = amendment.relatesTo,
+        relatedItem = amendment.relatedItem,
+        status = amendment.status,
+        type = amendment.type,
+        date = amendment.date,
+        token = amendment.token,
+        owner = amendment.owner,
+        documents = amendment.documents
+            .map { document ->
+                AmendmentEntity.Document(
+                    id = document.id,
+                    documentType = document.documentType,
+                    description = document.description,
+                    title = document.title
+                )
+            }
     )
 }

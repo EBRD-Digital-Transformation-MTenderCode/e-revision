@@ -12,7 +12,7 @@ import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.extension.cassandra.tryExecute
 import com.procurement.revision.infrastructure.fail.Fail
-import com.procurement.revision.infrastructure.model.entity.AmendmentDataEntity
+import com.procurement.revision.infrastructure.model.entity.AmendmentEntity
 import com.procurement.revision.infrastructure.utils.toJson
 import com.procurement.revision.infrastructure.utils.tryToObject
 import org.springframework.stereotype.Repository
@@ -98,11 +98,11 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
     private fun converter(row: Row): Result<Amendment, Fail.Incident> {
         val data = row.getString(columnData)
         val entity = data
-            .tryToObject(AmendmentDataEntity::class.java)
+            .tryToObject(AmendmentEntity::class.java)
             .doOnError { return failure(Fail.Incident.ParseFromDatabaseIncident(data)) }
             .get
 
-        return entity.amendment.let { amendment ->
+        return entity.let { amendment ->
             Amendment(
                 id = amendment.id,
                 token = amendment.token,
@@ -143,27 +143,25 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         }
     }
 
-    fun convert(amendment: Amendment) = AmendmentDataEntity(
-        amendment = AmendmentDataEntity.AmendmentEntity(
-            id = amendment.id,
-            description = amendment.description,
-            rationale = amendment.rationale,
-            relatesTo = amendment.relatesTo,
-            relatedItem = amendment.relatedItem,
-            status = amendment.status,
-            type = amendment.type,
-            date = amendment.date,
-            token = amendment.token,
-            owner = amendment.owner,
-            documents = amendment.documents
-                .map { document ->
-                    AmendmentDataEntity.AmendmentEntity.Document(
-                        id = document.id,
-                        documentType = document.documentType,
-                        description = document.description,
-                        title = document.title
-                    )
-                }
-        )
+    fun convert(amendment: Amendment) = AmendmentEntity(
+        id = amendment.id,
+        description = amendment.description,
+        rationale = amendment.rationale,
+        relatesTo = amendment.relatesTo,
+        relatedItem = amendment.relatedItem,
+        status = amendment.status,
+        type = amendment.type,
+        date = amendment.date,
+        token = amendment.token,
+        owner = amendment.owner,
+        documents = amendment.documents
+            .map { document ->
+                AmendmentEntity.Document(
+                    id = document.id,
+                    documentType = document.documentType,
+                    description = document.description,
+                    title = document.title
+                )
+            }
     )
 }

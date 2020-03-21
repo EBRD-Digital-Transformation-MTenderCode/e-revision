@@ -16,38 +16,34 @@ import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDese
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
 import java.time.LocalDateTime
 
-data class AmendmentDataEntity(
-    @field:JsonProperty("amendment") @param:JsonProperty("amendment") val amendment: AmendmentEntity
+data class AmendmentEntity(
+    @field:JsonProperty("id") @param:JsonProperty("id") val id: AmendmentId,
+
+    @JsonDeserialize(using = JsonDateTimeDeserializer::class)
+    @JsonSerialize(using = JsonDateTimeSerializer::class)
+    @field:JsonProperty("date") @param:JsonProperty("date") val date: LocalDateTime,
+
+    @field:JsonProperty("rationale") @param:JsonProperty("rationale") val rationale: String,
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
+
+    @field:JsonProperty("status") @param:JsonProperty("status") val status: AmendmentStatus,
+    @field:JsonProperty("type") @param:JsonProperty("type") val type: AmendmentType,
+    @field:JsonProperty("relatesTo") @param:JsonProperty("relatesTo") val relatesTo: AmendmentRelatesTo,
+    @field:JsonProperty("relatedItem") @param:JsonProperty("relatedItem") val relatedItem: String,
+    @field:JsonProperty("token") @param:JsonProperty("token") val token: Token,
+    @field:JsonProperty("owner") @param:JsonProperty("owner") val owner: Owner,
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    @field:JsonProperty("documents") @param:JsonProperty("documents") val documents: List<Document>?
 ) {
-    data class AmendmentEntity(
-        @field:JsonProperty("id") @param:JsonProperty("id") val id: AmendmentId,
-
-        @JsonDeserialize(using = JsonDateTimeDeserializer::class)
-        @JsonSerialize(using = JsonDateTimeSerializer::class)
-        @field:JsonProperty("date") @param:JsonProperty("date") val date: LocalDateTime,
-
-        @field:JsonProperty("rationale") @param:JsonProperty("rationale") val rationale: String,
+    data class Document(
+        @field:JsonProperty("documentType") @param:JsonProperty("documentType") val documentType: DocumentType,
+        @field:JsonProperty("id") @param:JsonProperty("id") val id: DocumentId,
+        @field:JsonProperty("title") @param:JsonProperty("title") val title: String,
 
         @JsonInclude(JsonInclude.Include.NON_NULL)
-        @field:JsonProperty("description") @param:JsonProperty("description") val description: String?,
-
-        @field:JsonProperty("status") @param:JsonProperty("status") val status: AmendmentStatus,
-        @field:JsonProperty("type") @param:JsonProperty("type") val type: AmendmentType,
-        @field:JsonProperty("relatesTo") @param:JsonProperty("relatesTo") val relatesTo: AmendmentRelatesTo,
-        @field:JsonProperty("relatedItem") @param:JsonProperty("relatedItem") val relatedItem: String,
-        @field:JsonProperty("token") @param:JsonProperty("token") val token: Token,
-        @field:JsonProperty("owner") @param:JsonProperty("owner") val owner: Owner,
-
-        @JsonInclude(JsonInclude.Include.NON_EMPTY)
-        @field:JsonProperty("documents") @param:JsonProperty("documents") val documents: List<Document>?
-    ) {
-        data class Document(
-            @field:JsonProperty("documentType") @param:JsonProperty("documentType") val documentType: DocumentType,
-            @field:JsonProperty("id") @param:JsonProperty("id") val id: DocumentId,
-            @field:JsonProperty("title") @param:JsonProperty("title") val title: String,
-
-            @JsonInclude(JsonInclude.Include.NON_NULL)
-            @field:JsonProperty("description") @param:JsonProperty("description") val description: String?
-        )
-    }
+        @field:JsonProperty("description") @param:JsonProperty("description") val description: String?
+    )
 }

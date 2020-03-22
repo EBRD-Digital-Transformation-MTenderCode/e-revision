@@ -64,23 +64,13 @@ class DataValidationParams private constructor(
             ocid: String,
             operationType: String
         ): Result<DataValidationParams, DataErrors> {
-            val operationTypeParsed = operationType.takeIf { it in OperationType }
-                ?.also {
-                    if (it !in allowedOperationType) {
-                        return failure(
-                            DataErrors.Validation.UnknownValue(
-                                name = "operationType",
-                                expectedValues = allowedOperationType,
-                                actualValue = it
-                            )
-                        )
-                    }
-                }?.let { OperationType.creator(it) }
+            val operationTypeParsed = OperationType.orNull(operationType)
+                ?.takeIf { it.key in allowedOperationType }
                 ?: return failure(
                     DataErrors.Validation.UnknownValue(
                         name = "operationType",
                         actualValue = operationType,
-                        expectedValues = OperationType.allowedValues
+                        expectedValues = allowedOperationType
                     )
                 )
 
@@ -174,23 +164,13 @@ class DataValidationParams private constructor(
                         }
                         .get
 
-                    val documentTypeParsed = documentType.takeIf { it in DocumentType }
-                        ?.also {
-                            if (it !in allowedDocumentType)
-                                return failure(
-                                    DataErrors.Validation.UnknownValue(
-                                        name = "documentType",
-                                        actualValue = documentType,
-                                        expectedValues = allowedDocumentType
-                                    )
-                                )
-                        }
-                        ?.let { DocumentType.creator(it) }
+                    val documentTypeParsed = DocumentType.orNull(documentType)
+                        ?.takeIf { it.key in allowedDocumentType }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "documentType",
                                 actualValue = documentType,
-                                expectedValues = DocumentType.allowedValues
+                                expectedValues = allowedDocumentType
                             )
                         )
 

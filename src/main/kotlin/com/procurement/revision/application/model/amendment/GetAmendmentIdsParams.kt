@@ -55,70 +55,40 @@ class GetAmendmentIdsParams private constructor(
             val statusParsed = status
                 ?.let {
                     AmendmentStatus.orNull(it)
+                        ?.takeIf { it.key in allowedStatuses }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "status",
-                                expectedValues = AmendmentStatus.allowedValues,
+                                expectedValues = allowedStatuses,
                                 actualValue = status
                             )
                         )
-                }?.also { amendmentStatus ->
-                    val key = amendmentStatus.key
-                    if (key !in allowedStatuses) {
-                        return failure(
-                            DataErrors.Validation.UnknownValue(
-                                name = "status",
-                                expectedValues = allowedStatuses,
-                                actualValue = key
-                            )
-                        )
-                    }
                 }
 
             val typeParsed = type
                 ?.let {
                     AmendmentType.orNull(it)
+                        ?.takeIf { it.key in allowedTypes }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "type",
                                 actualValue = type,
-                                expectedValues = AmendmentType.allowedValues
+                                expectedValues = allowedTypes
                             )
                         )
-                }?.also { amendmentType ->
-                    val key = amendmentType.key
-                    if (key !in allowedTypes) {
-                        return failure(
-                            DataErrors.Validation.UnknownValue(
-                                name = "type",
-                                expectedValues = allowedTypes,
-                                actualValue = key
-                            )
-                        )
-                    }
                 }
 
             val relatesToParsed = relatesTo
                 ?.let {
                     AmendmentRelatesTo.orNull(it)
+                        ?.takeIf { it.key in allowedRelatesTo }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "relatesTo",
-                                expectedValues = AmendmentRelatesTo.allowedValues,
+                                expectedValues = allowedRelatesTo,
                                 actualValue = relatesTo
                             )
                         )
-                }?.also { amendmentRelatesTo ->
-                    val key = amendmentRelatesTo.key
-                    if (key !in allowedRelatesTo) {
-                        return failure(
-                            DataErrors.Validation.UnknownValue(
-                                name = "relatesTo",
-                                expectedValues = allowedRelatesTo,
-                                actualValue = key
-                            )
-                        )
-                    }
                 }
 
             if (relatedItems != null && relatedItems.isEmpty())

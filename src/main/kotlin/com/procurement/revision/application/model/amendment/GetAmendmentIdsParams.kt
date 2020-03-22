@@ -11,30 +11,6 @@ import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.lib.toSetBy
 
-val allowedStatuses = AmendmentStatus.values().filter { value ->
-    when (value) {
-        AmendmentStatus.PENDING -> true
-        AmendmentStatus.CANCELLED,
-        AmendmentStatus.ACTIVE,
-        AmendmentStatus.WITHDRAWN -> false
-    }
-}.toSetBy { it.key }
-
-val allowedTypes = AmendmentType.values().filter { value ->
-    when (value) {
-        AmendmentType.CANCELLATION -> true
-        AmendmentType.TENDER_CHANGE -> false
-    }
-}.toSetBy { it.key }
-
-val allowedRelatesTo = AmendmentRelatesTo.values().filter { value ->
-    when (value) {
-        AmendmentRelatesTo.LOT,
-        AmendmentRelatesTo.TENDER -> true
-        AmendmentRelatesTo.CAN -> false
-    }
-}.toSetBy { it.key }
-
 class GetAmendmentIdsParams private constructor(
     val status: AmendmentStatus?,
     val type: AmendmentType?,
@@ -44,6 +20,30 @@ class GetAmendmentIdsParams private constructor(
     val ocid: Ocid
 ) {
     companion object {
+        private val allowedStatuses = AmendmentStatus.values().filter { value ->
+            when (value) {
+                AmendmentStatus.PENDING -> true
+                AmendmentStatus.CANCELLED,
+                AmendmentStatus.ACTIVE,
+                AmendmentStatus.WITHDRAWN -> false
+            }
+        }.toSetBy { it.key }
+
+        private val allowedTypes = AmendmentType.values().filter { value ->
+            when (value) {
+                AmendmentType.CANCELLATION -> true
+                AmendmentType.TENDER_CHANGE -> false
+            }
+        }.toSetBy { it.key }
+
+        private val allowedRelatesTo = AmendmentRelatesTo.values().filter { value ->
+            when (value) {
+                AmendmentRelatesTo.LOT,
+                AmendmentRelatesTo.TENDER -> true
+                AmendmentRelatesTo.CAN -> false
+            }
+        }.toSetBy { it.key }
+
         fun tryCreate(
             status: String?,
             type: String?,
@@ -63,13 +63,13 @@ class GetAmendmentIdsParams private constructor(
                             )
                         )
                 }?.also { amendmentStatus ->
-                    val amendmentStatusKey = amendmentStatus.key
-                    if (amendmentStatusKey !in allowedStatuses) {
+                    val key = amendmentStatus.key
+                    if (key !in allowedStatuses) {
                         return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "status",
                                 expectedValues = allowedStatuses,
-                                actualValue = amendmentStatusKey
+                                actualValue = key
                             )
                         )
                     }
@@ -86,13 +86,13 @@ class GetAmendmentIdsParams private constructor(
                             )
                         )
                 }?.also { amendmentType ->
-                    val amendmentTypeKey = amendmentType.key
-                    if (amendmentTypeKey !in allowedTypes) {
+                    val key = amendmentType.key
+                    if (key !in allowedTypes) {
                         return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "type",
                                 expectedValues = allowedTypes,
-                                actualValue = amendmentTypeKey
+                                actualValue = key
                             )
                         )
                     }
@@ -109,13 +109,13 @@ class GetAmendmentIdsParams private constructor(
                             )
                         )
                 }?.also { amendmentRelatesTo ->
-                    val amendmentRelatesToKey = amendmentRelatesTo.key
-                    if (amendmentRelatesToKey !in allowedRelatesTo) {
+                    val key = amendmentRelatesTo.key
+                    if (key !in allowedRelatesTo) {
                         return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "relatesTo",
                                 expectedValues = allowedRelatesTo,
-                                actualValue = amendmentRelatesToKey
+                                actualValue = key
                             )
                         )
                     }

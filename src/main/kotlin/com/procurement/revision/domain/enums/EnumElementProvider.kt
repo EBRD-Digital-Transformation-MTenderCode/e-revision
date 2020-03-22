@@ -40,4 +40,6 @@ abstract class EnumElementProvider<T>(val info: EnumInfo<T>) where T : Enum<T>,
         } else
             Result.success(element)
     }
+
+    operator fun contains(key: String): Boolean = orNull(key) != null
 }

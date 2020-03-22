@@ -36,11 +36,15 @@ sealed class Fail {
             }
         }
 
-        class DatabaseInteractionIncident(exception: Exception) : Incident(
+        class DatabaseInteractionIncident(val exception: Exception) : Incident(
             level = Level.ERROR,
             number = "1",
-            description = "Database incident. ${exception.message}"
-        )
+            description = "Database incident."
+        ) {
+            override fun logging(logger: Logger) {
+                logger.error(message = message, exception = exception)
+            }
+        }
 
         class DatabaseConsistencyIncident(message: String) : Incident(
             level = Level.ERROR,
@@ -52,7 +56,11 @@ sealed class Fail {
             level = Level.ERROR,
             number = "3",
             description = "Could not parse data stored in database."
-        )
+        ) {
+            override fun logging(logger: Logger) {
+                logger.error(message = message, mdc = mapOf("jsonData" to jsonData))
+            }
+        }
 
         class Parsing(className: String, val exception: Exception) : Incident(
             level = Level.ERROR,

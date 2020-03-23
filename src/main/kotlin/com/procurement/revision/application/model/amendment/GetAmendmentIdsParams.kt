@@ -9,6 +9,7 @@ import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.model.Cpid
 import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.infrastructure.fail.error.DataErrors
+import com.procurement.revision.lib.toSetBy
 
 class GetAmendmentIdsParams private constructor(
     val status: AmendmentStatus?,
@@ -19,6 +20,33 @@ class GetAmendmentIdsParams private constructor(
     val ocid: Ocid
 ) {
     companion object {
+        private val allowedStatuses = AmendmentStatus.values()
+            .filter { value ->
+                when (value) {
+                    AmendmentStatus.PENDING -> true
+                    AmendmentStatus.CANCELLED,
+                    AmendmentStatus.ACTIVE,
+                    AmendmentStatus.WITHDRAWN -> false
+                }
+            }.toSetBy { it.key }
+
+        private val allowedTypes = AmendmentType.values()
+            .filter { value ->
+                when (value) {
+                    AmendmentType.CANCELLATION -> true
+                    AmendmentType.TENDER_CHANGE -> false
+                }
+            }.toSetBy { it.key }
+
+        private val allowedRelatesTo = AmendmentRelatesTo.values()
+            .filter { value ->
+                when (value) {
+                    AmendmentRelatesTo.LOT,
+                    AmendmentRelatesTo.TENDER -> true
+                    AmendmentRelatesTo.CAN -> false
+                }
+            }.toSetBy { it.key }
+
         fun tryCreate(
             status: String?,
             type: String?,
@@ -27,14 +55,14 @@ class GetAmendmentIdsParams private constructor(
             cpid: String,
             ocid: String
         ): Result<GetAmendmentIdsParams, DataErrors> {
-
             val statusParsed = status
                 ?.let {
                     AmendmentStatus.orNull(it)
+                        ?.takeIf { it.key in allowedStatuses }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "status",
-                                expectedValues = AmendmentStatus.allowedValues,
+                                expectedValues = allowedStatuses,
                                 actualValue = status
                             )
                         )
@@ -43,11 +71,12 @@ class GetAmendmentIdsParams private constructor(
             val typeParsed = type
                 ?.let {
                     AmendmentType.orNull(it)
+                        ?.takeIf { it.key in allowedTypes }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "type",
                                 actualValue = type,
-                                expectedValues = AmendmentType.allowedValues
+                                expectedValues = allowedTypes
                             )
                         )
                 }
@@ -55,10 +84,11 @@ class GetAmendmentIdsParams private constructor(
             val relatesToParsed = relatesTo
                 ?.let {
                     AmendmentRelatesTo.orNull(it)
+                        ?.takeIf { it.key in allowedRelatesTo }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "relatesTo",
-                                expectedValues = AmendmentRelatesTo.allowedValues,
+                                expectedValues = allowedRelatesTo,
                                 actualValue = relatesTo
                             )
                         )

@@ -1,19 +1,29 @@
 package com.procurement.revision.domain.model
 
-import com.procurement.revision.domain.functional.Result
-import com.procurement.revision.domain.functional.Result.Companion.failure
-import com.procurement.revision.domain.functional.Result.Companion.success
+import com.fasterxml.jackson.annotation.JsonValue
 
-class Cpid private constructor(val value: String) {
+
+class Cpid private constructor(private val value: String) {
+
+    override fun equals(other: Any?): Boolean {
+        return if (this !== other)
+            other is Cpid
+                && this.value == other.value
+        else
+            true
+    }
+
+    override fun hashCode(): Int = value.hashCode()
+
+    @JsonValue
+    override fun toString(): String = value
 
     companion object {
-        private val regex = "^([a-z]{4})-([a-z0-9]{6})-([A-Z]{2})-[0-9]{13}\$".toRegex()
+        private val regex = "^[a-z]{4}-[a-z0-9]{6}-[A-Z]{2}-[0-9]{13}\$".toRegex()
 
-        fun tryCreate(cpid: String): Result<Cpid, String> {
-            return if (cpid.matches(regex = regex))
-                success(Cpid(value = cpid))
-            else
-                failure(regex.pattern)
-        }
+        val pattern: String
+            get() = regex.pattern
+
+        fun tryCreateOrNull(value: String): Cpid? = if (value.matches(regex)) Cpid(value = value) else null
     }
 }

@@ -12,6 +12,7 @@ import com.procurement.revision.domain.model.amendment.tryAmendmentId
 import com.procurement.revision.domain.model.document.tryDocumentId
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
+import com.procurement.revision.lib.toSetBy
 
 class DataValidationParams private constructor(
     val amendment: Amendment,
@@ -20,6 +21,45 @@ class DataValidationParams private constructor(
     val operationType: OperationType
 ) {
     companion object {
+        private val allowedOperationType = OperationType.values()
+            .filter { value ->
+                when (value) {
+                    OperationType.LOT_CANCELLATION,
+                    OperationType.TENDER_CANCELLATION -> true
+                }
+            }.toSetBy { it.key }
+
+        private val allowedDocumentType = DocumentType.values()
+            .filter { value ->
+                when (value) {
+                    DocumentType.CANCELLATION_DETAILS -> true
+                    DocumentType.ASSET_AND_LIABILITY_ASSESSMENT,
+                    DocumentType.BIDDING_DOCUMENTS,
+                    DocumentType.BILL_OF_QUANTITY,
+                    DocumentType.CLARIFICATIONS,
+                    DocumentType.COMPLAINTS,
+                    DocumentType.CONFLICT_OF_INTEREST,
+                    DocumentType.CONTRACT_ARRANGEMENTS,
+                    DocumentType.CONTRACT_DRAFT,
+                    DocumentType.CONTRACT_GUARANTEES,
+                    DocumentType.ELIGIBILITY_CRITERIA,
+                    DocumentType.ENVIRONMENTAL_IMPACT,
+                    DocumentType.EVALUATION_CRITERIA,
+                    DocumentType.EVALUATION_REPORTS,
+                    DocumentType.FEASIBILITY_STUDY,
+                    DocumentType.HEARING_NOTICE,
+                    DocumentType.ILLUSTRATION,
+                    DocumentType.MARKET_STUDIES,
+                    DocumentType.NEEDS_ASSESSMENT,
+                    DocumentType.PROCUREMENT_PLAN,
+                    DocumentType.PROJECT_PLAN,
+                    DocumentType.RISK_PROVISIONS,
+                    DocumentType.SHORTLISTED_FIRMS,
+                    DocumentType.TECHNICAL_SPECIFICATIONS,
+                    DocumentType.TENDER_NOTICE -> false
+                }
+            }.toSetBy { it.key }
+
         fun tryCreate(
             amendment: Amendment,
             cpid: String,
@@ -27,11 +67,12 @@ class DataValidationParams private constructor(
             operationType: String
         ): Result<DataValidationParams, DataErrors> {
             val operationTypeParsed = OperationType.orNull(operationType)
+                ?.takeIf { it.key in allowedOperationType }
                 ?: return failure(
                     DataErrors.Validation.UnknownValue(
                         name = "operationType",
-                        expectedValues = OperationType.allowedValues,
-                        actualValue = operationType
+                        actualValue = operationType,
+                        expectedValues = allowedOperationType
                     )
                 )
 
@@ -126,11 +167,12 @@ class DataValidationParams private constructor(
                         .get
 
                     val documentTypeParsed = DocumentType.orNull(documentType)
+                        ?.takeIf { it.key in allowedDocumentType }
                         ?: return failure(
                             DataErrors.Validation.UnknownValue(
                                 name = "documentType",
                                 actualValue = documentType,
-                                expectedValues = DocumentType.allowedValues
+                                expectedValues = allowedDocumentType
                             )
                         )
 

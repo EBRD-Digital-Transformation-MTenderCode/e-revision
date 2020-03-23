@@ -95,26 +95,6 @@ internal class AmendmentServiceTest {
         }
 
         @Test
-        fun handleNonMatchingStatuses() {
-            val amendment = getTestAmendment()
-            whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendment)))
-
-            val nonMatchingStatus = AmendmentStatus.ACTIVE
-
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
-                    status = nonMatchingStatus.toString(),
-                    relatesTo = amendment.relatesTo.toString(),
-                    relatedItems = listOf(amendment.relatedItem),
-                    cpid = CPID,
-                    ocid = OCID,
-                    type = amendment.type.toString()
-                ).get
-            )
-            assertTrue(actualIds.get.isEmpty())
-        }
-
-        @Test
         fun handleNoStatus() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(status = AmendmentStatus.ACTIVE)
@@ -148,7 +128,7 @@ internal class AmendmentServiceTest {
             val amendment = getTestAmendment()
             whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendment)))
 
-            val nonMatchingRelatesTo = AmendmentRelatesTo.CAN
+            val nonMatchingRelatesTo = AmendmentRelatesTo.TENDER
             val actualIds = amendmentService.getAmendmentIdsBy(
                 GetAmendmentIdsParams.tryCreate(
                     status = amendment.status.toString(),
@@ -240,26 +220,6 @@ internal class AmendmentServiceTest {
         }
 
         @Test
-        fun handleNonMatchingType() {
-            val amendment = getTestAmendment()
-            whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendment)))
-
-            val nonMatchingType = AmendmentType.TENDER_CHANGE
-
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
-                    status = amendment.status.toString(),
-                    relatesTo = amendment.relatesTo.toString(),
-                    relatedItems = listOf(amendment.relatedItem),
-                    cpid = CPID,
-                    ocid = OCID,
-                    type = nonMatchingType.toString()
-                ).get
-            )
-            assertTrue(actualIds.get.isEmpty())
-        }
-
-        @Test
         fun handleNoType() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(type = AmendmentType.TENDER_CHANGE)
@@ -344,8 +304,8 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid.value),
-                    ocid = eq(params.ocid.value),
+                    cpid = eq(params.cpid.toString()),
+                    ocid = eq(params.ocid.toString()),
                     amendment = any()
                 )
             ).thenReturn(Result.success(true))
@@ -368,8 +328,8 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid.value),
-                    ocid = eq(params.ocid.value),
+                    cpid = eq(params.cpid.toString()),
+                    ocid = eq(params.ocid.toString()),
                     amendment = any()
                 )
             ).thenReturn(Result.success(true))
@@ -410,14 +370,14 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid.value),
-                    ocid = eq(params.ocid.value),
+                    cpid = eq(params.cpid.toString()),
+                    ocid = eq(params.ocid.toString()),
                     amendment = any()
                 )
             ).thenReturn(Result.success(false))
 
             val amendmentFromDb = getTestAmendment()
-            whenever(amendmentRepository.findBy(params.cpid.value, params.ocid.value, params.amendment.id)).thenReturn(
+            whenever(amendmentRepository.findBy(params.cpid.toString(), params.ocid.toString(), params.amendment.id)).thenReturn(
                 Result.success(amendmentFromDb)
             )
 

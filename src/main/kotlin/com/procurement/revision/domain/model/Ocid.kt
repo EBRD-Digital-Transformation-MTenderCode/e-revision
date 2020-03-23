@@ -1,16 +1,32 @@
 package com.procurement.revision.domain.model
 
-import com.procurement.revision.domain.functional.Result
+import com.fasterxml.jackson.annotation.JsonValue
+import com.procurement.revision.domain.enums.Stage
 
-class Ocid private constructor(val value: String) {
+class Ocid private constructor(private val value: String) {
+
+    override fun equals(other: Any?): Boolean {
+        return if (this !== other)
+            other is Ocid
+                && this.value == other.value
+        else
+            true
+    }
+
+    override fun hashCode(): Int = value.hashCode()
+
+    @JsonValue
+    override fun toString(): String = value
+
     companion object {
-        private val regex = "^([a-z]{4})-([a-z0-9]{6})-([A-Z]{2})-([0-9]{13})-([A-Z]{2})-([0-9]{13})\$".toRegex()
+        private val STAGES: String
+            get() = Stage.allowedValues.joinToString(separator = "|", prefix = "(", postfix = ")") { it.toUpperCase() }
 
-        fun tryCreate(ocid: String): Result<Ocid, String> {
-            return if (ocid.matches(regex = regex))
-                Result.success(Ocid(value = ocid))
-            else
-                Result.failure(regex.pattern)
-        }
+        private val regex = "^[a-z]{4}-[a-z0-9]{6}-[A-Z]{2}-[0-9]{13}-$STAGES-[0-9]{13}\$".toRegex()
+
+        val pattern: String
+            get() = regex.pattern
+
+        fun tryCreateOrNull(value: String): Ocid? = if (value.matches(regex)) Ocid(value = value) else null
     }
 }

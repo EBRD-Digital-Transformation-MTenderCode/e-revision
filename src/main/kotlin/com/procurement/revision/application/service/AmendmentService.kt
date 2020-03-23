@@ -30,7 +30,7 @@ class AmendmentService(
 ) {
 
     fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
-        val amendments = amendmentRepository.findBy(params.cpid.value, params.ocid.value)
+        val amendments = amendmentRepository.findBy(params.cpid.toString(), params.ocid.toString())
             .doOnError { incident -> return failure(incident) }
             .get
         val relatedItems = params.relatedItems.toSet()
@@ -96,16 +96,16 @@ class AmendmentService(
                 )
             }
         return amendmentRepository.saveNewAmendment(
-            cpid = params.cpid.value,
-            ocid = params.ocid.value,
+            cpid = params.cpid.toString(),
+            ocid = params.ocid.toString(),
             amendment = createdAmendment
         ).bind { isSaved ->
             if (isSaved) {
                 success(createdAmendment.convertToCreateAmendmentResult())
             } else {
                 amendmentRepository.findBy(
-                    cpid = params.cpid.value,
-                    ocid = params.ocid.value,
+                    cpid = params.cpid.toString(),
+                    ocid = params.ocid.toString(),
                     id = createdAmendment.id
                 ).bind { amendment ->
                     if (amendment != null)

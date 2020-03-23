@@ -20,29 +20,32 @@ class GetAmendmentIdsParams private constructor(
     val ocid: Ocid
 ) {
     companion object {
-        private val allowedStatuses = AmendmentStatus.values().filter { value ->
-            when (value) {
-                AmendmentStatus.PENDING -> true
-                AmendmentStatus.CANCELLED,
-                AmendmentStatus.ACTIVE,
-                AmendmentStatus.WITHDRAWN -> false
-            }
-        }.toSetBy { it.key }
+        private val allowedStatuses = AmendmentStatus.values()
+            .filter { value ->
+                when (value) {
+                    AmendmentStatus.PENDING -> true
+                    AmendmentStatus.CANCELLED,
+                    AmendmentStatus.ACTIVE,
+                    AmendmentStatus.WITHDRAWN -> false
+                }
+            }.toSetBy { it.key }
 
-        private val allowedTypes = AmendmentType.values().filter { value ->
-            when (value) {
-                AmendmentType.CANCELLATION -> true
-                AmendmentType.TENDER_CHANGE -> false
-            }
-        }.toSetBy { it.key }
+        private val allowedTypes = AmendmentType.values()
+            .filter { value ->
+                when (value) {
+                    AmendmentType.CANCELLATION -> true
+                    AmendmentType.TENDER_CHANGE -> false
+                }
+            }.toSetBy { it.key }
 
-        private val allowedRelatesTo = AmendmentRelatesTo.values().filter { value ->
-            when (value) {
-                AmendmentRelatesTo.LOT,
-                AmendmentRelatesTo.TENDER -> true
-                AmendmentRelatesTo.CAN -> false
-            }
-        }.toSetBy { it.key }
+        private val allowedRelatesTo = AmendmentRelatesTo.values()
+            .filter { value ->
+                when (value) {
+                    AmendmentRelatesTo.LOT,
+                    AmendmentRelatesTo.TENDER -> true
+                    AmendmentRelatesTo.CAN -> false
+                }
+            }.toSetBy { it.key }
 
         fun tryCreate(
             status: String?,

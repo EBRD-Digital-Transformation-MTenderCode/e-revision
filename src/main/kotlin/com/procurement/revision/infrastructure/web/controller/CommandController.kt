@@ -1,6 +1,7 @@
 package com.procurement.revision.infrastructure.web.controller
 
 import com.procurement.revision.application.service.Logger
+import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.service.CommandService
@@ -9,11 +10,9 @@ import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.ApiVersion
 import com.procurement.revision.infrastructure.web.dto.NaN
 import com.procurement.revision.infrastructure.web.dto.generateResponseOnFailure
-import com.procurement.revision.infrastructure.web.dto.tryGetAction
 import com.procurement.revision.infrastructure.web.dto.tryGetId
 import com.procurement.revision.infrastructure.web.dto.tryGetNode
 import com.procurement.revision.infrastructure.web.dto.tryGetVersion
-import com.procurement.revision.domain.functional.Result
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -48,9 +47,6 @@ class CommandController(private val commandService: CommandService, private val 
         val id = node.tryGetId()
             .doOnError { error -> return generateResponse(fail = error, version = version) }
             .get
-
-        node.tryGetAction()
-            .doOnError { error -> return generateResponse(fail = error, id = id, version = version) }
 
         val response =
             commandService.execute(node)

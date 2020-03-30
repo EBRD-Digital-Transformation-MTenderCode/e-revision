@@ -1,5 +1,6 @@
 package com.procurement.revision.application.service
 
+import com.procurement.revision.application.model.amendment.CheckAccessToAmendmentParams
 import com.procurement.revision.application.model.amendment.CreateAmendmentParams
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.model.amendment.DataValidationParams
@@ -115,6 +116,24 @@ class AmendmentService(
                 }
             }
         }
+    }
+
+    fun checkAccessToAmendment(params: CheckAccessToAmendmentParams): ValidationResult<Fail> {
+        val amendment = amendmentRepository.findBy(
+            cpid = params.cpid.toString(),
+            ocid = params.ocid.toString(),
+            id = params.amendmentId
+        )
+            .doReturn { incident -> return ValidationResult.error(incident) }
+            ?: return ValidationResult.error(ValidationError.AmendmentNotFound())
+
+        if (params.owner != amendment.owner)
+            return ValidationResult.error(ValidationError.InvalidOwner())
+
+        if (params.token != amendment.token)
+            return ValidationResult.error(ValidationError.InvalidToken())
+
+        return ValidationResult.ok()
     }
 
     private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true

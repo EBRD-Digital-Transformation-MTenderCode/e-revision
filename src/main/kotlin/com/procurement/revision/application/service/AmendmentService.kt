@@ -125,13 +125,13 @@ class AmendmentService(
             id = params.amendmentId
         )
             .doReturn { incident -> return ValidationResult.error(incident) }
-            ?: return ValidationResult.error(ValidationError.AmendmentNotFound())
+            ?: return ValidationResult.error(ValidationError.AmendmentNotFound(params.amendmentId))
 
         if (params.owner != amendment.owner)
-            return ValidationResult.error(ValidationError.InvalidOwner())
+            return ValidationResult.error(ValidationError.InvalidOwner(id = params.owner))
 
         if (params.token != amendment.token)
-            return ValidationResult.error(ValidationError.InvalidToken())
+            return ValidationResult.error(ValidationError.InvalidToken(id = params.token))
 
         return ValidationResult.ok()
     }

@@ -28,15 +28,6 @@ class ApiSuccessResponse(
     override val status: ResponseStatus = ResponseStatus.SUCCESS
 }
 
-class ApiFailResponse(version: ApiVersion, id: UUID, result: List<Error>) :
-    ApiResponse(version = version, id = id, result = result) {
-
-    @field:JsonProperty("status")
-    override val status: ResponseStatus = ResponseStatus.ERROR
-
-    class Error(val code: String, val description: String)
-}
-
 class ApiIncidentResponse(version: ApiVersion, id: UUID, result: Incident) :
     ApiResponse(version = version, id = id, result = result) {
 
@@ -49,14 +40,21 @@ class ApiIncidentResponse(version: ApiVersion, id: UUID, result: Incident) :
     }
 }
 
-class ApiDataErrorResponse(
+class ApiErrorResponse(
     version: ApiVersion, id: UUID, result: List<Error>
 ) : ApiResponse(version = version, result = result, id = id) {
     @field:JsonProperty("status")
     override val status: ResponseStatus = ResponseStatus.ERROR
 
-    class Error(val code: String, val description: String, val details: List<Detail>) {
-        class Detail(val name: String)
+    class Error(
+        val code: String,
+        val description: String,
+        @JsonInclude(JsonInclude.Include.NON_EMPTY) val details: List<Detail>? = null
+    ) {
+        class Detail(
+            @JsonInclude(JsonInclude.Include.NON_NULL) val name: String? = null,
+            @JsonInclude(JsonInclude.Include.NON_NULL) val id: String? = null
+        )
     }
 }
 

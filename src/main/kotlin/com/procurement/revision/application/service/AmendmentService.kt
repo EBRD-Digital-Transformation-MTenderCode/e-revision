@@ -31,7 +31,7 @@ class AmendmentService(
 ) {
 
     fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
-        val amendments = amendmentRepository.findBy(params.cpid.toString(), params.ocid.toString())
+        val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
             .doOnError { incident -> return failure(incident) }
             .get
         val relatedItems = params.relatedItems.toSet()
@@ -97,16 +97,16 @@ class AmendmentService(
                 )
             }
         return amendmentRepository.saveNewAmendment(
-            cpid = params.cpid.toString(),
-            ocid = params.ocid.toString(),
+            cpid = params.cpid,
+            ocid = params.ocid,
             amendment = createdAmendment
         ).bind { isSaved ->
             if (isSaved) {
                 success(createdAmendment.convertToCreateAmendmentResult())
             } else {
                 amendmentRepository.findBy(
-                    cpid = params.cpid.toString(),
-                    ocid = params.ocid.toString(),
+                    cpid = params.cpid,
+                    ocid = params.ocid,
                     id = createdAmendment.id
                 ).bind { amendment ->
                     if (amendment != null)
@@ -120,8 +120,8 @@ class AmendmentService(
 
     fun checkAccessToAmendment(params: CheckAccessToAmendmentParams): ValidationResult<Fail> {
         val amendment = amendmentRepository.findBy(
-            cpid = params.cpid.toString(),
-            ocid = params.ocid.toString(),
+            cpid = params.cpid,
+            ocid = params.ocid,
             id = params.amendmentId
         )
             .doReturn { incident -> return ValidationResult.error(incident) }

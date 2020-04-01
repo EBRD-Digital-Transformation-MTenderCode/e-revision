@@ -8,6 +8,7 @@ import com.procurement.revision.domain.enums.EnumElementProvider
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.util.extension.nowDefaultUTC
+import com.procurement.revision.domain.util.extension.toListOrEmpty
 import com.procurement.revision.domain.util.extension.tryUUID
 import com.procurement.revision.infrastructure.configuration.properties.GlobalProperties
 import com.procurement.revision.infrastructure.extension.tryGetAttribute
@@ -68,9 +69,9 @@ private fun generateDataErrorResponse(
             ApiErrorResponse.Error(
                 code = getFullErrorCode(dataError.code),
                 description = dataError.description,
-                details = listOf(
-                    ApiErrorResponse.Error.Detail(name = dataError.name)
-                )
+                details = ApiErrorResponse.Error.Detail
+                    .tryCreateOrNull(name = dataError.name).toListOrEmpty()
+
             )
         )
     )
@@ -85,9 +86,9 @@ private fun generateValidationErrorResponse(
             ApiErrorResponse.Error(
                 code = getFullErrorCode(validationError.code),
                 description = validationError.description,
-                details = if (validationError.entityId == null) null else listOf(
-                    ApiErrorResponse.Error.Detail(id = validationError.entityId)
-                )
+                details = ApiErrorResponse.Error.Detail
+                    .tryCreateOrNull(id = validationError.entityId).toListOrEmpty()
+
             )
         )
     )

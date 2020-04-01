@@ -85,8 +85,8 @@ private fun generateValidationErrorResponse(
             ApiErrorResponse.Error(
                 code = getFullErrorCode(validationError.code),
                 description = validationError.description,
-                details = if (validationError.id == null) null else listOf(
-                    ApiErrorResponse.Error.Detail(id = validationError.id)
+                details = if (validationError.entityId == null) null else listOf(
+                    ApiErrorResponse.Error.Detail(id = validationError.entityId)
                 )
             )
         )

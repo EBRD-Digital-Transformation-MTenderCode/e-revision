@@ -7,14 +7,14 @@ import com.procurement.revision.infrastructure.fail.Fail
 sealed class ValidationError(
     numberError: String,
     override val description: String,
-    val id: String? = null
+    val entityId: String? = null
 ) : Fail.Error("VR-") {
     override val code: String = prefix + numberError
 
     class InvalidDocumentType(documentId: DocumentId) : ValidationError(
         numberError = "1",
         description = "Document '${documentId}' has invalid documentType.",
-        id = documentId
+        entityId = documentId
     )
 
     class InvalidToken() : ValidationError(
@@ -27,9 +27,9 @@ sealed class ValidationError(
         description = "Request owner doesn't match owner from the database."
     )
 
-    class AmendmentNotFound(id: AmendmentId) : ValidationError(
+    class AmendmentNotFound(amendmentId: AmendmentId) : ValidationError(
         numberError = "10.2.4.3",
         description = "Amendment not found.",
-        id = id.toString()
+        entityId = amendmentId.toString()
     )
 }

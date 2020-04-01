@@ -16,6 +16,8 @@ import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.enums.AmendmentType
 import com.procurement.revision.domain.enums.DocumentType
+import com.procurement.revision.domain.model.Cpid
+import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeDeserializer
 import com.procurement.revision.infrastructure.bind.databinding.JsonDateTimeSerializer
@@ -43,8 +45,8 @@ import java.util.*
 @ContextConfiguration(classes = [DatabaseTestConfiguration::class])
 class AmendmentDataEntityRepositoryIT {
     companion object {
-        private const val CPID = "cpid-1"
-        private const val OCID = "ocid-1"
+        private val CPID = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1565251033096")!!
+        private val OCID = Ocid.tryCreateOrNull("ocds-b3wdp1-MD-1581509539187-EV-1581509653044")!!
         private val ID = UUID.randomUUID()
         private val TOKEN = UUID.randomUUID()
         private val DATE = JsonDateTimeDeserializer.deserialize(JsonDateTimeSerializer.serialize(LocalDateTime.now()))
@@ -101,7 +103,7 @@ class AmendmentDataEntityRepositoryIT {
 
     @Test
     fun cnNotFound() {
-        val actualAmendments = amendmentRepository.findBy(cpid = "UNKNOWN", ocid = OCID).get
+        val actualAmendments = amendmentRepository.findBy(cpid = Cpid.tryCreateOrNull("ocds-t1s2t3-MD-1565251033000")!!, ocid = OCID).get
         assertThat(actualAmendments, `is`(empty<Amendment>()))
     }
 
@@ -156,9 +158,9 @@ class AmendmentDataEntityRepositoryIT {
     }
 
     private fun insertAmendment(
-        cpid: String = CPID,
+        cpid: String = CPID.toString(),
         id: UUID = ID,
-        ocid: String = OCID
+        ocid: String = OCID.toString()
     ) {
 
         val entity = convert(stubAmendment())

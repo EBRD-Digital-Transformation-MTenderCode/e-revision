@@ -27,3 +27,5 @@ fun <T, R, E> List<T>.mapResult(block: (T) -> Result<R, E>): Result<List<R>, E> 
     }
     return Result.success(r)
 }
+
+fun <T> T?.toListOrEmpty(): List<T> = if (this != null) listOf(this) else emptyList()

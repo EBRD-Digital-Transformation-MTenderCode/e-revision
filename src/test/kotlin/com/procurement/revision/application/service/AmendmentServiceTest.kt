@@ -304,8 +304,8 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid.toString()),
-                    ocid = eq(params.ocid.toString()),
+                    cpid = eq(params.cpid),
+                    ocid = eq(params.ocid),
                     amendment = any()
                 )
             ).thenReturn(Result.success(true))
@@ -328,8 +328,8 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid.toString()),
-                    ocid = eq(params.ocid.toString()),
+                    cpid = eq(params.cpid),
+                    ocid = eq(params.ocid),
                     amendment = any()
                 )
             ).thenReturn(Result.success(true))
@@ -370,14 +370,14 @@ internal class AmendmentServiceTest {
             whenever(generable.generateToken()).thenReturn(token)
             whenever(
                 amendmentRepository.saveNewAmendment(
-                    cpid = eq(params.cpid.toString()),
-                    ocid = eq(params.ocid.toString()),
+                    cpid = eq(params.cpid),
+                    ocid = eq(params.ocid),
                     amendment = any()
                 )
             ).thenReturn(Result.success(false))
 
             val amendmentFromDb = getTestAmendment()
-            whenever(amendmentRepository.findBy(params.cpid.toString(), params.ocid.toString(), params.amendment.id)).thenReturn(
+            whenever(amendmentRepository.findBy(params.cpid, params.ocid, params.amendment.id)).thenReturn(
                 Result.success(amendmentFromDb)
             )
 

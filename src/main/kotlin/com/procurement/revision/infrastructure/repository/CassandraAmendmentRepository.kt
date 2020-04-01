@@ -8,6 +8,8 @@ import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
+import com.procurement.revision.domain.model.Cpid
+import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.extension.cassandra.tryExecute
@@ -59,11 +61,11 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
     private val preparedFindByCpidAndOcidAndIdCQL = session.prepare(FIND_BY_CPID_AND_OCID_AND_ID_CQL)
     private val preparedSaveNewAmendmentCQL = session.prepare(SAVE_NEW_AMENDMENT)
 
-    override fun findBy(cpid: String, ocid: String): Result<List<Amendment>, Fail.Incident> {
+    override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<Amendment>, Fail.Incident> {
         val query = preparedFindByCpidAndOcidCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
-                setString(columnOcid, ocid)
+                setString(columnCpid, cpid.toString())
+                setString(columnOcid, ocid.toString())
             }
 
         return query.tryExecute(session)
@@ -77,11 +79,11 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             .asSuccess()
     }
 
-    override fun findBy(cpid: String, ocid: String, id: AmendmentId): Result<Amendment?, Fail.Incident> {
+    override fun findBy(cpid: Cpid, ocid: Ocid, id: AmendmentId): Result<Amendment?, Fail.Incident> {
         val query = preparedFindByCpidAndOcidAndIdCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
-                setString(columnOcid, ocid)
+                setString(columnCpid, cpid.toString())
+                setString(columnOcid, ocid.toString())
                 setUUID(columnId, id)
             }
 
@@ -128,12 +130,12 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         }.asSuccess()
     }
 
-    override fun saveNewAmendment(cpid: String, ocid: String, amendment: Amendment): Result<Boolean, Fail.Incident> {
+    override fun saveNewAmendment(cpid: Cpid, ocid: Ocid, amendment: Amendment): Result<Boolean, Fail.Incident> {
         val entity = convert(amendment)
         val statements = preparedSaveNewAmendmentCQL.bind()
             .apply {
-                setString(columnCpid, cpid)
-                setString(columnOcid, ocid)
+                setString(columnCpid, cpid.toString())
+                setString(columnOcid, ocid.toString())
                 setUUID(columnId, amendment.id)
                 setString(columnData, entity.toJson())
             }

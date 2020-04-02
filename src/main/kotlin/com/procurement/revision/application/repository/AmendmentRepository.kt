@@ -10,5 +10,6 @@ import com.procurement.revision.infrastructure.fail.Fail
 interface AmendmentRepository {
     fun findBy(cpid: Cpid, ocid: Ocid): Result<List<Amendment>, Fail.Incident>
     fun findBy(cpid: Cpid, ocid: Ocid, id: AmendmentId): Result<Amendment?, Fail.Incident>
+    fun findBy(cpid: Cpid, ocid: Ocid, ids: List<AmendmentId>): Result<List<Amendment>, Fail.Incident>
     fun saveNewAmendment(cpid: Cpid, ocid: Ocid, amendment: Amendment): Result<Boolean, Fail.Incident>
 }

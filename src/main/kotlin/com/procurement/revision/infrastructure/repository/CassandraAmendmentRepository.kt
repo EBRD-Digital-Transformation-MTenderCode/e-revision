@@ -55,11 +55,20 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                   AND $columnOcid=?
                   AND $columnId=?
             """
+
+        private const val FIND_BY_IDS = """
+               SELECT $columnData
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId IN :values;
+            """
     }
 
     private val preparedFindByCpidAndOcidCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
     private val preparedFindByCpidAndOcidAndIdCQL = session.prepare(FIND_BY_CPID_AND_OCID_AND_ID_CQL)
     private val preparedSaveNewAmendmentCQL = session.prepare(SAVE_NEW_AMENDMENT)
+    private val prepareFindByIds = session.prepare(FIND_BY_IDS)
 
     override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<Amendment>, Fail.Incident> {
         val query = preparedFindByCpidAndOcidCQL.bind()
@@ -94,6 +103,21 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             ?.let { row -> converter(row = row) }
             ?.doOnError { error -> return failure(error) }
             ?.get
+            .asSuccess()
+    }
+
+    override fun findBy(cpid: Cpid, ocid: Ocid, ids: List<AmendmentId>): Result<List<Amendment>, Fail.Incident> {
+        val query = prepareFindByIds.bind()
+            .setList("values", ids)
+            .setString(columnCpid, cpid.toString())
+            .setString(columnOcid, ocid.toString())
+
+        return query.tryExecute(session)
+            .forwardResult { error -> return error }
+            .map { row ->
+                converter(row = row)
+                    .forwardResult { error -> return error }
+            }
             .asSuccess()
     }
 

@@ -5,6 +5,8 @@ import com.procurement.revision.application.model.amendment.CreateAmendmentParam
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
+import com.procurement.revision.application.model.amendment.state.GetMainPartOfAmendmentParams
+import com.procurement.revision.application.model.amendment.state.GetMainPartOfAmendmentResult
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
@@ -14,14 +16,17 @@ import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.functional.Result.Companion.success
 import com.procurement.revision.domain.functional.ValidationResult
+import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
+import com.procurement.revision.infrastructure.converter.convertToGetMainPartOfAmendmentResult
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.Fail.Incident.DatabaseConsistencyIncident
 import com.procurement.revision.infrastructure.fail.error.ValidationError
 import com.procurement.revision.infrastructure.model.OperationType
+import com.procurement.revision.lib.toSetBy
 import org.springframework.stereotype.Service
 
 @Service
@@ -134,6 +139,29 @@ class AmendmentService(
             return ValidationResult.error(ValidationError.InvalidToken())
 
         return ValidationResult.ok()
+    }
+
+    fun getMainPartOfAmendment(params: GetMainPartOfAmendmentParams)
+        : Result<List<GetMainPartOfAmendmentResult>, Fail> {
+        val amendments = amendmentRepository.findBy(
+            cpid = params.cpid,
+            ocid = params.ocid,
+            ids = params.amendmentIds
+        ).forwardResult { incident -> return incident }
+
+        val amendmentIds = params.amendmentIds.toSetBy { it }
+        val resultAmendmentIds = amendments.toSetBy { it.id }
+
+        val absentAmendments = amendmentIds - resultAmendmentIds
+        if (absentAmendments.isNotEmpty())
+            return failure(
+                ValidationError.AmendmentNotFoundOnGetMainPart(
+                    absentAmendments.first()
+                )
+            )
+        return amendments.map { amendment ->
+            amendment.convertToGetMainPartOfAmendmentResult()
+        }.asSuccess()
     }
 
     private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true

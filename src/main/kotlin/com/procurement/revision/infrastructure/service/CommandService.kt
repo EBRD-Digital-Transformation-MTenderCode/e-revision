@@ -6,6 +6,7 @@ import com.procurement.revision.infrastructure.handler.CheckAccessToAmendmentHan
 import com.procurement.revision.infrastructure.handler.CreateAmendmentHandler
 import com.procurement.revision.infrastructure.handler.DataValidationHandler
 import com.procurement.revision.infrastructure.handler.GetAmendmentIdsHandler
+import com.procurement.revision.infrastructure.handler.GetMainPartOfAmendmentHandler
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.CommandType
 import com.procurement.revision.infrastructure.web.dto.generateResponseOnFailure
@@ -20,7 +21,8 @@ class CommandService(
     private val getAmendmentIdsHandler: GetAmendmentIdsHandler,
     private val dataValidationHandler: DataValidationHandler,
     private val createAmendmentHandler: CreateAmendmentHandler,
-    private val checkAccessToAmendmentHandler: CheckAccessToAmendmentHandler
+    private val checkAccessToAmendmentHandler: CheckAccessToAmendmentHandler,
+    private val getMainPartOfAmendmentHandler: GetMainPartOfAmendmentHandler
 ) {
 
     fun execute(node: JsonNode): ApiResponse {
@@ -46,6 +48,10 @@ class CommandService(
 
             CommandType.CHECK_ACCESS_TO_AMENDMENT ->
                 checkAccessToAmendmentHandler.handle(node)
+
+            CommandType.GET_MAIN_PART_OF_AMENDMENT_BY_IDS ->
+                getMainPartOfAmendmentHandler.handle(node)
+
 
         }
     }

@@ -7,6 +7,8 @@ import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
 import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentParams
 import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentResult
+import com.procurement.revision.application.model.amendment.state.SetStateForAmendmentParams
+import com.procurement.revision.application.model.amendment.state.SetStateForAmendmentResult
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
@@ -20,8 +22,10 @@ import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.functional.bind
 import com.procurement.revision.domain.model.amendment.Amendment
 import com.procurement.revision.domain.model.amendment.AmendmentId
+import com.procurement.revision.domain.util.extension.ifFalse
 import com.procurement.revision.infrastructure.converter.convertToCreateAmendmentResult
 import com.procurement.revision.infrastructure.converter.convertToGetMainPartOfAmendmentResult
+import com.procurement.revision.infrastructure.converter.convertToSetStateForAmendmentResult
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.fail.Fail.Incident.DatabaseConsistencyIncident
 import com.procurement.revision.infrastructure.fail.error.ValidationError
@@ -167,4 +171,31 @@ class AmendmentService(
     private fun <T> testEquals(value: T, pattern: T?): Boolean = if (pattern != null) value == pattern else true
     private fun <T> testContains(value: T, patterns: Set<T>): Boolean =
         if (patterns.isNotEmpty()) value in patterns else true
+
+    fun setStateForAmendment(params: SetStateForAmendmentParams)
+        : Result<SetStateForAmendmentResult, Fail> {
+        val amendment = amendmentRepository.findBy(
+            cpid = params.cpid,
+            ocid = params.ocid,
+            id = params.amendment.id
+        ).forwardResult { incident -> return incident }
+            ?: return failure(
+                ValidationError.AmendmentNotFoundOnSetStateForAmendment(
+                    params.amendment.id
+                )
+            )
+        val updatedAmendment = amendment.copy(
+            status = params.amendment.status
+        )
+
+        amendmentRepository.updateAmendment(
+            cpid = params.cpid, ocid = params.ocid, amendment = updatedAmendment
+        )
+            .forwardResult { incident -> return incident }
+            .ifFalse { return failure(DatabaseConsistencyIncident("Could not find amendment ${amendment.id}")) }
+
+        return updatedAmendment
+            .convertToSetStateForAmendmentResult()
+            .asSuccess()
+    }
 }

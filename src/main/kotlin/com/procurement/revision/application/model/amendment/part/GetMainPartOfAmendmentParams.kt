@@ -29,10 +29,13 @@ class GetMainPartOfAmendmentParams private constructor(
             val ocidParsed = parseOcid(ocid)
                 .doReturn { error -> return failure(error = error) }
 
+            val amendmentIdsAttribute = "amendmentIds"
             if (amendmentIds.isEmpty())
-                return failure(DataErrors.Validation.EmptyArray(name = "amendmentIds"))
+                return failure(DataErrors.Validation.EmptyArray(name = amendmentIdsAttribute))
 
-            val amendmentIdParsed = amendmentIds.mapResult { amendmentId -> parseAmendmentId(amendmentId) }
+            val amendmentIdParsed = amendmentIds.mapResult { amendmentId ->
+                parseAmendmentId(value = amendmentId, attributeName = amendmentIdsAttribute)
+            }
                 .forwardResult { error -> return error }
 
             return GetMainPartOfAmendmentParams(

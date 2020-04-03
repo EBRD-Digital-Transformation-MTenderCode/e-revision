@@ -1,5 +1,6 @@
 package com.procurement.revision.application.model.amendment
 
+import com.procurement.revision.domain.enums.AmendmentStatus
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.model.Cpid
@@ -34,12 +35,15 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
             )
         )
 
-fun parseAmendmentId(value: String): Result<AmendmentId, DataErrors.Validation.DataFormatMismatch> =
+fun parseAmendmentId(
+    value: String,
+    attributeName: String
+): Result<AmendmentId, DataErrors.Validation.DataFormatMismatch> =
     value.tryAmendmentId()
         .doReturn {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
-                    name = "amendmentId",
+                    name = attributeName,
                     expectedFormat = "uuid",
                     actualValue = value
                 )
@@ -70,3 +74,16 @@ fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMis
             )
         }.asSuccess()
 
+fun parseAmendmentStatus(
+    status: String, allowedStatuses: Set<String>, attributeName: String
+): Result<AmendmentStatus, DataErrors.Validation.UnknownValue> =
+    AmendmentStatus.orNull(status)
+        ?.takeIf { it.key in allowedStatuses }
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.UnknownValue(
+                name = attributeName,
+                expectedValues = allowedStatuses,
+                actualValue = status
+            )
+        )

@@ -38,4 +38,10 @@ sealed class ValidationError(
         description = "Amendment not found.",
         entityId = amendmentId.toString()
     )
+
+    class AmendmentNotFoundOnSetStateForAmendment(amendmentId: AmendmentId) : ValidationError(
+        numberError = "VR-10.2.6.1",
+        description = "Amendment not found.",
+        entityId = amendmentId.toString()
+    )
 }

@@ -1,4 +1,4 @@
-package com.procurement.revision.application.model.amendment.state
+package com.procurement.revision.application.model.amendment.part
 
 import com.procurement.revision.application.model.amendment.parseAmendmentId
 import com.procurement.revision.application.model.amendment.parseCpid

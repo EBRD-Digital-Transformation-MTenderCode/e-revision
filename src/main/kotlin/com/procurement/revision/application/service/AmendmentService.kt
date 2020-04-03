@@ -5,8 +5,8 @@ import com.procurement.revision.application.model.amendment.CreateAmendmentParam
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.model.amendment.DataValidationParams
 import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
-import com.procurement.revision.application.model.amendment.state.GetMainPartOfAmendmentParams
-import com.procurement.revision.application.model.amendment.state.GetMainPartOfAmendmentResult
+import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentParams
+import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentResult
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus

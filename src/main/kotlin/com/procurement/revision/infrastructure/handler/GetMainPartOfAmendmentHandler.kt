@@ -1,7 +1,7 @@
 package com.procurement.revision.infrastructure.handler
 
 import com.fasterxml.jackson.databind.JsonNode
-import com.procurement.revision.application.model.amendment.state.GetMainPartOfAmendmentResult
+import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentResult
 import com.procurement.revision.application.service.AmendmentService
 import com.procurement.revision.application.service.Logger
 import com.procurement.revision.domain.functional.Result

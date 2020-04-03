@@ -1,7 +1,7 @@
 package com.procurement.revision.infrastructure.converter
 
-import com.procurement.revision.application.model.amendment.state.GetMainPartOfAmendmentParams
-import com.procurement.revision.application.model.amendment.state.GetMainPartOfAmendmentResult
+import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentParams
+import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentResult
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.model.amendment.Amendment

@@ -38,6 +38,20 @@ class GetMainPartOfAmendmentParams private constructor(
             }
                 .forwardResult { error -> return error }
 
+            val duplicateIds = amendmentIdParsed
+                .groupingBy { it }
+                .eachCount()
+                .filter { it.value > 1 }
+                .map { it.key }
+
+            if (duplicateIds.isNotEmpty())
+                return failure(
+                    DataErrors.Validation.UniquenessDataMismatch(
+                        value = duplicateIds.first().toString(),
+                        name = amendmentIdsAttribute
+                    )
+                )
+
             return GetMainPartOfAmendmentParams(
                 cpid = cpidParsed,
                 ocid = ocidParsed,

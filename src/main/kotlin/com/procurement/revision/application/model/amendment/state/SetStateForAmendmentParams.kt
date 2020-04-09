@@ -19,7 +19,7 @@ class SetStateForAmendmentParams private constructor(
 ) {
     companion object {
 
-        private val allowedStatuses = AmendmentStatus.values()
+        private val allowedStatuses = AmendmentStatus.allowedElements
             .filter { value ->
                 when (value) {
                     AmendmentStatus.ACTIVE -> true
@@ -44,9 +44,7 @@ class SetStateForAmendmentParams private constructor(
         }
     }
 
-    class Amendment private constructor(
-        val id: AmendmentId, val status: AmendmentStatus
-    ) {
+    class Amendment private constructor(val id: AmendmentId, val status: AmendmentStatus) {
         companion object {
             fun tryCreate(
                 id: String, status: String
@@ -60,9 +58,7 @@ class SetStateForAmendmentParams private constructor(
                     allowedStatuses = allowedStatuses
                 ).forwardResult { error -> return error }
 
-                return Amendment(
-                    id = idParsed, status = statusParsed
-                ).asSuccess()
+                return Amendment(id = idParsed, status = statusParsed).asSuccess()
             }
         }
     }

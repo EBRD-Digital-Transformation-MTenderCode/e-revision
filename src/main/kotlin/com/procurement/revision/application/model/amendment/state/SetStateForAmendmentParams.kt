@@ -11,7 +11,6 @@ import com.procurement.revision.domain.model.Cpid
 import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.fail.error.DataErrors
-import com.procurement.revision.lib.toSetBy
 
 class SetStateForAmendmentParams private constructor(
     val cpid: Cpid,
@@ -28,7 +27,7 @@ class SetStateForAmendmentParams private constructor(
                     AmendmentStatus.CANCELLED,
                     AmendmentStatus.WITHDRAWN -> false
                 }
-            }.toSetBy { it.key }
+            }.toSet()
 
         fun tryCreate(
             cpid: String, ocid: String, amendment: Amendment

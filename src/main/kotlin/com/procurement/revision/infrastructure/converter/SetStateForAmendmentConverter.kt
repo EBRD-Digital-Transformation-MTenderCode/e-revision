@@ -11,7 +11,7 @@ fun SetStateForAmendmentRequest.convert(): Result<SetStateForAmendmentParams, Da
     SetStateForAmendmentParams.tryCreate(
         cpid = cpid,
         ocid = ocid,
-        amendment = amendment.convert().forwardResult { error -> return error }
+        amendment = amendment.convert().orForwardFail { error -> return error }
     )
 
 fun SetStateForAmendmentRequest.Amendment.convert(): Result<SetStateForAmendmentParams.Amendment, DataErrors> =

@@ -37,7 +37,7 @@ class GetMainPartOfAmendmentParams private constructor(
             val amendmentIdParsed = amendmentIds.mapResult { amendmentId ->
                 parseAmendmentId(value = amendmentId, attributeName = AMENDMENT_IDS_ATTRIBUTE_NAME)
             }
-                .forwardResult { error -> return error }
+                .orForwardFail { error -> return error }
 
             val duplicateIds = amendmentIdParsed
                 .groupingBy { it }

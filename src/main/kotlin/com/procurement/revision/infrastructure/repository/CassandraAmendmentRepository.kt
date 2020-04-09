@@ -123,10 +123,10 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             .setString(columnOcid, ocid.toString())
 
         return query.tryExecute(session)
-            .forwardResult { error -> return error }
+            .orForwardFail { error -> return error }
             .map { row ->
                 converter(row = row)
-                    .forwardResult { error -> return error }
+                    .orForwardFail { error -> return error }
             }
             .asSuccess()
     }

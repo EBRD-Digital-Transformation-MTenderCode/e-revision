@@ -28,9 +28,9 @@ class SetStateForAmendmentHandler(
     override fun execute(node: JsonNode): Result<SetStateForAmendmentResult, Fail> {
         val params = node
             .tryGetParams(SetStateForAmendmentRequest::class.java)
-            .forwardResult { error -> return error }
+            .orForwardFail { error -> return error }
             .convert()
-            .forwardResult { errors -> return errors }
+            .orForwardFail { errors -> return errors }
 
         return amendmentService.setStateForAmendment(params)
     }

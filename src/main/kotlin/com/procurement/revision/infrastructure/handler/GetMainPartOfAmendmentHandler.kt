@@ -22,9 +22,9 @@ class GetMainPartOfAmendmentHandler(
     override fun execute(node: JsonNode): Result<List<GetMainPartOfAmendmentResult>, Fail> {
         val params = node
             .tryGetParams(GetMainPartOfAmendmentRequest::class.java)
-            .forwardResult { error -> return error }
+            .orForwardFail { error -> return error }
             .convert()
-            .forwardResult { error -> return error }
+            .orForwardFail { error -> return error }
 
         return amendmentService.getMainPartOfAmendment(params)
     }

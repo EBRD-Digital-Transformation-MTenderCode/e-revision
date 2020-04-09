@@ -33,10 +33,10 @@ class SetStateForAmendmentParams private constructor(
             cpid: String, ocid: String, amendment: Amendment
         ): Result<SetStateForAmendmentParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
-                .forwardResult { error -> return error }
+                .orForwardFail { error -> return error }
 
             val ocidParsed = parseOcid(ocid)
-                .forwardResult { error -> return error }
+                .orForwardFail { error -> return error }
 
             return SetStateForAmendmentParams(
                 cpid = cpidParsed, ocid = ocidParsed, amendment = amendment
@@ -50,13 +50,13 @@ class SetStateForAmendmentParams private constructor(
                 id: String, status: String
             ): Result<Amendment, DataErrors> {
                 val idParsed = parseAmendmentId(value = id, attributeName = "amendment.id")
-                    .forwardResult { error -> return error }
+                    .orForwardFail { error -> return error }
 
                 val statusParsed = parseAmendmentStatus(
                     status = status,
                     attributeName = "amendment.status",
                     allowedStatuses = allowedStatuses
-                ).forwardResult { error -> return error }
+                ).orForwardFail { error -> return error }
 
                 return Amendment(id = idParsed, status = statusParsed).asSuccess()
             }

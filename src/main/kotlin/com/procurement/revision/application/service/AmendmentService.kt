@@ -151,7 +151,7 @@ class AmendmentService(
             cpid = params.cpid,
             ocid = params.ocid,
             ids = params.amendmentIds
-        ).forwardResult { incident -> return incident }
+        ).orForwardFail { incident -> return incident }
 
         val amendmentIds = params.amendmentIds.toSetBy { it }
         val resultAmendmentIds = amendments.toSetBy { it.id }
@@ -178,7 +178,7 @@ class AmendmentService(
             cpid = params.cpid,
             ocid = params.ocid,
             id = params.amendment.id
-        ).forwardResult { incident -> return incident }
+        ).orForwardFail { incident -> return incident }
             ?: return failure(
                 ValidationError.AmendmentNotFoundOnSetStateForAmendment(
                     params.amendment.id
@@ -191,7 +191,7 @@ class AmendmentService(
         amendmentRepository.updateAmendment(
             cpid = params.cpid, ocid = params.ocid, amendment = updatedAmendment
         )
-            .forwardResult { incident -> return incident }
+            .orForwardFail { incident -> return incident }
             .ifFalse { return failure(DatabaseConsistencyIncident("Could not find amendment ${amendment.id}")) }
 
         return updatedAmendment

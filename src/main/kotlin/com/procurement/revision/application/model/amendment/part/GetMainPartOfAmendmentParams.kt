@@ -18,6 +18,8 @@ class GetMainPartOfAmendmentParams private constructor(
     val amendmentIds: List<AmendmentId>
 ) {
     companion object {
+        private const val AMENDMENT_IDS_ATTRIBUTE_NAME = "amendmentIds"
+
         fun tryCreate(
             cpid: String,
             ocid: String,
@@ -29,12 +31,11 @@ class GetMainPartOfAmendmentParams private constructor(
             val ocidParsed = parseOcid(ocid)
                 .doReturn { error -> return failure(error = error) }
 
-            val amendmentIdsAttribute = "amendmentIds"
             if (amendmentIds.isEmpty())
-                return failure(DataErrors.Validation.EmptyArray(name = amendmentIdsAttribute))
+                return failure(DataErrors.Validation.EmptyArray(name = AMENDMENT_IDS_ATTRIBUTE_NAME))
 
             val amendmentIdParsed = amendmentIds.mapResult { amendmentId ->
-                parseAmendmentId(value = amendmentId, attributeName = amendmentIdsAttribute)
+                parseAmendmentId(value = amendmentId, attributeName = AMENDMENT_IDS_ATTRIBUTE_NAME)
             }
                 .forwardResult { error -> return error }
 
@@ -48,7 +49,7 @@ class GetMainPartOfAmendmentParams private constructor(
                 return failure(
                     DataErrors.Validation.UniquenessDataMismatch(
                         value = duplicateIds.first().toString(),
-                        name = amendmentIdsAttribute
+                        name = AMENDMENT_IDS_ATTRIBUTE_NAME
                     )
                 )
 

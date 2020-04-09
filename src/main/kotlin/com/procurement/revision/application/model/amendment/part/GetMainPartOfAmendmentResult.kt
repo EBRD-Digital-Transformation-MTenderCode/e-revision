@@ -12,5 +12,5 @@ data class GetMainPartOfAmendmentResult(
     @param:JsonProperty("status") @field:JsonProperty("status") val status: AmendmentStatus,
     @param:JsonProperty("type") @field:JsonProperty("type") val type: AmendmentType,
     @param:JsonProperty("relatesTo") @field:JsonProperty("relatesTo") val relatesTo: AmendmentRelatesTo,
-    @param:JsonProperty("relateditem") @field:JsonProperty("relateditem") val relateditem: String
+    @param:JsonProperty("relatedItem") @field:JsonProperty("relatedItem") val relatedItem: String
 )

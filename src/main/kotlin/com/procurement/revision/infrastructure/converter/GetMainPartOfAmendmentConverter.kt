@@ -16,7 +16,7 @@ fun Amendment.convertToGetMainPartOfAmendmentResult() =
     GetMainPartOfAmendmentResult(
         id = id,
         status = status,
-        relateditem = relatedItem,
+        relatedItem = relatedItem,
         relatesTo = relatesTo,
         type = type
     )

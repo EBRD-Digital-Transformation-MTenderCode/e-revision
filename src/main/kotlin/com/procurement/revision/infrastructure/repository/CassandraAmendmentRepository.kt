@@ -41,6 +41,15 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                IF NOT EXISTS
             """
 
+        private const val UPDATE_AMENDMENT = """
+               UPDATE $keySpace.$tableName
+                  SET $columnData=?
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId=?               
+               IF EXISTS
+            """
+
         private const val FIND_BY_CPID_AND_OCID_CQL = """
                SELECT $columnData
                  FROM $keySpace.$tableName
@@ -55,11 +64,21 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
                   AND $columnOcid=?
                   AND $columnId=?
             """
+
+        private const val FIND_BY_IDS = """
+               SELECT $columnData
+                 FROM $keySpace.$tableName
+                WHERE $columnCpid=? 
+                  AND $columnOcid=?
+                  AND $columnId IN :values;
+            """
     }
 
     private val preparedFindByCpidAndOcidCQL = session.prepare(FIND_BY_CPID_AND_OCID_CQL)
     private val preparedFindByCpidAndOcidAndIdCQL = session.prepare(FIND_BY_CPID_AND_OCID_AND_ID_CQL)
     private val preparedSaveNewAmendmentCQL = session.prepare(SAVE_NEW_AMENDMENT)
+    private val prepareFindByIds = session.prepare(FIND_BY_IDS)
+    private val preparedUpdateAmendment = session.prepare(UPDATE_AMENDMENT)
 
     override fun findBy(cpid: Cpid, ocid: Ocid): Result<List<Amendment>, Fail.Incident> {
         val query = preparedFindByCpidAndOcidCQL.bind()
@@ -94,6 +113,21 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
             ?.let { row -> converter(row = row) }
             ?.doOnError { error -> return failure(error) }
             ?.get
+            .asSuccess()
+    }
+
+    override fun findBy(cpid: Cpid, ocid: Ocid, ids: List<AmendmentId>): Result<List<Amendment>, Fail.Incident> {
+        val query = prepareFindByIds.bind()
+            .setList("values", ids)
+            .setString(columnCpid, cpid.toString())
+            .setString(columnOcid, ocid.toString())
+
+        return query.tryExecute(session)
+            .orForwardFail { error -> return error }
+            .map { row ->
+                converter(row = row)
+                    .orForwardFail { error -> return error }
+            }
             .asSuccess()
     }
 
@@ -133,6 +167,22 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
     override fun saveNewAmendment(cpid: Cpid, ocid: Ocid, amendment: Amendment): Result<Boolean, Fail.Incident> {
         val entity = convert(amendment)
         val statements = preparedSaveNewAmendmentCQL.bind()
+            .apply {
+                setString(columnCpid, cpid.toString())
+                setString(columnOcid, ocid.toString())
+                setUUID(columnId, amendment.id)
+                setString(columnData, entity.toJson())
+            }
+
+        return statements.tryExecute(session).bind { resultSet ->
+            success(resultSet.wasApplied())
+        }
+    }
+
+    override fun updateAmendment(cpid: Cpid, ocid: Ocid, amendment: Amendment)
+        : Result<Boolean, Fail.Incident> {
+        val entity = convert(amendment)
+        val statements = preparedUpdateAmendment.bind()
             .apply {
                 setString(columnCpid, cpid.toString())
                 setString(columnOcid, ocid.toString())

@@ -31,7 +31,7 @@ class CheckAccessToAmendmentParams private constructor(
             val ocidParsed = parseOcid(ocid)
                 .doReturn { error -> return failure(error = error) }
 
-            val amendmentIdParsed = parseAmendmentId(amendmentId)
+            val amendmentIdParsed = parseAmendmentId(value = amendmentId, attributeName =  "amendmentId")
                 .doReturn { error -> return failure(error = error) }
 
             val tokenParsed = parseToken(token)

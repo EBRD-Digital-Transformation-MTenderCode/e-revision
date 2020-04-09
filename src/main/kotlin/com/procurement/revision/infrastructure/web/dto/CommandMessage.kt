@@ -27,7 +27,9 @@ enum class CommandType(@JsonValue override val key: String) : Action, EnumElemen
     GET_AMENDMENTS_IDS("getAmendmentIds"),
     DATA_VALIDATION("dataValidation"),
     CREATE_AMENDMENT("createAmendment"),
-    CHECK_ACCESS_TO_AMENDMENT("CheckAccessToAmendment");
+    CHECK_ACCESS_TO_AMENDMENT("CheckAccessToAmendment"),
+    GET_MAIN_PART_OF_AMENDMENT_BY_IDS("getMainPartOfAmendmentByIds"),
+    SET_STATE_FOR_AMENDMENT("setStateForAmendment");
 
     override fun toString(): String = key
 

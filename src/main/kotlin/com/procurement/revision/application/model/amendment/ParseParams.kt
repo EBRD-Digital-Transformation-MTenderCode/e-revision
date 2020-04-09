@@ -1,5 +1,8 @@
 package com.procurement.revision.application.model.amendment
 
+import com.procurement.revision.domain.enums.AmendmentStatus
+import com.procurement.revision.domain.enums.EnumElementProvider
+import com.procurement.revision.domain.enums.EnumElementProvider.Companion.keysAsStrings
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.asSuccess
 import com.procurement.revision.domain.model.Cpid
@@ -34,12 +37,15 @@ fun parseOcid(value: String): Result<Ocid, DataErrors.Validation.DataMismatchToP
             )
         )
 
-fun parseAmendmentId(value: String): Result<AmendmentId, DataErrors.Validation.DataFormatMismatch> =
+fun parseAmendmentId(
+    value: String,
+    attributeName: String
+): Result<AmendmentId, DataErrors.Validation.DataFormatMismatch> =
     value.tryAmendmentId()
         .doReturn {
             return Result.failure(
                 DataErrors.Validation.DataFormatMismatch(
-                    name = "amendmentId",
+                    name = attributeName,
                     expectedFormat = "uuid",
                     actualValue = value
                 )
@@ -70,3 +76,22 @@ fun parseOwner(value: String): Result<Owner, DataErrors.Validation.DataFormatMis
             )
         }.asSuccess()
 
+fun parseAmendmentStatus(
+    status: String, allowedStatuses: Set<AmendmentStatus>, attributeName: String
+): Result<AmendmentStatus, DataErrors.Validation.UnknownValue> =
+    parseEnum(value = status, allowedEnums = allowedStatuses, attributeName = attributeName, target = AmendmentStatus)
+
+private fun <T> parseEnum(
+    value: String, allowedEnums: Set<T>, attributeName: String, target: EnumElementProvider<T>
+): Result<T, DataErrors.Validation.UnknownValue> where T : Enum<T>,
+                                                       T : EnumElementProvider.Key =
+    target.orNull(value)
+        ?.takeIf { it in allowedEnums }
+        ?.asSuccess()
+        ?: Result.failure(
+            DataErrors.Validation.UnknownValue(
+                name = attributeName,
+                expectedValues = allowedEnums.keysAsStrings(),
+                actualValue = value
+            )
+        )

@@ -29,6 +29,6 @@ class FindAmendmentIdsHandler(
             .doOnError { error -> return failure(error) }
             .get
 
-        return amendmentService.getAmendmentIdsBy(params)
+        return amendmentService.findAmendmentIdsBy(params)
     }
 }

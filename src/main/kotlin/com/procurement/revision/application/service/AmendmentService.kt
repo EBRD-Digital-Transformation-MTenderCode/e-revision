@@ -39,7 +39,7 @@ class AmendmentService(
     private val generable: Generable
 ) {
 
-    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
+    fun findAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
         val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
             .doOnError { incident -> return failure(incident) }
             .get

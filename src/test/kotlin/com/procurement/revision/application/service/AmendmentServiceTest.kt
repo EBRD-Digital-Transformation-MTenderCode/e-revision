@@ -64,10 +64,10 @@ internal class AmendmentServiceTest {
     )
 
     @Nested
-    inner class GetAmendmentIdsBy {
+    inner class FindAmendmentIdsBy {
 
         @Test
-        fun getAmendmentIdsBySuccess() {
+        fun findAmendmentIdsBySuccess() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(relatedItem = "someItem")
             whenever(amendmentRepository.findBy(any(), any())).thenReturn(

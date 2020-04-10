@@ -5,7 +5,7 @@ import com.procurement.revision.application.service.Logger
 import com.procurement.revision.infrastructure.handler.CheckAccessToAmendmentHandler
 import com.procurement.revision.infrastructure.handler.CreateAmendmentHandler
 import com.procurement.revision.infrastructure.handler.DataValidationHandler
-import com.procurement.revision.infrastructure.handler.GetAmendmentIdsHandler
+import com.procurement.revision.infrastructure.handler.FindAmendmentIdsHandler
 import com.procurement.revision.infrastructure.handler.GetMainPartOfAmendmentHandler
 import com.procurement.revision.infrastructure.handler.SetStateForAmendmentHandler
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Service
 @Service
 class CommandService(
     private val logger: Logger,
-    private val getAmendmentIdsHandler: GetAmendmentIdsHandler,
+    private val findAmendmentIdsHandler: FindAmendmentIdsHandler,
     private val dataValidationHandler: DataValidationHandler,
     private val createAmendmentHandler: CreateAmendmentHandler,
     private val checkAccessToAmendmentHandler: CheckAccessToAmendmentHandler,
@@ -39,8 +39,8 @@ class CommandService(
             }
 
         return when (action) {
-            CommandType.GET_AMENDMENTS_IDS ->
-                getAmendmentIdsHandler.handle(node)
+            CommandType.FIND_AMENDMENTS_IDS ->
+                findAmendmentIdsHandler.handle(node)
 
             CommandType.DATA_VALIDATION ->
                 dataValidationHandler.handle(node)

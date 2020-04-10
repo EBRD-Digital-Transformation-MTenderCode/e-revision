@@ -14,7 +14,7 @@ import com.procurement.revision.infrastructure.web.dto.tryGetParams
 import org.springframework.stereotype.Component
 
 @Component
-class GetAmendmentIdsHandler(
+class FindAmendmentIdsHandler(
     private val amendmentService: AmendmentService, logger: Logger
 ) : AbstractHandler<CommandType, List<AmendmentId>>(logger) {
 

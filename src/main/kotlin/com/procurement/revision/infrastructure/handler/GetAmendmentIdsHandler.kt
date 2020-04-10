@@ -18,7 +18,7 @@ class GetAmendmentIdsHandler(
     private val amendmentService: AmendmentService, logger: Logger
 ) : AbstractHandler<CommandType, List<AmendmentId>>(logger) {
 
-    override val action: CommandType = CommandType.GET_AMENDMENTS_IDS
+    override val action: CommandType = CommandType.FIND_AMENDMENTS_IDS
 
     override fun execute(node: JsonNode): Result<List<AmendmentId>, Fail> {
         val params = node

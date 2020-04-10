@@ -9,7 +9,7 @@ import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.web.dto.CommandType
-import com.procurement.revision.infrastructure.web.dto.request.amendment.GetAmendmentIdsRequest
+import com.procurement.revision.infrastructure.web.dto.request.amendment.FindAmendmentIdsRequest
 import com.procurement.revision.infrastructure.web.dto.tryGetParams
 import org.springframework.stereotype.Component
 
@@ -22,7 +22,7 @@ class FindAmendmentIdsHandler(
 
     override fun execute(node: JsonNode): Result<List<AmendmentId>, Fail> {
         val params = node
-            .tryGetParams(GetAmendmentIdsRequest::class.java)
+            .tryGetParams(FindAmendmentIdsRequest::class.java)
             .doOnError { error -> return failure(error) }
             .get
             .convert()

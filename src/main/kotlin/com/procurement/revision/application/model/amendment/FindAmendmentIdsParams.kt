@@ -11,7 +11,7 @@ import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.lib.toSetBy
 
-class GetAmendmentIdsParams private constructor(
+class FindAmendmentIdsParams private constructor(
     val status: AmendmentStatus?,
     val type: AmendmentType?,
     val relatesTo: AmendmentRelatesTo?,
@@ -54,7 +54,7 @@ class GetAmendmentIdsParams private constructor(
             relatedItems: List<String>?,
             cpid: String,
             ocid: String
-        ): Result<GetAmendmentIdsParams, DataErrors> {
+        ): Result<FindAmendmentIdsParams, DataErrors> {
             val statusParsed = status
                 ?.let {
                     AmendmentStatus.orNull(it)
@@ -105,7 +105,7 @@ class GetAmendmentIdsParams private constructor(
                 .doReturn { error -> return failure(error = error) }
 
             return success(
-                GetAmendmentIdsParams(
+                FindAmendmentIdsParams(
                     ocid = ocidParsed,
                     status = statusParsed,
                     type = typeParsed,

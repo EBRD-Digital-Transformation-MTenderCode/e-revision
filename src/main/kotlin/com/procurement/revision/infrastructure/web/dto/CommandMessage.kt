@@ -24,7 +24,7 @@ import java.util.*
 
 enum class CommandType(@JsonValue override val key: String) : Action, EnumElementProvider.Key {
 
-    GET_AMENDMENTS_IDS("getAmendmentIds"),
+    FIND_AMENDMENTS_IDS("findAmendmentIds"),
     DATA_VALIDATION("dataValidation"),
     CREATE_AMENDMENT("createAmendment"),
     CHECK_ACCESS_TO_AMENDMENT("CheckAccessToAmendment"),

@@ -6,7 +6,7 @@ import com.nhaarman.mockito_kotlin.mock
 import com.nhaarman.mockito_kotlin.whenever
 import com.procurement.revision.application.model.amendment.CreateAmendmentParams
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
-import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
+import com.procurement.revision.application.model.amendment.FindAmendmentIdsParams
 import com.procurement.revision.application.repository.AmendmentRepository
 import com.procurement.revision.domain.enums.AmendmentRelatesTo
 import com.procurement.revision.domain.enums.AmendmentStatus
@@ -64,10 +64,10 @@ internal class AmendmentServiceTest {
     )
 
     @Nested
-    inner class GetAmendmentIdsBy {
+    inner class FindAmendmentIdsBy {
 
         @Test
-        fun getAmendmentIdsBySuccess() {
+        fun findAmendmentIdsBySuccess() {
             val amendmentFirst = getTestAmendment()
             val amendmentSecond = getTestAmendment().copy(relatedItem = "someItem")
             whenever(amendmentRepository.findBy(any(), any())).thenReturn(
@@ -79,8 +79,8 @@ internal class AmendmentServiceTest {
                 )
             )
 
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = amendmentFirst.status.toString(),
                     relatesTo = amendmentFirst.relatesTo.toString(),
                     relatedItems = listOf(amendmentFirst.relatedItem),
@@ -107,8 +107,8 @@ internal class AmendmentServiceTest {
                 )
             )
 
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = null,
                     relatesTo = amendmentFirst.relatesTo.toString(),
                     relatedItems = listOf(amendmentFirst.relatedItem, amendmentSecond.relatedItem),
@@ -129,8 +129,8 @@ internal class AmendmentServiceTest {
             whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendment)))
 
             val nonMatchingRelatesTo = AmendmentRelatesTo.TENDER
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = amendment.status.toString(),
                     relatesTo = nonMatchingRelatesTo.toString(),
                     relatedItems = listOf(amendment.relatedItem),
@@ -155,8 +155,8 @@ internal class AmendmentServiceTest {
                 )
             )
 
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = amendmentFirst.status.toString(),
                     relatesTo = null,
                     relatedItems = listOf(amendmentFirst.relatedItem, amendmentSecond.relatedItem),
@@ -177,8 +177,8 @@ internal class AmendmentServiceTest {
             whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendment)))
 
             val nonMatchingRelatedItems = listOf("someItem")
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = amendment.status.toString(),
                     relatesTo = amendment.relatesTo.toString(),
                     relatedItems = nonMatchingRelatedItems,
@@ -203,8 +203,8 @@ internal class AmendmentServiceTest {
                 )
             )
 
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = amendmentFirst.status.toString(),
                     relatesTo = null,
                     relatedItems = null,
@@ -232,8 +232,8 @@ internal class AmendmentServiceTest {
                 )
             )
 
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = amendmentFirst.status.toString(),
                     relatesTo = null,
                     relatedItems = listOf(amendmentFirst.relatedItem, amendmentSecond.relatedItem),
@@ -253,8 +253,8 @@ internal class AmendmentServiceTest {
             val amendment = getTestAmendment()
             whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(listOf(amendment)))
 
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = null,
                     relatesTo = null,
                     relatedItems = null,
@@ -274,8 +274,8 @@ internal class AmendmentServiceTest {
             val amendmentsInDb = listOf(amendment)
             whenever(amendmentRepository.findBy(any(), any())).thenReturn(Result.success(amendmentsInDb))
 
-            val actualIds = amendmentService.getAmendmentIdsBy(
-                GetAmendmentIdsParams.tryCreate(
+            val actualIds = amendmentService.findAmendmentIdsBy(
+                FindAmendmentIdsParams.tryCreate(
                     status = amendment.status.toString(),
                     relatesTo = amendment.relatesTo.toString(),
                     relatedItems = listOf(amendment.relatedItem, amendment.relatedItem),

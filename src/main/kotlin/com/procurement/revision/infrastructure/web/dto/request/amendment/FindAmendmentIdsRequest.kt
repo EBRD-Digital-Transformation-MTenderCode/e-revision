@@ -3,7 +3,7 @@ package com.procurement.revision.infrastructure.web.dto.request.amendment
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class GetAmendmentIdsRequest(
+data class FindAmendmentIdsRequest(
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @param:JsonProperty("status") @field:JsonProperty("status") val status: String?,
 

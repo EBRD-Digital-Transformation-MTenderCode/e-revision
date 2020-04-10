@@ -9,26 +9,26 @@ import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.infrastructure.converter.convert
 import com.procurement.revision.infrastructure.fail.Fail
 import com.procurement.revision.infrastructure.web.dto.CommandType
-import com.procurement.revision.infrastructure.web.dto.request.amendment.GetAmendmentIdsRequest
+import com.procurement.revision.infrastructure.web.dto.request.amendment.FindAmendmentIdsRequest
 import com.procurement.revision.infrastructure.web.dto.tryGetParams
 import org.springframework.stereotype.Component
 
 @Component
-class GetAmendmentIdsHandler(
+class FindAmendmentIdsHandler(
     private val amendmentService: AmendmentService, logger: Logger
 ) : AbstractHandler<CommandType, List<AmendmentId>>(logger) {
 
-    override val action: CommandType = CommandType.GET_AMENDMENTS_IDS
+    override val action: CommandType = CommandType.FIND_AMENDMENTS_IDS
 
     override fun execute(node: JsonNode): Result<List<AmendmentId>, Fail> {
         val params = node
-            .tryGetParams(GetAmendmentIdsRequest::class.java)
+            .tryGetParams(FindAmendmentIdsRequest::class.java)
             .doOnError { error -> return failure(error) }
             .get
             .convert()
             .doOnError { error -> return failure(error) }
             .get
 
-        return amendmentService.getAmendmentIdsBy(params)
+        return amendmentService.findAmendmentIdsBy(params)
     }
 }

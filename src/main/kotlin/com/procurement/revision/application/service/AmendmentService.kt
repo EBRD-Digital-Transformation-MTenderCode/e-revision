@@ -4,7 +4,7 @@ import com.procurement.revision.application.model.amendment.CheckAccessToAmendme
 import com.procurement.revision.application.model.amendment.CreateAmendmentParams
 import com.procurement.revision.application.model.amendment.CreateAmendmentResult
 import com.procurement.revision.application.model.amendment.DataValidationParams
-import com.procurement.revision.application.model.amendment.GetAmendmentIdsParams
+import com.procurement.revision.application.model.amendment.FindAmendmentIdsParams
 import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentParams
 import com.procurement.revision.application.model.amendment.part.GetMainPartOfAmendmentResult
 import com.procurement.revision.application.model.amendment.state.SetStateForAmendmentParams
@@ -39,7 +39,7 @@ class AmendmentService(
     private val generable: Generable
 ) {
 
-    fun getAmendmentIdsBy(params: GetAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
+    fun findAmendmentIdsBy(params: FindAmendmentIdsParams): Result<List<AmendmentId>, Fail.Incident> {
         val amendments = amendmentRepository.findBy(params.cpid, params.ocid)
             .doOnError { incident -> return failure(incident) }
             .get

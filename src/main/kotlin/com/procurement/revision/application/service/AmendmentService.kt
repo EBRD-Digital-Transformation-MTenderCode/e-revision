@@ -92,7 +92,7 @@ class AmendmentService(
                     type = type,
                     relatesTo = relatesTo,
                     relatedItem = params.relatedEntityId,
-                    date = params.startDate,
+                    date = params.date,
                     documents = amendment.documents.map { document ->
                         Amendment.Document(
                             id = document.id,

@@ -23,7 +23,7 @@ class CreateAmendmentParams private constructor(
     val amendment: Amendment,
     val relatedEntityId: String,
     val operationType: OperationType,
-    val startDate: LocalDateTime,
+    val date: LocalDateTime,
     val cpid: Cpid,
     val ocid: Ocid,
     val owner: Owner
@@ -72,7 +72,7 @@ class CreateAmendmentParams private constructor(
             amendment: Amendment,
             relatedEntityId: String,
             operationType: String,
-            startDate: String,
+            date: String,
             cpid: String,
             ocid: String,
             owner: String
@@ -88,12 +88,12 @@ class CreateAmendmentParams private constructor(
                     )
                 )
 
-            val startDateParsed = startDate.tryParse()
+            val dateParsed = date.tryParse()
                 .doOnError { expectedFormat ->
                     return failure(
                         DataErrors.Validation.DataFormatMismatch(
-                            name = "startDate",
-                            actualValue = startDate,
+                            name = "date",
+                            actualValue = date,
                             expectedFormat = expectedFormat
                         )
                     )
@@ -126,7 +126,7 @@ class CreateAmendmentParams private constructor(
                     relatedEntityId = relatedEntityId,
                     owner = ownerParsed,
                     amendment = amendment,
-                    startDate = startDateParsed
+                    date = dateParsed
                 )
             )
         }

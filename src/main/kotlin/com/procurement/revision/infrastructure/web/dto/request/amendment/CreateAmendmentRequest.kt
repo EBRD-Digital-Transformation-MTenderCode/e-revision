@@ -8,7 +8,7 @@ data class CreateAmendmentRequest(
     @param:JsonProperty("amendment") @field:JsonProperty("amendment") val amendment: Amendment,
     @param:JsonProperty("relatedEntityId") @field:JsonProperty("relatedEntityId") val relatedEntityId: String,
     @param:JsonProperty("operationType") @field:JsonProperty("operationType") val operationType: String,
-    @param:JsonProperty("startDate") @field:JsonProperty("startDate") val startDate: String,
+    @param:JsonProperty("date") @field:JsonProperty("date") val date: String,
     @param:JsonProperty("cpid") @field:JsonProperty("cpid") val cpid: String,
     @param:JsonProperty("ocid") @field:JsonProperty("ocid") val ocid: String,
     @param:JsonProperty("owner") @field:JsonProperty("owner") val owner: String

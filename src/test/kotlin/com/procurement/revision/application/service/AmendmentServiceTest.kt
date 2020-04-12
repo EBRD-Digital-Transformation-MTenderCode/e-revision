@@ -349,7 +349,7 @@ internal class AmendmentServiceTest {
                     status = AmendmentStatus.PENDING,
                     type = AmendmentType.CANCELLATION,
                     token = token,
-                    date = params.startDate,
+                    date = params.date,
                     documents = amendment.documents.map { document ->
                         CreateAmendmentResult.Document(
                             id = document.id,
@@ -413,7 +413,7 @@ internal class AmendmentServiceTest {
                 ocid = "ocds-t1s2t3-MD-1580306096762-EV-1582034422825",
                 operationType = operationType.toString(),
                 owner = "owner",
-                startDate = "2019-10-04T15:51:23Z",
+                date = "2019-10-04T15:51:23Z",
                 amendment = CreateAmendmentParams.Amendment.tryCreate(
                     rationale = "rationale",
                     description = "description",

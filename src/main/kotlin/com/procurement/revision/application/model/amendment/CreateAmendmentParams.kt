@@ -13,7 +13,6 @@ import com.procurement.revision.domain.model.amendment.tryAmendmentId
 import com.procurement.revision.domain.model.date.tryParse
 import com.procurement.revision.domain.model.document.DocumentId
 import com.procurement.revision.domain.model.document.tryDocumentId
-import com.procurement.revision.domain.model.tryOwner
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 import com.procurement.revision.infrastructure.model.OperationType
 import com.procurement.revision.lib.toSetBy
@@ -100,17 +99,8 @@ class CreateAmendmentParams private constructor(
                 }
                 .get
 
-            val ownerParsed = owner.tryOwner()
-                .doOnError {
-                    return failure(
-                        DataErrors.Validation.DataFormatMismatch(
-                            name = "owner",
-                            actualValue = owner,
-                            expectedFormat = "string"
-                        )
-                    )
-                }
-                .get
+            val ownerParsed = parseOwner(owner)
+                .doReturn { error -> return failure(error = error) }
 
             val cpidParsed = parseCpid(cpid)
                 .doReturn { error -> return failure(error = error) }

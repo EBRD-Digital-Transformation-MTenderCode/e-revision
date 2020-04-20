@@ -45,7 +45,7 @@ internal class AmendmentServiceTest {
     private fun getTestAmendment() = Amendment(
         id = UUID.randomUUID(),
         token = UUID.randomUUID(),
-        owner = "owner",
+        owner = UUID.randomUUID(),
         date = LocalDateTime.now(),
         rationale = "rationale",
         description = "description",
@@ -412,7 +412,7 @@ internal class AmendmentServiceTest {
                 cpid = "ocds-t1s2t3-MD-1580306096762",
                 ocid = "ocds-t1s2t3-MD-1580306096762-EV-1582034422825",
                 operationType = operationType.toString(),
-                owner = "owner",
+                owner = UUID.randomUUID().toString(),
                 date = "2019-10-04T15:51:23Z",
                 amendment = CreateAmendmentParams.Amendment.tryCreate(
                     rationale = "rationale",

@@ -49,6 +49,7 @@ class AmendmentDataEntityRepositoryIT {
         private val OCID = Ocid.tryCreateOrNull("ocds-b3wdp1-MD-1581509539187-EV-1581509653044")!!
         private val ID = UUID.randomUUID()
         private val TOKEN = UUID.randomUUID()
+        private val OWNER = UUID.randomUUID()
         private val DATE = JsonDateTimeDeserializer.deserialize(JsonDateTimeSerializer.serialize(LocalDateTime.now()))
         private const val JSON_DATA = """ {"ac": "data"} """
 
@@ -174,7 +175,7 @@ class AmendmentDataEntityRepositoryIT {
 
     private fun stubAmendment() = Amendment(
         token = TOKEN,
-        owner = "amendment.owner",
+        owner = OWNER,
         id = ID,
         description = "amendment.description",
         rationale = "amendment.rationale",

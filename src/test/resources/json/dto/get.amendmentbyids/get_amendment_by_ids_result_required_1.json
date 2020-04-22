@@ -1,0 +1,17 @@
+{
+  "status": "pending",
+  "type": "cancellation",
+  "relatesTo": "tender",
+  "documents": [
+    {
+      "documentType": "cancellationDetails",
+      "id": "string",
+      "title": "string",
+      "description": "string"
+    }
+  ],
+  "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "relatedItem": "string",
+  "rationale": "string",
+  "date": "2020-02-22T11:25:44Z"
+}

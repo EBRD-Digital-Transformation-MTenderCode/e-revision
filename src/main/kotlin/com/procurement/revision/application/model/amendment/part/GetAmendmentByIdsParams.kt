@@ -12,7 +12,7 @@ import com.procurement.revision.domain.model.amendment.AmendmentId
 import com.procurement.revision.domain.util.extension.mapResult
 import com.procurement.revision.infrastructure.fail.error.DataErrors
 
-class GetMainPartOfAmendmentParams private constructor(
+class GetAmendmentByIdsParams private constructor(
     val cpid: Cpid,
     val ocid: Ocid,
     val amendmentIds: List<AmendmentId>
@@ -24,7 +24,7 @@ class GetMainPartOfAmendmentParams private constructor(
             cpid: String,
             ocid: String,
             amendmentIds: List<String>
-        ): Result<GetMainPartOfAmendmentParams, DataErrors> {
+        ): Result<GetAmendmentByIdsParams, DataErrors> {
             val cpidParsed = parseCpid(cpid)
                 .doReturn { error -> return failure(error = error) }
 
@@ -53,7 +53,7 @@ class GetMainPartOfAmendmentParams private constructor(
                     )
                 )
 
-            return GetMainPartOfAmendmentParams(
+            return GetAmendmentByIdsParams(
                 cpid = cpidParsed,
                 ocid = ocidParsed,
                 amendmentIds = amendmentIdParsed

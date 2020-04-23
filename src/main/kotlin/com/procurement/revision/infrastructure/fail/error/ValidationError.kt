@@ -33,7 +33,7 @@ sealed class ValidationError(
         entityId = amendmentId.toString()
     )
 
-    class AmendmentNotFoundOnGetMainPart(amendmentId: AmendmentId) : ValidationError(
+    class AmendmentNotFoundOnGetAmendmentByIds(amendmentId: AmendmentId) : ValidationError(
         numberError = "10.2.5.1",
         description = "Amendment not found.",
         entityId = amendmentId.toString()

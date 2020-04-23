@@ -6,7 +6,7 @@ import com.procurement.revision.infrastructure.handler.CheckAccessToAmendmentHan
 import com.procurement.revision.infrastructure.handler.CreateAmendmentHandler
 import com.procurement.revision.infrastructure.handler.DataValidationHandler
 import com.procurement.revision.infrastructure.handler.FindAmendmentIdsHandler
-import com.procurement.revision.infrastructure.handler.GetMainPartOfAmendmentHandler
+import com.procurement.revision.infrastructure.handler.GetAmendmentByIdsHandler
 import com.procurement.revision.infrastructure.handler.SetStateForAmendmentHandler
 import com.procurement.revision.infrastructure.web.dto.ApiResponse
 import com.procurement.revision.infrastructure.web.dto.CommandType
@@ -23,7 +23,7 @@ class CommandService(
     private val dataValidationHandler: DataValidationHandler,
     private val createAmendmentHandler: CreateAmendmentHandler,
     private val checkAccessToAmendmentHandler: CheckAccessToAmendmentHandler,
-    private val getMainPartOfAmendmentHandler: GetMainPartOfAmendmentHandler,
+    private val getAmendmentByIdsHandler: GetAmendmentByIdsHandler,
     private val setStateForAmendmentHandler: SetStateForAmendmentHandler
 ) {
 
@@ -51,8 +51,8 @@ class CommandService(
             CommandType.CHECK_ACCESS_TO_AMENDMENT ->
                 checkAccessToAmendmentHandler.handle(node)
 
-            CommandType.GET_MAIN_PART_OF_AMENDMENT_BY_IDS ->
-                getMainPartOfAmendmentHandler.handle(node)
+            CommandType.GET_AMENDMENT_BY_IDS ->
+                getAmendmentByIdsHandler.handle(node)
 
             CommandType.SET_STATE_FOR_AMENDMENT ->
                 setStateForAmendmentHandler.handle(node)

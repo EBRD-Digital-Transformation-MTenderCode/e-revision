@@ -22,9 +22,9 @@ class SetStateForAmendmentParams private constructor(
         private val allowedStatuses = AmendmentStatus.allowedElements
             .filter { value ->
                 when (value) {
-                    AmendmentStatus.ACTIVE -> true
+                    AmendmentStatus.ACTIVE,
+                    AmendmentStatus.CANCELLED -> true
                     AmendmentStatus.PENDING,
-                    AmendmentStatus.CANCELLED,
                     AmendmentStatus.WITHDRAWN -> false
                 }
             }.toSet()

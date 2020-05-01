@@ -23,9 +23,9 @@ class FindAmendmentIdsParams private constructor(
         private val allowedStatuses = AmendmentStatus.values()
             .filter { value ->
                 when (value) {
-                    AmendmentStatus.PENDING -> true
+                    AmendmentStatus.PENDING,
                     AmendmentStatus.CANCELLED,
-                    AmendmentStatus.ACTIVE,
+                    AmendmentStatus.ACTIVE -> true
                     AmendmentStatus.WITHDRAWN -> false
                 }
             }.toSetBy { it.key }

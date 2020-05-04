@@ -135,7 +135,7 @@ class CassandraAmendmentRepository(private val session: Session) : AmendmentRepo
         val data = row.getString(columnData)
         val entity = data
             .tryToObject(AmendmentEntity::class.java)
-            .doOnError { return failure(Fail.Incident.ParseFromDatabaseIncident(data)) }
+            .doOnError { error ->  return failure(Fail.Incident.ParseFromDatabaseIncident(data, error.exception)) }
             .get
 
         return entity.let { amendment ->

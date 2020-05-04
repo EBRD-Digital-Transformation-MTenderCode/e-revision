@@ -43,10 +43,10 @@ fun <T : Any> String.toObject(target: Class<T>): T = try {
     throw IllegalArgumentException("Error binding JSON to an object of type '${target.canonicalName}'.", expected)
 }
 
-fun <T : Any> String.tryToObject(target: Class<T>): Result<T, String> = try {
+fun <T : Any> String.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {
     Result.success(JsonMapper.mapper.readValue(this, target))
 } catch (expected: Exception) {
-    Result.failure("Error binding string to an object of type '${target.canonicalName}'.")
+    Result.failure(Fail.Incident.Parsing(target.canonicalName, expected))
 }
 
 fun <T : Any> JsonNode.tryToObject(target: Class<T>): Result<T, Fail.Incident.Parsing> = try {

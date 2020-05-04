@@ -52,17 +52,17 @@ sealed class Fail {
             description = "Database consistency incident. $message"
         )
 
-        class ParseFromDatabaseIncident(private val jsonData: String) : Incident(
+        class ParseFromDatabaseIncident(private val jsonData: String, val exception: Exception) : Incident(
             level = Level.ERROR,
             number = "3",
             description = "Could not parse data stored in database."
         ) {
             override fun logging(logger: Logger) {
-                logger.error(message = message, mdc = mapOf("jsonData" to jsonData))
+                logger.error(message = message, mdc = mapOf("jsonData" to jsonData), exception = exception)
             }
         }
 
-        class Parsing(className: String, private val exception: Exception) : Incident(
+        class Parsing(className: String, val exception: Exception) : Incident(
             level = Level.ERROR,
             number = "4",
             description = "Error parsing to $className."

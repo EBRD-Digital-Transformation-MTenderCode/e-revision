@@ -1,0 +1,11 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: e-revision
+  cloud:
+    config:
+      failFast: true
+      name: e-revision
+      enabled: false

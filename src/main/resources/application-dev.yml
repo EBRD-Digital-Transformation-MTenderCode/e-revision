@@ -6,6 +6,6 @@ spring:
     name: e-revision
 
 cassandra:
-  contact-points: 127.0.0.1
+  contact-points: localhost
   keyspace-name: revision
   port: 9042

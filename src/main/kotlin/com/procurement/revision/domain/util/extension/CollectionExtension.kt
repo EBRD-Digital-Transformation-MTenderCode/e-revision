@@ -29,3 +29,11 @@ fun <T, R, E> List<T>.mapResult(block: (T) -> Result<R, E>): Result<List<R>, E> 
 }
 
 fun <T> T?.toListOrEmpty(): List<T> = if (this != null) listOf(this) else emptyList()
+
+inline fun <T, V> Collection<T>?.getDuplicate(selector: (T) -> V): T? {
+    val unique = HashSet<V>()
+    this?.forEach { item ->
+        if (!unique.add(selector(item))) return item
+    }
+    return null
+}

@@ -1,10 +1,12 @@
 package com.procurement.revision.application.model.amendment
 
+import com.procurement.revision.application.model.noDuplicatesRule
 import com.procurement.revision.domain.enums.DocumentType
 import com.procurement.revision.domain.functional.Option
 import com.procurement.revision.domain.functional.Result
 import com.procurement.revision.domain.functional.Result.Companion.failure
 import com.procurement.revision.domain.functional.Result.Companion.success
+import com.procurement.revision.domain.functional.validate
 import com.procurement.revision.domain.model.Cpid
 import com.procurement.revision.domain.model.Ocid
 import com.procurement.revision.domain.model.amendment.AmendmentId
@@ -108,6 +110,12 @@ class DataValidationParams private constructor(
             ): Result<Amendment, DataErrors> {
                 if (documents.isDefined && documents.get.isEmpty())
                     return failure(DataErrors.Validation.EmptyArray("documents"))
+
+                if (documents.isDefined)
+                    documents.get
+                        .map { it.id }
+                        .validate(noDuplicatesRule("amendment.documents"))
+                        .orForwardFail { return it }
 
                 val idParsed = id.tryAmendmentId()
                     .doOnError {

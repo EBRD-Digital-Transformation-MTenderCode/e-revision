@@ -23,11 +23,9 @@ class FindAmendmentIdsHandler(
     override fun execute(node: JsonNode): Result<List<AmendmentId>, Fail> {
         val params = node
             .tryGetParams(FindAmendmentIdsRequest::class.java)
-            .doOnError { error -> return failure(error) }
-            .get
+            .orForwardFail { error -> return error }
             .convert()
-            .doOnError { error -> return failure(error) }
-            .get
+            .orForwardFail { error -> return error }
 
         return amendmentService.findAmendmentIdsBy(params)
     }

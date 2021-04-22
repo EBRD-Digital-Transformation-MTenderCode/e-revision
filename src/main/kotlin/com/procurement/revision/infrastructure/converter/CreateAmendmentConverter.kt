@@ -12,8 +12,7 @@ import com.procurement.revision.infrastructure.web.dto.request.amendment.CreateA
 fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, DataErrors> {
     val amendment = this.amendment
         .convert()
-        .doOnError { error -> return failure(error) }
-        .get
+        .orForwardFail { error -> return error }
 
     return CreateAmendmentParams.tryCreate(
         amendment = amendment,
@@ -29,8 +28,7 @@ fun CreateAmendmentRequest.convert(): Result<CreateAmendmentParams, DataErrors> 
 private fun CreateAmendmentRequest.Amendment.convert(): Result<CreateAmendmentParams.Amendment, DataErrors> {
     val documents = this.documents
         .mapOptionalResult { it.convert() }
-        .doOnError { error -> return failure(error) }
-        .get
+        .orForwardFail { error -> return error }
 
     return CreateAmendmentParams.Amendment.tryCreate(
         rationale = this.rationale,

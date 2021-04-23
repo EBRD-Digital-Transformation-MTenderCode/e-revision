@@ -9,8 +9,7 @@ import com.procurement.revision.infrastructure.web.dto.request.amendment.DataVal
 fun DataValidationRequest.convert(): Result<DataValidationParams, DataErrors> {
     val amendment = amendment
         .convert()
-        .doOnError { error -> return Result.failure(error) }
-        .get
+        .orForwardFail { error -> return error }
 
     return DataValidationParams.tryCreate(
         amendment = amendment,
@@ -23,8 +22,7 @@ fun DataValidationRequest.convert(): Result<DataValidationParams, DataErrors> {
 private fun DataValidationRequest.Amendment.convert(): Result<DataValidationParams.Amendment, DataErrors> {
     val documents = this.documents
         .mapOptionalResult { it.convert() }
-        .doOnError { error -> return Result.failure(error) }
-        .get
+        .orForwardFail { error -> return error }
 
     return DataValidationParams.Amendment.tryCreate(
         rationale = this.rationale,

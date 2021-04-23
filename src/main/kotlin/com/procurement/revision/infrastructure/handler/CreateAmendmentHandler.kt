@@ -28,12 +28,9 @@ class CreateAmendmentHandler(
     override fun execute(node: JsonNode): Result<CreateAmendmentResult, Fail> {
         val params = node
             .tryGetParams(CreateAmendmentRequest::class.java)
-            .doOnError { error -> return Result.failure(error) }
-            .get
+            .orForwardFail { error -> return error }
             .convert()
-            .doOnError { errors -> return Result.failure(errors) }
-            .get
-
+            .orForwardFail { errors -> return errors }
 
         return amendmentService.createAmendment(params)
     }
